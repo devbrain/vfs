@@ -33,5 +33,6 @@ conan_basic_setup(NO_OUTPUT_DIRS)
 
 
 # ===========================================================
+add_subdirectory(src/platform)
 add_subdirectory(src/unittest)
 
