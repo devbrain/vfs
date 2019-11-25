@@ -1,0 +1,5 @@
+add_executable(unittest main.cpp)
+target_link_libraries(unittest CONAN_PKG::gtest)
+target_include_directories(unittest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_test(NAME cache_test COMMAND unittest -r junit)
