@@ -12,7 +12,7 @@ namespace vfs
 		{
 		public:
 			explicit physfs(vfs_module* output)
-				: filesystem(output)
+				: filesystem(output, "physfs")
 			{
 
 			}

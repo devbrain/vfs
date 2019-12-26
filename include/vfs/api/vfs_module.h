@@ -120,6 +120,8 @@ struct vfs_module
 	 * returns maximal length for entry name
 	 */
 	size_t (*maximal_name_length)(void* opaque);
+
+	size_t (*get_name)(struct vfs_module* opaque, char* output, size_t output_size);
 };
 
 #define VFS_MODULE_REGISTER_NAME vfs_module_register
@@ -177,12 +179,19 @@ namespace vfs
 						}
 						else
 						{
-							_output.additional_attributes = static_cast<vfs_key_value*>(
-								realloc(_output.additional_attributes,
-								_output.num_of_additional_attributes * sizeof(vfs_key_value)));
+							void* new_ptr = realloc(_output.additional_attributes,
+								_output.num_of_additional_attributes * sizeof(vfs_key_value));
+							if (new_ptr)
+							{
+								_output.additional_attributes = 
+									static_cast<vfs_key_value*>(new_ptr);
+							}
 						}
-						init_attr(_output.additional_attributes[_output.num_of_additional_attributes-1]);
-						set_attr(_output.additional_attributes[_output.num_of_additional_attributes-1], key, value);
+						if (_output.additional_attributes)
+						{
+							init_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1]);
+							set_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1], key, value);
+						}
 					}
 				}
 			public:
@@ -250,7 +259,7 @@ namespace vfs
 				delete victim;
 			}
 
-			static void _stats_destructor (void* opaque, struct vfs_inode_stats* victim)
+			static void _stats_destructor (void* /*opaque*/, struct vfs_inode_stats* victim)
 			{
 				vfs::module::inode::stats::destructor(victim);
 			}
@@ -289,7 +298,7 @@ namespace vfs
 						return 0;
 					}
 					std::memcpy(output, s.c_str(), std::min(max_output_length, s.size()));
-					return s.size();
+					return static_cast<int>(s.size());
 				}
 				catch (std::exception&)
 				{
@@ -301,7 +310,9 @@ namespace vfs
 		class filesystem
 		{
 		public:
-			explicit filesystem(struct vfs_module* output)
+			filesystem(struct vfs_module* output, 
+				const std::string& name)
+				: _name(name)
 			{
 				_setup(output);
 			}
@@ -310,8 +321,9 @@ namespace vfs
 			virtual inode* load_root (const std::string& params) = 0;
 			virtual size_t max_name_length() = 0;
 
-
 		private:
+			const std::string& _name;
+
 			void _setup(struct vfs_module* output)
 			{
 				output->opaque = this;
@@ -319,6 +331,7 @@ namespace vfs
 				output->destructor = _destructor;
 				output->load_root = _load_root;
 				output->maximal_name_length = _maximal_name_length;
+				output->get_name = _get_name;
 			}
 
 			static void _destructor (struct vfs_module* victim)
@@ -339,6 +352,13 @@ namespace vfs
 			{
 				auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
 				return fs->max_name_length();
+			}
+
+			static size_t _get_name(struct vfs_module* opaque, char* output, size_t output_size)
+			{
+				auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+				std::memcpy(output, fs->_name.c_str(), std::min(output_size, fs->_name.size()));
+				return fs->_name.size();
 			}
 		};
 

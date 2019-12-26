@@ -2,18 +2,44 @@
 // Created by igor on 25/12/2019.
 //
 
+#include "module_loader.hh"
+
 #if !defined(WIN32)
 #include <dlfcn.h>
+#else 
+#include <windows.h>
+
+#define RTLD_LAZY 0
+
+namespace
+{
+	void* dlopen(const std::filesystem::path::value_type* path, int)
+	{
+		return LoadLibraryW(path);
+	}
+
+	void* dlsym(void* dll,const char* symbol)
+	{
+		return GetProcAddress(reinterpret_cast<HMODULE>(dll), symbol);
+	}
+
+	void dlclose(void* dll)
+	{
+		FreeLibrary(reinterpret_cast<HMODULE>(dll));
+	}
+
+}
+
 #endif
 
-#include "module_loader.hh"
+
 
 
 namespace
 {
 	void* probe_module(const stdfs::path& pth)
 	{
-		void* dll = dlopen(pth.c_str(), RTLD_NOW);
+		void* dll = dlopen(pth.c_str(), RTLD_LAZY);
 		if (!dll)
 		{
 			return nullptr;
