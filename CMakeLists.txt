@@ -2,11 +2,9 @@ cmake_minimum_required (VERSION 3.11)
 
 project(vfs)
 
-
+option(BUILD_SHARED_LIBS "Build shared library" ON)
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-
 string(COMPARE EQUAL "${CMAKE_CFG_INTDIR}" "." ONYX_IS_SINGLE_CONFIGURATION)
-
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/conan/conan.cmake")
   if (NOT EXISTS ${CMAKE_BINARY_DIR}/conan.cmake)
@@ -31,8 +29,15 @@ conan_load_buildinfo ()
 
 conan_basic_setup(NO_OUTPUT_DIRS)
 
-
 # ===========================================================
-add_subdirectory(src/platform)
-add_subdirectory(src/unittest)
+include(GenerateExportHeader)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads)
+
+set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
+# ===========================================================
+add_subdirectory(unittest)
+add_subdirectory(src/api)
+add_subdirectory(src/physfs)
 
