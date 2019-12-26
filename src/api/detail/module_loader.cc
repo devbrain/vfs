@@ -44,11 +44,12 @@ namespace
 		{
 			return nullptr;
 		}
-		#define str(s) #s
-		if (dlsym(dll, str(VFS_MODULE_REGISTER_NAME)))
+
+		if (dlsym(dll, VFS_MODULE_REGISTER_NAME))
 		{
 			return dll;
 		}
+		std::string err = dlerror();
 		dlclose(dll);
 		return nullptr;
 	}
@@ -77,7 +78,7 @@ namespace vfs
 
 		vfs_module_register_t shared_module::get()
 		{
-		  return reinterpret_cast<vfs_module_register_t>(dlsym(_handle, str(VFS_MODULE_REGISTER_NAME)));
+		  return reinterpret_cast<vfs_module_register_t>(dlsym(_handle, VFS_MODULE_REGISTER_NAME));
 		}
 
 		shared_module::shared_module (void* handle)

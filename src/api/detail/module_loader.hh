@@ -6,7 +6,7 @@
 #define MODULE_LOADER_HH
 
 #include "vfs/api/vfs_module.h"
-#include "api/detail/stdfilesystem.hh"
+#include "vfs/api/stdfilesystem.hh"
 
 #include <memory>
 
@@ -26,6 +26,8 @@ namespace vfs
 			shared_module (void* handle);
 			void* _handle;
 		};
+
+
 	}
 }
 

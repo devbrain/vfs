@@ -2,17 +2,23 @@ find_package(Filesystem REQUIRED Experimental Final)
 
 set (src
         detail/spooky.cc
-        hasher.cc)
+        hasher.cc
+        detail/modules_table.cc
+        detail/module_loader.cc
+        system.cc
+)
 
 set(hdr
         detail/lru.hh
         detail/spooky.hh
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
         hasher.hh
-        ${PROJECT_ROOT}/include/vfs/api/vfs_module.h ../physfs/physfs.cc detail/filesystem.hh detail/module_loader.hh detail/stdfilesystem.hh detail/module_loader.cc)
-
-
-
+        ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
+        ${PROJECT_ROOT}/include/vfs/api/stdfilesystem.hh
+        ${PROJECT_ROOT}/include/vfs/api/system.hh
+        detail/filesystem.hh
+        detail/module_loader.hh
+        detail/modules_table.hh)
 
 add_library(vfs_api ${src} ${hdr})
 add_library(vfs_api::vfs_api ALIAS vfs_api)
@@ -36,10 +42,17 @@ target_compile_options(vfs_api PRIVATE
         -Wall>
         $<$<CXX_COMPILER_ID:MSVC>: "/W4" >)
 
+
 target_link_libraries(vfs_api PUBLIC
             Threads::Threads
             std::filesystem
         )
+
+find_library(DL_LIBRARY dl)
+if(DL_LIBRARY)
+    target_link_libraries(vfs_api PRIVATE ${DL_LIBRARY})
+endif()
+
 configure_file(vfs_config.h.in  ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h)
 
 target_compile_definitions(vfs_api

@@ -11,8 +11,8 @@ namespace vfs
 		class physfs : public filesystem
 		{
 		public:
-			explicit physfs(vfs_module* output)
-				: filesystem(output, "physfs")
+			explicit physfs()
+				: filesystem("physfs")
 			{
 
 			}

@@ -6,12 +6,21 @@
 #define FILESYSTEM_HH
 
 #include "vfs/api/vfs_module.h"
+#include "api/detail/module_loader.hh"
 
 namespace vfs
 {
 	namespace detail
 	{
+		class filesystem
+		{
+		public:
+			explicit filesystem(std::unique_ptr<shared_module>&& mdl);
 
+
+
+
+		};
 	} // ns detail
 } // ns vfs
 

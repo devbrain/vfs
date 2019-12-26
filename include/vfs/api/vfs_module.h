@@ -121,12 +121,12 @@ struct vfs_module
 	 */
 	size_t (*maximal_name_length)(void* opaque);
 
-	size_t (*get_name)(struct vfs_module* opaque, char* output, size_t output_size);
+	size_t (*get_name)(void* opaque, char* output, size_t output_size);
 };
 
-#define VFS_MODULE_REGISTER_NAME vfs_module_register
+#define VFS_MODULE_REGISTER_NAME "vfs_module_register"
 typedef void (*vfs_module_register_t)(struct vfs_module* output);
-VFS_EXTERN_C void VFS_MODULE_API VFS_MODULE_REGISTER_NAME (struct vfs_module* output);
+VFS_EXTERN_C void VFS_MODULE_API vfs_module_register (struct vfs_module* output);
 /*
  * ==============================================================================
  */
@@ -310,21 +310,17 @@ namespace vfs
 		class filesystem
 		{
 		public:
-			filesystem(struct vfs_module* output, 
-				const std::string& name)
+			explicit filesystem(const std::string& name)
 				: _name(name)
 			{
-				_setup(output);
+
 			}
 			virtual ~filesystem () = default;
 
 			virtual inode* load_root (const std::string& params) = 0;
 			virtual size_t max_name_length() = 0;
 
-		private:
-			const std::string& _name;
-
-			void _setup(struct vfs_module* output)
+			virtual void setup(struct vfs_module* output)
 			{
 				output->opaque = this;
 
@@ -333,6 +329,11 @@ namespace vfs
 				output->maximal_name_length = _maximal_name_length;
 				output->get_name = _get_name;
 			}
+
+		private:
+			const std::string _name;
+
+
 
 			static void _destructor (struct vfs_module* victim)
 			{
@@ -354,7 +355,7 @@ namespace vfs
 				return fs->max_name_length();
 			}
 
-			static size_t _get_name(struct vfs_module* opaque, char* output, size_t output_size)
+			static size_t _get_name(void* opaque, char* output, size_t output_size)
 			{
 				auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
 				std::memcpy(output, fs->_name.c_str(), std::min(output_size, fs->_name.size()));
@@ -368,7 +369,7 @@ namespace vfs
 #define REGISTER_FVS_MODULE(FILESYS_TYPE)											\
 VFS_EXTERN_C void VFS_MODULE_API vfs_module_register(struct vfs_module* output)		\
 {																					\
-	new FILESYS_TYPE(output);							  			    			\
+	(new FILESYS_TYPE())->setup(output);							  			    	\
 }
 
 
