@@ -2,6 +2,8 @@
 // Created by igor on 26/12/2019.
 //
 
+#include <iostream>
+
 #include "vfs/api/system.hh"
 #include "api/detail/modules_table.hh"
 
@@ -14,6 +16,11 @@ namespace vfs
 			impl(const stdfs::path& modules_path)
 			: all_modules(modules_path)
 			{
+				for (const auto& v : all_modules)
+				{
+					std::cout << v.type() << "\t" << v.path() << std::endl;
+
+				}
 			}
 			modules_table all_modules;
 		};

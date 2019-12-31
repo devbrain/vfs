@@ -84,8 +84,8 @@ namespace vfs
 				bool operator==(const iterator& other) const;
 				bool operator!=(const iterator& other) const;
 
-				[[nodiscard]] data operator++(int);
-				[[nodiscard]] iterator& operator++();
+				 data operator++(int);
+				 iterator& operator++();
 
 			};
 		};
