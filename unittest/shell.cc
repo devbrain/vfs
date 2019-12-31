@@ -9,4 +9,5 @@
 int main (int argc, char* argv[])
 {
 	vfs::detail::system s(argv[1]);
+
 }

@@ -21,10 +21,12 @@ namespace vfs
 
 			~shared_module();
 
-			vfs_module_register_t get();
+			vfs_module_register_t get() const;
+			stdfs::path path() const;
 		private:
-			shared_module (void* handle);
+			shared_module (void* handle, const stdfs::path& pth);
 			void* _handle;
+			stdfs::path _path;
 		};
 
 
