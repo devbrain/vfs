@@ -6,6 +6,7 @@ set (src
         detail/modules_table.cc
         detail/module_loader.cc
         system.cc
+        path.cc
 )
 
 set(hdr
@@ -16,6 +17,7 @@ set(hdr
         ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
         ${PROJECT_ROOT}/include/vfs/api/stdfilesystem.hh
         ${PROJECT_ROOT}/include/vfs/api/system.hh
+        ${PROJECT_ROOT}/include/vfs/api/path.hh
         detail/filesystem.hh
         detail/module_loader.hh
         detail/modules_table.hh)

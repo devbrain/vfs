@@ -24,14 +24,18 @@ namespace vfs
 			class iterator;
 		public:
 			explicit modules_table(const stdfs::path& path);
+			~modules_table();
+
 			void add(const stdfs::path& path);
 			[[nodiscard]] iterator begin();
 			[[nodiscard]] iterator end();
+			[[nodiscard]] vfs_module* get(const std::string& type) const;
 		private:
 			void _add_file(const stdfs::path& path);
 		private:
 			class entry
 			{
+				friend class modules_table;
 			public:
 				entry(vfs_module* obj, std::unique_ptr<shared_module>&& dll);
 
@@ -39,6 +43,7 @@ namespace vfs
 				bool dec_ref();
 				[[nodiscard]] int ref_count() const;
 				[[nodiscard]] stdfs::path path() const;
+				[[nodiscard]] vfs_module* module() const;
 			private:
 				~entry();
 			private:

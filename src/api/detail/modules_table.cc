@@ -41,6 +41,11 @@ namespace vfs::detail
 		return _ref_count;
 	}
 	// ------------------------------------------------------------------------------------
+	vfs_module* modules_table::entry::module() const
+	{
+		return _module;
+	}
+	// ------------------------------------------------------------------------------------
 	modules_table::entry::~entry()
 	{
 		if (_module)
@@ -52,6 +57,14 @@ namespace vfs::detail
 	modules_table::modules_table(const stdfs::path& path)
 	{
 		add(path);
+	}
+	// -----------------------------------------------------------------------------------
+	modules_table::~modules_table()
+	{
+		for (auto e : _entries)
+		{
+			delete e.second;
+		}
 	}
 	// -----------------------------------------------------------------------------------
 	void modules_table::add(const stdfs::path& path)
@@ -118,6 +131,16 @@ namespace vfs::detail
 	modules_table::iterator modules_table::end()
 	{
 		return iterator(_entries.end());
+	}
+	// -----------------------------------------------------------------------------------
+	vfs_module* modules_table::get(const std::string& type) const
+	{
+		auto itr = _entries.find(type);
+		if (itr == _entries.end())
+		{
+			return nullptr;
+		}
+		return itr->second->module();
 	}
 	// ====================================================================================
 	modules_table::iterator::data::data (const map_t::const_iterator& itr)

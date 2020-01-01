@@ -8,6 +8,5 @@
 
 int main (int argc, char* argv[])
 {
-	vfs::detail::system s(argv[1]);
-
+	vfs::load_module(argv[1]);
 }

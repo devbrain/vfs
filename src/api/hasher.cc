@@ -35,5 +35,14 @@ namespace vfs
 			return hash(data.c_str(), data.length(), seed);
 		}
 		// ---------------------------------------------------------------------------------------
-	}
-}
+		hash_t hash(const path& pth)
+		{
+			hash_t ret = {0, 0};
+			for (int i=0; i<pth.depth(); i++)
+			{
+				ret = hash(pth[i], ret);
+			}
+			return hash(pth.get_file_name(), ret);
+		}
+	} // ns core
+} // ns vfs

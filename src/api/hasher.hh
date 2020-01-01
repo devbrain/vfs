@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-#include "vfs/api/vfs_api.h"
+#include <vfs/api/vfs_api.h>
+#include <vfs/api/path.hh>
 
 
 namespace vfs
@@ -24,6 +25,7 @@ namespace vfs
 
         VFS_API hash_t hash(const std::string& data);
         VFS_API hash_t hash(const std::string& data, const hash_t& seed);
+        VFS_API hash_t hash(const path& pth);
 
     } // ns core
 } // ns vfs

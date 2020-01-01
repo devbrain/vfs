@@ -2,7 +2,7 @@
 // Created by igor on 26/12/2019.
 //
 
-#include <iostream>
+#include <cstdlib>
 
 #include "vfs/api/system.hh"
 #include "api/detail/modules_table.hh"
@@ -11,25 +11,53 @@ namespace vfs
 {
 	namespace detail
 	{
-		struct system::impl
+		class system
 		{
-			impl(const stdfs::path& modules_path)
-			: all_modules(modules_path)
-			{
-				for (const auto& v : all_modules)
-				{
-					std::cout << v.type() << "\t" << v.path() << std::endl;
+		public:
+			explicit system(const stdfs::path& modules_path);
+			void add_module(const stdfs::path& modules_path);
 
-				}
-			}
-			modules_table all_modules;
+			[[nodiscard]] vfs_module* get_module(const std::string& type) const;
+
+			~system();
+		private:
+			modules_table _all_modules;
 		};
 		// =============================================================================
 		system::system(const stdfs::path& modules_path)
+			: _all_modules(modules_path)
 		{
-			_impl = std::make_unique<impl>(modules_path);
+		}
+		// ------------------------------------------------------------------------------
+		void system::add_module(const stdfs::path& modules_path)
+		{
+			_all_modules.add(modules_path);
+		}
+		// ------------------------------------------------------------------------------
+		vfs_module* system::get_module(const std::string& type) const
+		{
+			return _all_modules.get(type);
 		}
 		// ------------------------------------------------------------------------------
 		system::~system() = default;
 	} // ns detail
+	// ==================================================================================
+	static detail::system* system = nullptr;
+	static void system_destructor()
+	{
+		delete system;
+	}
+	// ----------------------------------------------------------------------------------
+	void load_module(const stdfs::path& path_to_module)
+	{
+		if (system == nullptr)
+		{
+			system = new detail::system(path_to_module);
+			std::atexit(system_destructor);
+		}
+		else
+		{
+			system->add_module(path_to_module);
+		}
+	}
 } // ns vfs
