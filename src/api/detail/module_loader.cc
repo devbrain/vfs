@@ -49,7 +49,7 @@ namespace
 		{
 			return dll;
 		}
-		std::string err = dlerror();
+		
 		dlclose(dll);
 		return nullptr;
 	}
