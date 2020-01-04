@@ -31,9 +31,9 @@ conan_basic_setup(NO_OUTPUT_DIRS)
 
 # ===========================================================
 include(GenerateExportHeader)
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
+find_package(Filesystem REQUIRED Experimental Final)
 
 set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 # ===========================================================

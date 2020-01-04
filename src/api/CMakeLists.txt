@@ -1,5 +1,3 @@
-find_package(Filesystem REQUIRED Experimental Final)
-
 set (src
         detail/spooky.cc
         hasher.cc
@@ -13,6 +11,7 @@ set(hdr
         detail/lru.hh
         detail/spooky.hh
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
+        ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h
         hasher.hh
         ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
         ${PROJECT_ROOT}/include/vfs/api/stdfilesystem.hh
@@ -66,7 +65,7 @@ target_compile_definitions(vfs_api
                         _CRT_NONSTDC_NO_DEPRECATE
                         NOMINMAX >
         )
-
+target_compile_features(vfs_api PUBLIC cxx_std_17)
 set_target_properties(vfs_api PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib

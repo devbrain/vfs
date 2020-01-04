@@ -1,7 +1,8 @@
 #ifndef VFS_CONFIG_H__
 #define VFS_CONFIG_H__
 
-// the configured options and settings for Tutorial
+
+
 #define VFS_VERSION_MAJOR @VFS_VERSION_MAJOR@
 #define VFS_VERSION_MINOR @VFS_VERSION_MINOR@
 

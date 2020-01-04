@@ -3,35 +3,32 @@
 //
 
 #include "vfs/api/vfs_module.h"
+#include "physfs_inode.hh"
 
-namespace vfs
+
+class physfs : public vfs::module::filesystem
 {
-	namespace module
+public:
+	explicit physfs()
+		: vfs::module::filesystem("physfs")
 	{
-		class physfs : public filesystem
-		{
-		public:
-			explicit physfs()
-				: filesystem("physfs")
-			{
 
-			}
+	}
 
-		private:
-			inode* load_root (const std::string& params) override
-			{
-				return nullptr;
-			}
+private:
+	vfs::module::inode* load_root(const std::string& params) override
+	{
+		return new physfs_inode(stdfs::path(params));
+	}
 
-			size_t max_name_length() override
-			{
-				return 64;
-			}
-		};
-	} // ns module
-} // ns vfs
+	size_t max_name_length() override
+	{
+		return 64;
+	}
+};
 
-REGISTER_FVS_MODULE(vfs::module::physfs)
+
+REGISTER_FVS_MODULE(physfs)
 
 
 

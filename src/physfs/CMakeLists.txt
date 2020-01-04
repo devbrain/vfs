@@ -1,5 +1,5 @@
-set (src physfs.cc)
-set (hdr )
+set (src physfs.cc physfs_inode.cc)
+set (hdr physfs_inode.cc)
 
 add_library(vfs_api_physfs ${src} ${hdr})
 add_library(vfs_api_physfs::vfs_api_physfs ALIAS vfs_api_physfs)
@@ -22,6 +22,7 @@ target_compile_options(vfs_api_physfs PRIVATE
 
 target_link_libraries(vfs_api_physfs PUBLIC
         Threads::Threads
+        std::filesystem
         )
 
 target_compile_definitions(vfs_api_physfs
