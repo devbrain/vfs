@@ -8,9 +8,11 @@
 #include "vfs/vfs_config.h"
 
 #if defined(__cplusplus)
+# if !defined(_MSC_VER)
 #	if !(__cplusplus > 201402L)
 	#	error "C++17 is required"
 #	endif
+# endif
 #endif
 
 #include VFS_FS_HEADER

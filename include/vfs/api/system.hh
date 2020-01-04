@@ -11,7 +11,7 @@
 
 namespace vfs
 {
-	void load_module(const stdfs::path& path_to_module);
+	VFS_API void load_module(const stdfs::path& path_to_module);
 } // ns vfs
 
 #endif //SYSTEM_HH

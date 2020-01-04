@@ -5,7 +5,6 @@
 
 #include "vfs/api/system.hh"
 
-
 int main (int argc, char* argv[])
 {
 	vfs::load_module(argv[1]);

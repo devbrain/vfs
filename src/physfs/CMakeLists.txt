@@ -4,7 +4,7 @@ set (hdr physfs_inode.cc)
 add_library(vfs_api_physfs ${src} ${hdr})
 add_library(vfs_api_physfs::vfs_api_physfs ALIAS vfs_api_physfs)
 
-
+target_compile_features(vfs_api_physfs PUBLIC cxx_std_17)
 target_include_directories(vfs_api_physfs
         PUBLIC
         $<INSTALL_INTERFACE:include>
