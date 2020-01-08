@@ -5,11 +5,11 @@
 #include "modules_table.hh"
 
 
-namespace vfs::detail
+namespace vfs::core
 {
 	modules_table::entry::entry(vfs_module* obj, std::unique_ptr<shared_module>&& dll)
 		: _ref_count(1),
-		  _module(obj),
+		  _fs(new filesystem(obj)),
 		  _dll(std::move(dll))
 	{
 
@@ -41,17 +41,14 @@ namespace vfs::detail
 		return _ref_count;
 	}
 	// ------------------------------------------------------------------------------------
-	vfs_module* modules_table::entry::module() const
+	filesystem* modules_table::entry::module() const
 	{
-		return _module;
+		return _fs;
 	}
 	// ------------------------------------------------------------------------------------
 	modules_table::entry::~entry()
 	{
-		if (_module)
-		{
-			_module->destructor(_module);
-		}
+		delete _fs;
 	}
 	// ===================================================================================
 	modules_table::modules_table(const stdfs::path& path)
@@ -133,7 +130,7 @@ namespace vfs::detail
 		return iterator(_entries.end());
 	}
 	// -----------------------------------------------------------------------------------
-	vfs_module* modules_table::get(const std::string& type) const
+	filesystem* modules_table::get(const std::string& type) const
 	{
 		auto itr = _entries.find(type);
 		if (itr == _entries.end())

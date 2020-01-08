@@ -1,25 +1,39 @@
 set (src
         detail/spooky.cc
-        hasher.cc
         detail/modules_table.cc
         detail/module_loader.cc
+        detail/fstab.cc
+
+        hasher.cc
         system.cc
         path.cc
+        filesystem.cc
+        mount_point.cc
+
 )
 
 set(hdr
         detail/lru.hh
         detail/spooky.hh
+        detail/module_loader.hh
+        detail/modules_table.hh
+        detail/fstab.hh
+        detail/refcount.hh
+
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
         ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h
-        hasher.hh
+
         ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
         ${PROJECT_ROOT}/include/vfs/api/stdfilesystem.hh
         ${PROJECT_ROOT}/include/vfs/api/system.hh
         ${PROJECT_ROOT}/include/vfs/api/path.hh
-        detail/filesystem.hh
-        detail/module_loader.hh
-        detail/modules_table.hh)
+        ${PROJECT_ROOT}/include/vfs/api/exception.hh
+
+        hasher.hh
+        filesystem.hh
+        mount_point.hh
+
+        )
 
 add_library(vfs_api ${src} ${hdr})
 add_library(vfs_api::vfs_api ALIAS vfs_api)

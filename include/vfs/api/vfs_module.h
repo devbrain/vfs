@@ -61,6 +61,11 @@ struct vfs_inode_stats
 
 	size_t num_of_additional_attributes;
 	struct vfs_key_value* additional_attributes;
+
+	/*
+	 * de-allocates the additional_attributes
+	 */
+	void (* destructor)(struct vfs_inode_stats* victim);
 };
 
 /*
@@ -102,10 +107,7 @@ struct vfs_inode_ops
 	 */
 	void (* destructor)(struct vfs_inode_ops* victim);
 
-	/*
-	 * de-allocates the victim (stats)
-	 */
-	void (* stats_destructor)(void* opaque, struct vfs_inode_stats* victim);
+
 
 	/*
 	 * performs lookup for named entry in this inode.
@@ -187,11 +189,10 @@ namespace vfs
 			public:
 				stats(vfs_inode_stats& output, vfs_inode_type type, uint64_t length);
 				void attr(const char* key, const char* value);
-			public:
-				static void destructor(vfs_inode_stats* out);
 			private:
-				static void set_attr(vfs_key_value& out, const char* key, const char* value);
-				static void init_attr(vfs_key_value& out);
+				static void _destructor(vfs_inode_stats* out);
+				static void _set_attr(vfs_key_value& out, const char* key, const char* value);
+				static void _init_attr(vfs_key_value& out);
 			private:
 				vfs_inode_stats& _output;
 				std::size_t _num_atts;
@@ -214,7 +215,6 @@ namespace vfs
 			const vfs_inode_type _type;
 		private:
 			static void _destructor(struct vfs_inode_ops* victim);
-			static void _stats_destructor(void* /*opaque*/, struct vfs_inode_stats* victim);
 			static struct vfs_inode_ops* _lookup(void* opaque, char* name);
 			static int _stat(void* opaque, struct vfs_inode_stats* output);
 			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
@@ -249,9 +249,10 @@ namespace vfs
 			output.type = type;
 			output.size = length;
 			output.num_of_additional_attributes = 0;
-			init_attr(output.attr1);
-			init_attr(output.attr2);
+			_init_attr(output.attr1);
+			_init_attr(output.attr2);
 			output.additional_attributes = nullptr;
+			output.destructor = _destructor;
 		}
 		/* -------------------------------------------------------------------------- */
 		inline
@@ -260,11 +261,11 @@ namespace vfs
 			switch (_num_atts)
 			{
 			case 0:
-				set_attr(_output.attr1, key, value);
+				_set_attr(_output.attr1, key, value);
 				_num_atts++;
 				break;
 			case 1:
-				set_attr(_output.attr2, key, value);
+				_set_attr(_output.attr2, key, value);
 				_num_atts++;
 				break;
 			default:
@@ -286,14 +287,14 @@ namespace vfs
 				}
 				if (_output.additional_attributes)
 				{
-					init_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1]);
-					set_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1], key, value);
+					_init_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1]);
+					_set_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1], key, value);
 				}
 			}
 		}
 		/* -------------------------------------------------------------------------- */
 		inline
-		void inode::stats::destructor(vfs_inode_stats* out)
+		void inode::stats::_destructor(vfs_inode_stats* out)
 		{
 			if (out->additional_attributes != nullptr)
 			{
@@ -302,14 +303,14 @@ namespace vfs
 		}
 		/* -------------------------------------------------------------------------- */
 		inline
-		void inode::stats::set_attr(vfs_key_value& out, const char* key, const char* value)
+		void inode::stats::_set_attr(vfs_key_value& out, const char* key, const char* value)
 		{
 			std::memcpy(out.key, key, std::min(std::strlen(key), sizeof(out.key)));
 			std::memcpy(out.value, key, std::min(std::strlen(value), sizeof(out.value)));
 		}
 		/* -------------------------------------------------------------------------- */
 		inline
-		void inode::stats::init_attr(vfs_key_value& out)
+		void inode::stats::_init_attr(vfs_key_value& out)
 		{
 			std::memset(out.value, 0, sizeof(out.value));
 			std::memset(out.key, 0, sizeof(out.key));
@@ -335,8 +336,6 @@ namespace vfs
 
 			res->opaque = opaque;
 			res->destructor = _destructor;
-			res->stats_destructor = _stats_destructor;
-
 			res->lookup = _lookup;
 			res->get_directory_iterator = _get_directory_iterator;
 			res->stat = _stat;
@@ -352,12 +351,6 @@ namespace vfs
 				delete ino;
 			}
 			delete victim;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		void inode::_stats_destructor(void* /*opaque*/, struct vfs_inode_stats* victim)
-		{
-			vfs::module::inode::stats::destructor(victim);
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline

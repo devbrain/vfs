@@ -5,11 +5,14 @@
 #include <cstdlib>
 
 #include "vfs/api/system.hh"
+#include "vfs/api/exception.hh"
+
 #include "api/detail/modules_table.hh"
+#include "api/detail/fstab.hh"
 
 namespace vfs
 {
-	namespace detail
+	namespace core
 	{
 		class system
 		{
@@ -17,7 +20,7 @@ namespace vfs
 			explicit system(const stdfs::path& modules_path);
 			void add_module(const stdfs::path& modules_path);
 
-			[[nodiscard]] vfs_module* get_module(const std::string& type) const;
+			[[nodiscard]] filesystem* get_module(const std::string& type) const;
 
 			~system();
 		private:
@@ -34,7 +37,7 @@ namespace vfs
 			_all_modules.add(modules_path);
 		}
 		// ------------------------------------------------------------------------------
-		vfs_module* system::get_module(const std::string& type) const
+		filesystem* system::get_module(const std::string& type) const
 		{
 			return _all_modules.get(type);
 		}
@@ -42,9 +45,12 @@ namespace vfs
 		system::~system() = default;
 	} // ns detail
 	// ==================================================================================
-	static detail::system* system = nullptr;
+	static core::system* system = nullptr;
+	static core::fstab* fstab = nullptr;
+
 	static void system_destructor()
 	{
+		delete fstab;
 		delete system;
 	}
 	// ----------------------------------------------------------------------------------
@@ -52,12 +58,31 @@ namespace vfs
 	{
 		if (system == nullptr)
 		{
-			system = new detail::system(path_to_module);
+			system = new core::system(path_to_module);
 			std::atexit(system_destructor);
 		}
 		else
 		{
 			system->add_module(path_to_module);
 		}
+	}
+	// -------------------------------------------------------------------------------------
+	void mount(const std::string& fstype, const std::string& args, const path& mount_point)
+	{
+		auto* fs = system->get_module(fstype);
+		if (fstab == nullptr)
+		{
+			fstab = new core::fstab;
+		}
+		fstab->mount(fs, mount_point, args);
+	}
+	// -------------------------------------------------------------------------------------
+	void unmount (const path& mount_point)
+	{
+		if (fstab == nullptr)
+		{
+			throw exception("no mounted filesystems found");
+		}
+		fstab->unmount(mount_point);
 	}
 } // ns vfs
