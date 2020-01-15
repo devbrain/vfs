@@ -9,7 +9,8 @@ set (src
         path.cc
         filesystem.cc
         mount_point.cc
-
+        modules.cc
+        mounts.cc
 )
 
 set(hdr
@@ -26,6 +27,8 @@ set(hdr
         ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
         ${PROJECT_ROOT}/include/vfs/api/stdfilesystem.hh
         ${PROJECT_ROOT}/include/vfs/api/system.hh
+        ${PROJECT_ROOT}/include/vfs/api/modules.hh
+        ${PROJECT_ROOT}/include/vfs/api/mounts.hh
         ${PROJECT_ROOT}/include/vfs/api/path.hh
         ${PROJECT_ROOT}/include/vfs/api/exception.hh
 

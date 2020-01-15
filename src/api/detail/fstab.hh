@@ -10,10 +10,16 @@
 #include <memory>
 #include <map>
 
+namespace vfs
+{
+    class mounts;
+}
+
 namespace vfs::core
 {
 	class fstab
 	{
+	    friend class vfs::mounts;
 	public:
 		class entry
 		{

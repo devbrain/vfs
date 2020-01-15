@@ -14,7 +14,7 @@ namespace vfs
 {
 	namespace core
 	{
-		class system
+		struct system
 		{
 		public:
 			explicit system(const stdfs::path& modules_path);
@@ -23,7 +23,7 @@ namespace vfs
 			[[nodiscard]] filesystem* get_module(const std::string& type) const;
 
 			~system();
-		private:
+
 			modules_table _all_modules;
 		};
 		// =============================================================================
@@ -85,4 +85,22 @@ namespace vfs
 		}
 		fstab->unmount(mount_point);
 	}
+    // -------------------------------------------------------------------------------------
+	modules get_modules()
+    {
+        if (!system)
+        {
+            throw std::runtime_error("No modules loaded");
+        }
+        return modules(&system->_all_modules);
+    }
+    // -------------------------------------------------------------------------------------
+    mounts get_mounts()
+    {
+        if (!fstab)
+        {
+            throw std::runtime_error("No modules loaded");
+        }
+        return mounts(fstab);
+    }
 } // ns vfs

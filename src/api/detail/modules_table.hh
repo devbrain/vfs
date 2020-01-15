@@ -14,20 +14,22 @@
 #include <string>
 #include <iterator>
 
+namespace vfs
+{
+    class modules;
+}
+
 namespace vfs::core
 {
 
 	class modules_table
 	{
-	public:
-		class iterator;
+        friend class vfs::modules;
 	public:
 		explicit modules_table(const stdfs::path& path);
 		~modules_table();
 
 		void add(const stdfs::path& path);
-		[[nodiscard]] iterator begin();
-		[[nodiscard]] iterator end();
 		[[nodiscard]] filesystem* get(const std::string& type) const;
 
 	private:
@@ -55,46 +57,7 @@ namespace vfs::core
 		using map_t = std::map<std::string, entry*>;
 		map_t _entries;
 	public:
-		class iterator
-		{
-			friend class modules_table;
-		public:
-			class data
-			{
-				friend class iterator;
-			private:
-				std::string _type;
-				int _refcount;
-				stdfs::path _path;
-			public:
-				[[nodiscard]] std::string type() const;
-				[[nodiscard]] int refcount() const;
-				[[nodiscard]] stdfs::path path() const;
-			private:
-				explicit data(const map_t::const_iterator& itr);
-			};
-		public:
-			typedef data value_type;
-			typedef std::ptrdiff_t difference_type;
-			typedef data* pointer;
-			typedef data& reference;
-			typedef std::input_iterator_tag iterator_category;
-		private:
-			map_t::const_iterator _value;
-			explicit iterator(map_t::const_iterator itr)
-				: _value(itr)
-			{
-			}
-		public:
-			[[nodiscard]] data operator*() const;
 
-			bool operator==(const iterator& other) const;
-			bool operator!=(const iterator& other) const;
-
-			data operator++(int);
-			iterator& operator++();
-
-		};
 	};
 
 } // ns vfs::core

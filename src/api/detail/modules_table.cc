@@ -120,16 +120,6 @@ namespace vfs::core
 		}
 	}
 	// -----------------------------------------------------------------------------------
-	modules_table::iterator modules_table::begin()
-	{
-		return iterator(_entries.begin());
-	}
-	// -----------------------------------------------------------------------------------
-	modules_table::iterator modules_table::end()
-	{
-		return iterator(_entries.end());
-	}
-	// -----------------------------------------------------------------------------------
 	filesystem* modules_table::get(const std::string& type) const
 	{
 		auto itr = _entries.find(type);
@@ -140,53 +130,6 @@ namespace vfs::core
 		return itr->second->module();
 	}
 	// ====================================================================================
-	modules_table::iterator::data::data (const map_t::const_iterator& itr)
-		: _type (itr->first), _refcount(itr->second->ref_count()), _path(itr->second->path())
-	{
 
-	}
-	// -----------------------------------------------------------------------------------
-	std::string modules_table::iterator::data::type() const
-	{
-		return _type;
-	}
-	// -----------------------------------------------------------------------------------
-	int modules_table::iterator::data::refcount() const
-	{
-		return _refcount;
-	}
-	// -----------------------------------------------------------------------------------
-	stdfs::path modules_table::iterator::data::path() const
-	{
-		return _path;
-	}
-	// -----------------------------------------------------------------------------------
-	modules_table::iterator::data modules_table::iterator::operator*() const
-	{
-		return data(_value);
-	}
-	// -----------------------------------------------------------------------------------
-	bool modules_table::iterator::operator==(const iterator& other) const
-	{
-		return _value == other._value;
-	}
-	// -----------------------------------------------------------------------------------
-	bool modules_table::iterator::operator!=(const iterator& other) const
-	{
-		return !(*this == other);
-	}
-	// -----------------------------------------------------------------------------------
-	modules_table::iterator::data modules_table::iterator::operator++(int)
-	{
-		data ret(_value);
-		(void)++*this;
-        return ret;
-	}
-	// -----------------------------------------------------------------------------------
-	modules_table::iterator& modules_table::iterator::operator++()
-	{
-		++_value;
-		return *this;
-	}
 
 } // ns vfs::detail

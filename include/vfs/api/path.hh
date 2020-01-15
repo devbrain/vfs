@@ -20,12 +20,12 @@ namespace vfs
 		/**
 		 * Creates a path from a string.
 		 */
-		explicit path(const char* path);
+		path(const char* path);
 
 		/**
 		 * Creates a path from a string.
 		 */
-		explicit path(const std::string& path);
+		path(const std::string& path);
 
 		/**
 		 * Copy constructor
