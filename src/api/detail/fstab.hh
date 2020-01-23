@@ -4,6 +4,7 @@
 #include "api/hasher.hh"
 #include "api/filesystem.hh"
 #include "api/mount_point.hh"
+#include "api/detail/wrapped_pointer.hh"
 
 #include "vfs/api/path.hh"
 
@@ -30,6 +31,8 @@ namespace vfs::core
 			path mount_path() const noexcept;
 			std::string args () const noexcept;
 			std::string type () const noexcept;
+
+			wrapped_pointer<mount_point> get() const;
 		private:
 			std::unique_ptr<mount_point> _mount_point;
 			std::string _type;
@@ -37,7 +40,7 @@ namespace vfs::core
 			path _path;
 		};
 
-		void mount(filesystem* module, const path& mount_path, const std::string& args);
+		wrapped_pointer<mount_point> mount(filesystem* module, const path& mount_path, const std::string& args);
 		void unmount (const path& mount_path);
 	private:
 		using entry_map_t = std::map<core::hash_t, entry>;

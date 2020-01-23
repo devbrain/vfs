@@ -3,6 +3,7 @@
 
 #include <vfs/api/vfs_api.h>
 #include <vfs/api/stdfilesystem.hh>
+#include <vfs/api/detail/wrapped_iterator.hh>
 #include <memory>
 #include <iosfwd>
 
@@ -30,47 +31,34 @@ namespace vfs
         struct impl;
         std::unique_ptr<impl> _impl;
     public:
-        class iterator
+		class data
+		{
+			friend class detail::iterator<data, wrapper>;
+		private:
+			std::string _path;
+			std::string _type;
+			std::string _args;
+		public:
+
+			[[nodiscard]] std::string type() const noexcept ;
+			[[nodiscard]] std::string args() const noexcept ;
+			[[nodiscard]] std::string path() const noexcept ;
+		private:
+
+			explicit data(const wrapper& itr);
+		};
+    public:
+        class iterator : public detail::iterator<data, wrapper>
         {
             friend class fstab;
             friend class mounts;
-        public:
-            class data
-            {
-                friend class iterator;
-            private:
-                std::string _path;
-                std::string _type;
-                stdfs::path _args;
-            public:
-
-                [[nodiscard]] std::string type() const noexcept ;
-                [[nodiscard]] std::string args() const noexcept ;
-                [[nodiscard]] std::string path() const noexcept ;
-            private:
-
-                explicit data(const wrapper& itr);
-            };
-        public:
-            typedef data value_type;
-            typedef std::ptrdiff_t difference_type;
-            typedef data* pointer;
-            typedef data& reference;
-            typedef std::input_iterator_tag iterator_category;
         private:
-            wrapper& _value;
             explicit iterator(wrapper& itr)
-                    : _value(itr)
+                    : detail::iterator<data, wrapper>(itr)
             {
             }
-        public:
-            [[nodiscard]] data operator*() const;
-
-            bool operator==(const iterator& other) const;
-            bool operator!=(const iterator& other) const;
-
-            data operator++(int);
-            iterator& operator++();
+			bool _equals(const wrapper& a, const wrapper& b) const noexcept override;
+			void _inc(wrapper& a) override;
 
         };
     };
@@ -78,7 +66,7 @@ namespace vfs
     VFS_API [[nodiscard]] mounts::iterator begin(mounts& m);
     VFS_API [[nodiscard]] mounts::iterator end(mounts& m);
 
-    VFS_API std::ostream& operator << (std::ostream&, const mounts::iterator::data&);
+    VFS_API std::ostream& operator << (std::ostream&, const mounts::data&);
 } // ns vfs
 
 

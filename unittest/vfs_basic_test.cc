@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <vfs/api/system.hh>
+#include <vfs/api/exception.hh>
 #include "sandbox.hh"
 
 
@@ -15,6 +16,8 @@ TEST(BasicTest, testMount) {
     {
         std::cout << x << std::endl;
     }
+
+    EXPECT_THROW(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
 
     vfs::mount("physfs", sbox.root(), "/");
 

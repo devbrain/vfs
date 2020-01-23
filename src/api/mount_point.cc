@@ -6,7 +6,9 @@ namespace vfs::core
 {
 	mount_point::mount_point(std::unique_ptr<inode> root)
 	{
-		_allocated_nodes.insert(std::move(root));
+		std::shared_ptr<inode> sptr (std::move(root));
+		_root = std::weak_ptr<inode>(sptr);
+		_allocated_nodes.insert(std::move(sptr));
 	}
 	// ---------------------------------------------------------------------------
 	mount_point::~mount_point()
@@ -21,5 +23,18 @@ namespace vfs::core
 			}
 			);
 		std::cout << "mount_point::~mount_point()";
+	}
+	// ---------------------------------------------------------------------------
+	wrapped_pointer<inode> mount_point::root()  const noexcept
+	{
+		return wrapped_pointer<inode>(_root.lock().get());
+	}
+	// ---------------------------------------------------------------------------
+	wrapped_pointer<inode> mount_point::add(std::unique_ptr<inode> ino)
+	{
+		std::shared_ptr<inode> sptr (std::move(ino));
+		std::weak_ptr<inode> ret(sptr);
+		_allocated_nodes.insert(std::move(sptr));
+		return wrapped_pointer<inode>(ret.lock().get());
 	}
 } // ns vfs::core

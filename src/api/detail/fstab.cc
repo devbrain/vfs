@@ -53,15 +53,21 @@ namespace vfs::core
 	{
 		return _type;
 	}
+	// -------------------------------------------------------------------------------------
+	wrapped_pointer<mount_point> fstab::entry::get() const
+	{
+		return wrapped_pointer<mount_point>(_mount_point.get());
+	}
 	// =====================================================================================
-	void fstab::mount(filesystem* module, const path& mount_path, const std::string& args)
+	wrapped_pointer<mount_point> fstab::mount(filesystem* module, const path& mount_path, const std::string& args)
 	{
 		auto key = hash(mount_path);
-		auto [_, result] = _fstab.try_emplace(key, lazy_convert_construct([&]{return entry(module, mount_path, args);}));
+		auto [itr, result] = _fstab.try_emplace(key, lazy_convert_construct([&]{return entry(module, mount_path, args);}));
 		if (!result)
 		{
 			throw vfs::exception("this path is already mounted");
 		}
+		return itr->second.get();
 	}
 	// ------------------------------------------------------------------------------------
 	void fstab::unmount(const path& pth)

@@ -37,60 +37,39 @@ namespace vfs {
     modules::iterator modules::begin() {
         return iterator(_impl->begin);
     }
-
     // ----------------------------------------------------------------------------------
     modules::iterator modules::end() {
         return iterator(_impl->end);
     }
-
+	// ===================================================================================
+	bool modules::iterator::_equals(const wrapper& a, const wrapper& b) const noexcept
+	{
+    	return a.itr == b.itr;
+	}
+	// ----------------------------------------------------------------------------------
+	void modules::iterator::_inc(wrapper& a)
+	{
+    	++a.itr;
+	}
     // ===================================================================================
-    modules::iterator::data::data(const wrapper &w)
+    modules::data::data(const wrapper &w)
             : _type(w.itr->first), _refcount(w.itr->second->ref_count()), _path(w.itr->second->path()) {
 
     }
 
     // -----------------------------------------------------------------------------------
-    std::string modules::iterator::data::type() const noexcept {
+    std::string modules::data::type() const noexcept {
         return _type;
     }
 
     // -----------------------------------------------------------------------------------
-    int modules::iterator::data::refcount() const noexcept {
+    int modules::data::refcount() const noexcept {
         return _refcount;
     }
     // -----------------------------------------------------------------------------------
-    stdfs::path modules::iterator::data::path() const noexcept {
+    stdfs::path modules::data::path() const noexcept {
         return _path;
     }
-
-    // -----------------------------------------------------------------------------------
-    modules::iterator::data modules::iterator::operator*() const {
-        return data(_value);
-    }
-
-    // -----------------------------------------------------------------------------------
-    bool modules::iterator::operator==(const iterator &other) const {
-        return _value.itr == other._value.itr;
-    }
-
-    // -----------------------------------------------------------------------------------
-    bool modules::iterator::operator!=(const iterator &other) const {
-        return !(*this == other);
-    }
-
-    // -----------------------------------------------------------------------------------
-    modules::iterator::data modules::iterator::operator++(int) {
-        data ret(_value);
-        (void) ++*this;
-        return ret;
-    }
-
-    // -----------------------------------------------------------------------------------
-    modules::iterator &modules::iterator::operator++() {
-        ++_value.itr;
-        return *this;
-    }
-
     // ===================================================================================
     modules::iterator begin(modules &m) {
         return m.begin();
@@ -100,7 +79,7 @@ namespace vfs {
     modules::iterator end(modules &m) {
         return m.end();
     }
-    std::ostream& operator << (std::ostream& os, const modules::iterator::data& d)
+    std::ostream& operator << (std::ostream& os, const modules::data& d)
     {
         os << d.type() << "\t" << d.path();
         return os;

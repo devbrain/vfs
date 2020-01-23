@@ -9,11 +9,18 @@
 
 #include "api/detail/modules_table.hh"
 #include "api/detail/fstab.hh"
+#include "api/detail/dentry.hh"
 
 namespace vfs
 {
 	namespace core
 	{
+
+		static bool is_root(const path& p)
+		{
+			return p.empty();
+		}
+
 		struct system
 		{
 		public:
@@ -50,6 +57,7 @@ namespace vfs
 
 	static void system_destructor()
 	{
+		core::dentry_done();
 		delete fstab;
 		delete system;
 	}
@@ -70,11 +78,19 @@ namespace vfs
 	void mount(const std::string& fstype, const std::string& args, const path& mount_point)
 	{
 		auto* fs = system->get_module(fstype);
+		if (!fs)
+		{
+			throw vfs::exception("Can not find module");
+		}
 		if (fstab == nullptr)
 		{
 			fstab = new core::fstab;
 		}
-		fstab->mount(fs, mount_point, args);
+		auto mountedfs = fstab->mount(fs, mount_point, args);
+		if (core::is_root (mount_point))
+		{
+			core::dentry_init(mountedfs);
+		}
 	}
 	// -------------------------------------------------------------------------------------
 	void unmount (const path& mount_point)
