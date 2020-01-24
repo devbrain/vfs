@@ -16,9 +16,9 @@ namespace vfs
 	namespace core
 	{
 
-		static bool is_root(const path& p)
+		static bool is_root(const std::string& p)
 		{
-			return p.empty();
+			return p == "/";
 		}
 
 		struct system
@@ -59,7 +59,11 @@ namespace vfs
 	{
 		core::dentry_done();
 		delete fstab;
+
+		fstab = nullptr;
 		delete system;
+
+		system = nullptr;
 	}
 	// ----------------------------------------------------------------------------------
 	void load_module(const stdfs::path& path_to_module)
@@ -75,7 +79,12 @@ namespace vfs
 		}
 	}
 	// -------------------------------------------------------------------------------------
-	void mount(const std::string& fstype, const std::string& args, const path& mount_point)
+	void deinitialize()
+	{
+		system_destructor();
+	}
+	// -------------------------------------------------------------------------------------
+	void mount(const std::string& fstype, const std::string& args, const std::string& mount_point)
 	{
 		auto* fs = system->get_module(fstype);
 		if (!fs)
@@ -86,14 +95,29 @@ namespace vfs
 		{
 			fstab = new core::fstab;
 		}
-		auto mountedfs = fstab->mount(fs, mount_point, args);
+
 		if (core::is_root (mount_point))
 		{
+			auto mountedfs = fstab->mount(fs, mount_point, args);
 			core::dentry_init(mountedfs);
+		}
+		else
+		{
+			path p(mount_point);
+			p.make_directory();
+
+			auto[dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
+
+			if (depth != p.depth())
+			{
+				throw vfs::exception("Path does not exists");
+			}
+			auto mountedfs = fstab->mount(fs, mount_point, args);
+			core::dentry_mount(mountedfs, dent);
 		}
 	}
 	// -------------------------------------------------------------------------------------
-	void unmount (const path& mount_point)
+	void unmount (const std::string& mount_point)
 	{
 		if (fstab == nullptr)
 		{

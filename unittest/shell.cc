@@ -11,8 +11,8 @@ int main (int argc, char* argv[])
 	try
 	{
 		vfs::load_module(argv[1]);
-		vfs::mount("physfs", "/home/igor", vfs::path("/"));
-		vfs::unmount(vfs::path("/"));
+		vfs::mount("physfs", "/home/igor", "/");
+		vfs::unmount("/");
 	}
 	catch (std::exception &e)
 	{

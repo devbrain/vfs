@@ -37,4 +37,14 @@ namespace vfs::core
 		_allocated_nodes.insert(std::move(sptr));
 		return wrapped_pointer<inode>(ret.lock().get());
 	}
+	// ---------------------------------------------------------------------------
+	void mount_point::remove(inode* ino)
+	{
+		uintptr_t key = reinterpret_cast<uintptr_t>(ino);
+		auto itr = _allocated_nodes.find(key);
+		if (itr != _allocated_nodes.end())
+		{
+			_allocated_nodes.erase(itr);
+		}
+	}
 } // ns vfs::core

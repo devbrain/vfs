@@ -30,20 +30,57 @@ TEST(BasicTest, testMount) {
 	*/
 
     auto st = vfs::get_stats("/zopa");
-    EXPECT_TRUE(st.has_value());
+    EXPECT_TRUE(st);
     EXPECT_TRUE(st->type == vfs::stats::eDIRECTORY);
 
 	st = vfs::get_stats("/zopa/pizda");
-	EXPECT_TRUE(st.has_value());
+	EXPECT_TRUE(st);
 	EXPECT_TRUE(st->type == vfs::stats::eDIRECTORY);
 
 	st = vfs::get_stats("/zopa/pizda/1.txt");
-	EXPECT_TRUE(st.has_value());
+	EXPECT_TRUE(st);
 	EXPECT_TRUE(st->type == vfs::stats::eFILE);
 
 	st = vfs::get_stats("/zopa/pizda/2.txt");
-	EXPECT_FALSE(st.has_value());
+	EXPECT_FALSE(st);
 
+	vfs::deinitialize();
 }
+
+
+
+TEST(BasicTest, testMount2) {
+	sandbox sbox;
+	sbox.mkdir("zopa/pizda");
+	sbox.create_file("zopa/pizda/1.txt", "aaa");
+
+
+	vfs::load_module(stdfs::path("."));
+
+	EXPECT_THROW(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
+
+	vfs::mount("physfs", sbox.root(), "/");
+	vfs::mount("physfs", sbox.root() + "/zopa", "/zopa/pizda");
+
+
+
+	auto st = vfs::get_stats("/zopa");
+	EXPECT_TRUE(st);
+	EXPECT_TRUE(st->type == vfs::stats::eDIRECTORY);
+
+	st = vfs::get_stats("/zopa/pizda");
+	EXPECT_TRUE(!st);
+
+
+	st = vfs::get_stats("/zopa/1.txt");
+	EXPECT_TRUE(st);
+	EXPECT_TRUE(st->type == vfs::stats::eFILE);
+
+	st = vfs::get_stats("/zopa/2.txt");
+	EXPECT_FALSE(st);
+
+	vfs::deinitialize();
+}
+
 
 

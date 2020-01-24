@@ -19,6 +19,7 @@ namespace vfs::core
 
 		wrapped_pointer<inode> add(std::unique_ptr<inode> root);
 
+		void remove(inode* ino);
 		~mount_point();
 	private:
 		struct compare

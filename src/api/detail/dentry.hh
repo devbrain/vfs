@@ -18,6 +18,7 @@ namespace vfs::core
 	void dentry_done ();
 
 	std::tuple<dentry*, inode*, int> dentry_resolve(const path& pth, int from, int to);
+	void dentry_mount(wrapped_pointer<mount_point> wp, dentry* node);
 }
 
 #endif

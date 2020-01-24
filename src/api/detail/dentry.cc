@@ -15,12 +15,21 @@ namespace vfs::core {
 
 		}
 
-		~dentry()
+		void release ()
 		{
+			if (mount)
+			{
+				mount->remove(ino.get());
+			}
 			for (const auto& kv : children)
 			{
 				delete kv.second;
 			}
+		}
+
+		~dentry()
+		{
+			release();
 		}
 		dentry* parent;
 		wrapped_pointer<mount_point> mount;
@@ -88,8 +97,16 @@ namespace vfs::core {
 		root = new dentry(nullptr, wp, wp->root());
 	}
 	// ======================================================================
+	void dentry_mount(wrapped_pointer<mount_point> wp, dentry* node)
+	{
+		node->release();
+		node->mount = wp;
+		node->ino = wp->root();
+	}
+	// ======================================================================
 	void dentry_done ()
 	{
 		delete root;
+		root = nullptr;
 	}
 } // ns vfs::core
