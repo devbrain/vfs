@@ -332,6 +332,10 @@ namespace vfs
 		inline
 		vfs_inode_ops* inode::inode_create(vfs::module::inode* opaque)
 		{
+			if (!opaque)
+			{
+				return nullptr;
+			}
 			auto res = new vfs_inode_ops;
 
 			res->opaque = opaque;

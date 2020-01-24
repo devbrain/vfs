@@ -31,7 +31,7 @@ namespace vfs::core {
 
 	static dentry* root = nullptr;
 	// ======================================================================
-	std::tuple<dentry*, int> dentry_resolve(const path& pth, int from, int to)
+	std::tuple<dentry*, inode*, int> dentry_resolve(const path& pth, int from, int to)
 	{
 		if (!root)
 		{
@@ -76,7 +76,7 @@ namespace vfs::core {
 				}
 			}
 		}
-		return std::make_tuple(node.get(), i);
+		return std::make_tuple(node.get(), node->ino.get(), i);
 	}
 	// ======================================================================
 	void dentry_init (wrapped_pointer<mount_point> wp)

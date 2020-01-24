@@ -12,11 +12,12 @@ namespace vfs::core
 {
 	class mount_point;
 	struct dentry;
+	class inode;
 
 	void dentry_init (wrapped_pointer<mount_point> wp);
 	void dentry_done ();
 
-	std::tuple<dentry*, int> dentry_resolve(const path& pth, int from, int to);
+	std::tuple<dentry*, inode*, int> dentry_resolve(const path& pth, int from, int to);
 }
 
 #endif

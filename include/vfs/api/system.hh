@@ -5,6 +5,8 @@
 #ifndef SYSTEM_HH
 #define SYSTEM_HH
 
+#include <map>
+#include <optional>
 
 #include "vfs/api/stdfilesystem.hh"
 #include "vfs/api/vfs_api.h"
@@ -21,6 +23,23 @@ namespace vfs
 	VFS_API mounts get_mounts();
 
 	VFS_API void unmount (const path& mount_point);
+
+	struct VFS_API stats
+	{
+		uint64_t size;
+		std::map<std::string, std::string> attribs;
+
+		enum type_t
+		{
+			eLINK,
+			eFILE,
+			eDIRECTORY
+		};
+
+		type_t type;
+	};
+
+	VFS_API std::optional<stats> get_stats(const std::string& pth);
 } // ns vfs
 
 #endif //SYSTEM_HH
