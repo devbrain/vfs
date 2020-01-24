@@ -6,7 +6,10 @@
 #include <vfs/api/detail/wrapped_iterator.hh>
 #include <memory>
 #include <iosfwd>
-
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4275 4251 )
+#endif
 namespace vfs
 {
     namespace core
@@ -14,10 +17,12 @@ namespace vfs
         class modules_table;
     }
 
+	class VFS_API modules;
+	VFS_API modules get_modules();
 
     class VFS_API modules
 	{
-		friend modules get_modules();
+		friend VFS_API modules get_modules();
 		struct wrapper;
 	public:
 		class iterator;
@@ -29,7 +34,9 @@ namespace vfs
 	private:
 		explicit modules(core::modules_table* mtable);
 		struct impl;
+
 		std::unique_ptr<impl> _impl;
+
 	public:
 		class data
 		{
@@ -67,5 +74,8 @@ namespace vfs
     VFS_API std::ostream& operator << (std::ostream&, const modules::data&);
 } // ns vfs
 
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #endif

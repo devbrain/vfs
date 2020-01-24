@@ -44,7 +44,7 @@ physfs_inode::physfs_inode(const stdfs::path& pth)
 vfs::module::inode* physfs_inode::lookup(const char* name)
 {
 	const stdfs::path child = _path / name;
-	const char* x = child.c_str();
+	
 	if (!stdfs::exists(child))
 	{
 		return nullptr;

@@ -14,6 +14,11 @@
 #include "vfs/api/modules.hh"
 #include "vfs/api/mounts.hh"
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4251 )
+#endif
+
 namespace vfs
 {
 	VFS_API void deinitialize();
@@ -43,5 +48,9 @@ namespace vfs
 
 	VFS_API std::optional<stats> get_stats(const std::string& pth);
 } // ns vfs
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #endif //SYSTEM_HH

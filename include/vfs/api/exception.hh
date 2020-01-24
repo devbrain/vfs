@@ -7,6 +7,10 @@
 
 namespace vfs
 {
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4275 )
+#endif
 	class VFS_API exception : public std::runtime_error
 	{
 	public:
@@ -16,6 +20,9 @@ namespace vfs
 
 		}
 	};
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 } // ns vfs
 
 #endif

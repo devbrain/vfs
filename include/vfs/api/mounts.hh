@@ -7,6 +7,11 @@
 #include <memory>
 #include <iosfwd>
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4275 4251 )
+#endif
+
 namespace vfs
 {
     namespace core
@@ -14,10 +19,12 @@ namespace vfs
         class fstab;
     }
 
+    class VFS_API mounts;
+    VFS_API mounts get_mounts();
 
     class VFS_API mounts
     {
-        friend mounts get_mounts();
+        friend VFS_API mounts get_mounts();
         struct wrapper;
     public:
         class iterator;
@@ -69,5 +76,8 @@ namespace vfs
     VFS_API std::ostream& operator << (std::ostream&, const mounts::data&);
 } // ns vfs
 
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #endif
