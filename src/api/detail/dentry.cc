@@ -48,7 +48,6 @@ namespace vfs::core {
 		}
 
 		wrapped_pointer<mount_point> current_mount = root->mount;
-		wrapped_pointer<inode> ino = root->ino;
 		wrapped_pointer<dentry> node(root);
 
 		int i = 0;
@@ -63,11 +62,10 @@ namespace vfs::core {
 				{
 					current_mount = node->mount;
 				}
-				ino = node->ino;
 			}
 			else
 			{
-				auto new_inode = ino->lookup(name);
+				auto new_inode = node->ino->lookup(name);
 				if (new_inode)
 				{
 

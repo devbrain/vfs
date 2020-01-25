@@ -18,11 +18,11 @@ namespace vfs::core
 			{
 				if (x.use_count() > 1)
 				{
-					std::cout << "MEMORY LEAK" << std::endl;
+					std::cout << "(mount point) MEMORY LEAK" << std::endl;
 				}
 			}
 			);
-		std::cout << "mount_point::~mount_point()";
+	//	std::cout << "mount_point::~mount_point()";
 	}
 	// ---------------------------------------------------------------------------
 	wrapped_pointer<inode> mount_point::root()  const noexcept
