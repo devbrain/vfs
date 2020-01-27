@@ -22,7 +22,7 @@ namespace vfs
 
 	class VFS_API directory
 	{
-		friend directory open_directory (const std::string& pth);
+		friend VFS_API directory open_directory (const std::string& pth);
 	public:
 		std::tuple<std::string, stats> next ();
 		bool has_next() const;
@@ -32,7 +32,14 @@ namespace vfs
 		explicit directory(core::inode* ino);
 
 		struct impl;
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4251 )
+#endif
 		std::unique_ptr<impl> _pimpl;
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 	};
 
 
@@ -53,14 +60,21 @@ namespace vfs
 		pointer operator->() const;
 		directory_iterator& operator++();
 		directory_iterator operator++(int);
-		friend bool operator==(const directory_iterator& lhs, const directory_iterator& rhs);
-		friend bool operator!=(const directory_iterator& lhs, const directory_iterator& rhs);
+		friend VFS_API bool operator==(const directory_iterator& lhs, const directory_iterator& rhs);
+		friend VFS_API bool operator!=(const directory_iterator& lhs, const directory_iterator& rhs);
 
 	private:
 		void assert_directory() const;
 
 		directory* _directory;
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4251 )
+#endif
 		value_type _ino_stats;
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 	};
 
 	VFS_API directory_iterator begin(directory& w);

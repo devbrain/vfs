@@ -119,7 +119,7 @@ namespace vfs
 		return directory_iterator(w);
 	}
 	// -----------------------------------------------------------------------------------
-	directory_iterator end(directory& w)
+	directory_iterator end(directory& )
 	{
 		return directory_iterator();
 	}

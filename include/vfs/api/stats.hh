@@ -7,6 +7,11 @@
 
 #include <vfs/api/vfs_api.h>
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning( disable : 4275 4251 )
+#endif
+
 namespace vfs
 {
 	struct VFS_API stats
@@ -25,5 +30,9 @@ namespace vfs
 	};
 
 }
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 #endif
