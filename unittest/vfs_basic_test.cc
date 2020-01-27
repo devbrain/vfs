@@ -81,6 +81,11 @@ TEST(BasicTest, testMount2) {
 	st = vfs::get_stats("/a/pizda/2.txt");
 	EXPECT_FALSE(st);
 
+	for (const auto d : vfs::open_directory("/a"))
+	{
+		std::cout << std::get<0>(d) << std::endl;
+	}
+
 	vfs::deinitialize();
 }
 

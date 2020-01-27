@@ -8,11 +8,13 @@
 #include <map>
 #include <optional>
 
-#include "vfs/api/stdfilesystem.hh"
-#include "vfs/api/vfs_api.h"
-#include "vfs/api/path.hh"
-#include "vfs/api/modules.hh"
-#include "vfs/api/mounts.hh"
+#include <vfs/api/stdfilesystem.hh>
+#include <vfs/api/vfs_api.h>
+#include <vfs/api/path.hh>
+#include <vfs/api/modules.hh>
+#include <vfs/api/mounts.hh>
+#include <vfs/api/stats.hh>
+#include <vfs/api/directory_iterator.hh>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -31,22 +33,10 @@ namespace vfs
 
 	VFS_API void unmount (const std::string& mount_point);
 
-	struct VFS_API stats
-	{
-		uint64_t size;
-		std::map<std::string, std::string> attribs;
-
-		enum type_t
-		{
-			eLINK,
-			eFILE,
-			eDIRECTORY
-		};
-
-		type_t type;
-	};
 
 	VFS_API std::optional<stats> get_stats(const std::string& pth);
+
+	VFS_API  directory open_directory (const std::string& pth);
 } // ns vfs
 
 #if defined(_MSC_VER)

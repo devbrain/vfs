@@ -4,6 +4,7 @@ set (src
         detail/module_loader.cc
         detail/fstab.cc
         detail/dentry.cc
+        detail/stats_converter.cc
 
         hasher.cc
         system.cc
@@ -12,6 +13,8 @@ set (src
         mount_point.cc
         modules.cc
         mounts.cc
+        directory_iterator.cc
+
 
 )
 
@@ -24,6 +27,7 @@ set(hdr
         detail/refcount.hh
         detail/dentry.hh
         detail/wrapped_pointer.hh
+        detail/stats_converter.hh
 
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
         ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h
@@ -35,6 +39,8 @@ set(hdr
         ${PROJECT_ROOT}/include/vfs/api/mounts.hh
         ${PROJECT_ROOT}/include/vfs/api/path.hh
         ${PROJECT_ROOT}/include/vfs/api/exception.hh
+        ${PROJECT_ROOT}/include/vfs/api/stats.hh
+        ${PROJECT_ROOT}/include/vfs/api/directory_iterator.hh
         ${PROJECT_ROOT}/include/vfs/api/detail/wrapped_iterator.hh
 
         hasher.hh
