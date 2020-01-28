@@ -65,5 +65,14 @@ uint64_t physfs_inode::size()
 	}
 	return stdfs::file_size(_path);
 }
-
+// -----------------------------------------------------------------------------------
+bool physfs_inode::mkdir (const char* name)
+{
+	const stdfs::path child = _path / name;
+	if (stdfs::exists(child))
+	{
+		return false;
+	}
+	return stdfs::create_directory(child);
+}
 

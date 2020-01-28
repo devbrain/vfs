@@ -183,4 +183,25 @@ namespace vfs
 
 		return directory(ino);
 	}
+	// ---------------------------------------------------------------------------------
+	void create_directory (const std::string& pth)
+	{
+		path p (pth);
+		p.make_directory();
+
+		auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
+		if (depth == p.depth())
+		{
+			throw exception("path already exists");
+		}
+		if (depth != p.depth() - 1)
+		{
+			throw exception("path not exists");
+		}
+		p.make_file();
+		if (!ino->mkdir(p.get_file_name()))
+		{
+			throw exception("failed to create directory");
+		}
+	}
 } // ns vfs

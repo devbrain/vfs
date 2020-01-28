@@ -125,6 +125,8 @@ struct vfs_inode_ops
 	 * returns directory iterator or NULL if this inode is not directory
 	 */
 	struct vfs_directory_iterator* (*get_directory_iterator) (void* opaque);
+
+	int (* mkdir)(void* opaque, char* name);
 };
 
 struct vfs_module
@@ -209,6 +211,7 @@ namespace vfs
 			virtual inode* lookup(const char* name) = 0;
 			virtual directory_iterator* get_directory_iterator() = 0;
 			virtual uint64_t size() = 0;
+			virtual bool mkdir(const char* name) = 0;
 		public:
 			static vfs_inode_ops* inode_create(vfs::module::inode* opaque);
 		private:
@@ -218,6 +221,7 @@ namespace vfs
 			static struct vfs_inode_ops* _lookup(void* opaque, char* name);
 			static int _stat(void* opaque, struct vfs_inode_stats* output);
 			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
+			static int _mkdir(void* opaque, char* name);
 		};
 
 		class filesystem
@@ -343,6 +347,7 @@ namespace vfs
 			res->lookup = _lookup;
 			res->get_directory_iterator = _get_directory_iterator;
 			res->stat = _stat;
+			res->mkdir = _mkdir;
 			return res;
 		}
 		/* ----------------------------------------------------------------------------- */
@@ -380,6 +385,13 @@ namespace vfs
 			{
 				return 0;
 			}
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
+		int inode::_mkdir(void* opaque, char* name)
+		{
+			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+			return ino->mkdir(name) ? 1 : 0;
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline

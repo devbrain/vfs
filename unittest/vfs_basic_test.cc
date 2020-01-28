@@ -92,3 +92,33 @@ TEST(BasicTest, testMount2) {
 
 
 
+TEST(BasicTest, testMkdir) {
+	sandbox sbox;
+	sbox.mkdir("zopa/pizda");
+	sbox.mkdir("a");
+	sbox.create_file("zopa/pizda/1.txt", "aaa");
+
+
+	vfs::load_module(stdfs::path("."));
+
+	EXPECT_THROW(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
+
+	vfs::mount("physfs", sbox.root(), "/");
+	vfs::mount("physfs", sbox.root() + "/zopa", "/a");
+
+	vfs::create_directory("/zopa/newDir");
+
+	auto st = vfs::get_stats("/a/newDir");
+	EXPECT_TRUE(st);
+	EXPECT_EQ(st->type,vfs::stats::eDIRECTORY);
+
+
+	st = vfs::get_stats("/zopa/newDir");
+	EXPECT_TRUE(st);
+	EXPECT_EQ(st->type,vfs::stats::eDIRECTORY);
+
+	vfs::deinitialize();
+}
+
+
+

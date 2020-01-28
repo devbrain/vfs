@@ -13,6 +13,7 @@ public:
 	inode* lookup(const char* name) override ;
 	uint64_t size() override ;
 	vfs::module::directory_iterator* get_directory_iterator() override;
+	bool mkdir (const char* name) override ;
 private:
 	const stdfs::path _path;
 };

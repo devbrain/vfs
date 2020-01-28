@@ -37,6 +37,8 @@ namespace vfs
 	VFS_API std::optional<stats> get_stats(const std::string& pth);
 
 	VFS_API  directory open_directory (const std::string& pth);
+
+	VFS_API void create_directory (const std::string& pth);
 } // ns vfs
 
 #if defined(_MSC_VER)

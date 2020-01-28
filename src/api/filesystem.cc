@@ -1,6 +1,5 @@
 #include "filesystem.hh"
 
-
 namespace vfs::core
 {
 	filesystem::filesystem(vfs_module* ops)
@@ -95,6 +94,11 @@ namespace vfs::core
 			return nullptr;
 		}
 		return std::unique_ptr<directory_iterator>(new directory_iterator(itr, this));
+	}
+	// ----------------------------------------------------------------------
+	bool inode::mkdir(const std::string& name) const
+	{
+		return _ops->mkdir(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
 	}
 	// ----------------------------------------------------------------------
 	inode::inode(vfs_inode_ops* ops, filesystem* owner)
