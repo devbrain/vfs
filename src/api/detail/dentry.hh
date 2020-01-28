@@ -17,8 +17,11 @@ namespace vfs::core
 	void dentry_init (wrapped_pointer<mount_point> wp);
 	void dentry_done ();
 
-	std::tuple<dentry*, inode*, int> dentry_resolve(const path& pth, int from, int to);
+	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve(const path& pth, int from, int to);
+	void dentry_unlink(dentry* victim);
+	bool dentry_has_children (dentry* victim);
 	void dentry_mount(wrapped_pointer<mount_point> wp, dentry* node);
+
 }
 
 #endif

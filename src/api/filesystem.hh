@@ -77,12 +77,14 @@ namespace vfs::core
 		[[nodiscard]] std::unique_ptr<directory_iterator> get_directory_iterator() const;
 
 		[[nodiscard]] const filesystem* owner() const;
-		[[nodiscard]] bool mkdir(const std::string& name) const;
+		[[nodiscard]] bool mkdir(const std::string& name);
+		[[nodiscard]] bool dirty() const noexcept ;
 	private:
 		explicit inode(vfs_inode_ops* ops, filesystem* owner);
 	private:
 		vfs_inode_ops* _ops;
 		filesystem* _owner;
+		bool _dirty;
 	};
 }
 

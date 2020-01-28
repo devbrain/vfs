@@ -29,7 +29,7 @@ namespace vfs
 
 		~directory();
 	private:
-		explicit directory(core::inode* ino);
+		explicit directory(std::shared_ptr<core::inode> ino);
 
 		struct impl;
 #if defined(_MSC_VER)

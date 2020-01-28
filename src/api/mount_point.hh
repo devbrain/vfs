@@ -15,12 +15,14 @@ namespace vfs::core
 	public:
 		explicit mount_point(std::unique_ptr<inode> root);
 
-		wrapped_pointer<inode> root () const noexcept;
+		std::weak_ptr<inode> root () const noexcept;
 
-		wrapped_pointer<inode> add(std::unique_ptr<inode> root);
+		std::weak_ptr<inode> add(std::unique_ptr<inode> root);
 
 		void remove(inode* ino);
 		~mount_point();
+	private:
+		void _inode_destructor(inode* ino) noexcept ;
 	private:
 		struct compare
 		{

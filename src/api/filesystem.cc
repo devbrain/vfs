@@ -1,4 +1,5 @@
 #include "filesystem.hh"
+#include <vfs/api/exception.hh>
 
 namespace vfs::core
 {
@@ -83,7 +84,10 @@ namespace vfs::core
 	// ----------------------------------------------------------------------
 	void inode::stat(stats& st) const
 	{
-		_ops->stat(_ops->opaque, &st);
+		if (!_ops->stat(_ops->opaque, &st))
+		{
+			throw vfs::exception("failed to load stat");
+		}
 	}
 	// ----------------------------------------------------------------------
 	std::unique_ptr<directory_iterator> inode::get_directory_iterator() const
@@ -96,14 +100,20 @@ namespace vfs::core
 		return std::unique_ptr<directory_iterator>(new directory_iterator(itr, this));
 	}
 	// ----------------------------------------------------------------------
-	bool inode::mkdir(const std::string& name) const
+	bool inode::mkdir(const std::string& name)
 	{
-		return _ops->mkdir(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
+		auto res = _ops->mkdir(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
+		if (res)
+		{
+			_dirty = true;
+		}
+		return res;
 	}
 	// ----------------------------------------------------------------------
 	inode::inode(vfs_inode_ops* ops, filesystem* owner)
 	: _ops(ops),
-	_owner(owner)
+	_owner(owner),
+	_dirty(false)
 	{
 
 	}
@@ -119,5 +129,10 @@ namespace vfs::core
 	const filesystem* inode::owner() const
 	{
 		return _owner;
+	}
+	// ----------------------------------------------------------------------
+	bool inode::dirty() const noexcept
+	{
+		return _dirty;
 	}
 } // ns vfs

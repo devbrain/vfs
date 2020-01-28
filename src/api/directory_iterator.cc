@@ -9,9 +9,9 @@ namespace vfs
 {
 	struct directory::impl
 	{
-		impl(core::inode* ino)
+		impl(std::shared_ptr<core::inode> ino)
 		: di (std::move(ino->get_directory_iterator())),
-		node(ino)
+		  node(ino)
 		{
 			if (!di)
 			{
@@ -19,7 +19,7 @@ namespace vfs
 			}
 		}
 		std::unique_ptr<core::directory_iterator> di;
-		core::wrapped_pointer<core::inode> node;
+		std::shared_ptr<core::inode> node;
 	};
 	// -----------------------------------------------------------------------------------------
 	std::tuple<std::string, stats> directory::next ()
@@ -27,6 +27,7 @@ namespace vfs
 		std::string name = _pimpl->di->next();
 		core::stats st;
 		_pimpl->node->stat(st);
+
 
 		return std::make_tuple(name, convert(st));
 	}
@@ -38,7 +39,7 @@ namespace vfs
 	// -----------------------------------------------------------------------------------------
 	directory::~directory() = default;
 	// -----------------------------------------------------------------------------------------
-	directory::directory(core::inode* ino)
+	directory::directory(std::shared_ptr<core::inode> ino)
 	{
 		_pimpl = std::make_unique<impl>(ino);
 	}

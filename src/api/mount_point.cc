@@ -6,7 +6,11 @@ namespace vfs::core
 {
 	mount_point::mount_point(std::unique_ptr<inode> root)
 	{
-		std::shared_ptr<inode> sptr (std::move(root));
+		auto destructor = [this] (inode* pino) {
+			this->_inode_destructor(pino);
+		};
+		std::shared_ptr<inode> sptr (root.release(), destructor);
+
 		_root = std::weak_ptr<inode>(sptr);
 		_allocated_nodes.insert(std::move(sptr));
 	}
@@ -25,17 +29,21 @@ namespace vfs::core
 	//	std::cout << "mount_point::~mount_point()";
 	}
 	// ---------------------------------------------------------------------------
-	wrapped_pointer<inode> mount_point::root()  const noexcept
+	std::weak_ptr<inode> mount_point::root()  const noexcept
 	{
-		return wrapped_pointer<inode>(_root.lock().get());
+		return _root;
 	}
 	// ---------------------------------------------------------------------------
-	wrapped_pointer<inode> mount_point::add(std::unique_ptr<inode> ino)
+	std::weak_ptr<inode> mount_point::add(std::unique_ptr<inode> ino)
 	{
-		std::shared_ptr<inode> sptr (std::move(ino));
+		auto destructor = [this] (inode* pino) {
+			this->_inode_destructor(pino);
+		};
+		std::shared_ptr<inode> sptr (ino.release(), destructor);
+
 		std::weak_ptr<inode> ret(sptr);
 		_allocated_nodes.insert(std::move(sptr));
-		return wrapped_pointer<inode>(ret.lock().get());
+		return ret;
 	}
 	// ---------------------------------------------------------------------------
 	void mount_point::remove(inode* ino)
@@ -46,5 +54,14 @@ namespace vfs::core
 		{
 			_allocated_nodes.erase(itr);
 		}
+	}
+	// ---------------------------------------------------------------------------
+	void mount_point::_inode_destructor(inode* ino) noexcept
+	{
+		if (ino->dirty())
+		{
+			// TODO
+		}
+		delete ino;
 	}
 } // ns vfs::core

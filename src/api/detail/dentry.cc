@@ -7,7 +7,7 @@
 namespace vfs::core {
 	struct dentry
 	{
-		dentry(dentry* dparent, wrapped_pointer<mount_point> mp, wrapped_pointer<inode> pino)
+		dentry(dentry* dparent, wrapped_pointer<mount_point> mp, std::weak_ptr<inode> pino)
 		: parent(dparent),
 		mount (mp),
 		ino(pino)
@@ -19,7 +19,7 @@ namespace vfs::core {
 		{
 			if (mount)
 			{
-				mount->remove(ino.get());
+				mount->remove(ino.lock().get());
 			}
 			for (const auto& kv : children)
 			{
@@ -33,14 +33,14 @@ namespace vfs::core {
 		}
 		dentry* parent;
 		wrapped_pointer<mount_point> mount;
-		wrapped_pointer<inode> ino;
+		std::weak_ptr<inode> ino;
 
 		std::map<std::string, dentry*> children;
 	};
 
 	static dentry* root = nullptr;
 	// ======================================================================
-	std::tuple<dentry*, inode*, int> dentry_resolve(const path& pth, int from, int to)
+	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve(const path& pth, int from, int to)
 	{
 		if (!root)
 		{
@@ -55,6 +55,8 @@ namespace vfs::core {
 		{
 			const auto name = pth[i];
 			auto itr = node->children.find(name);
+
+
 			if (itr != node->children.end())
 			{
 				node = wrapped_pointer<dentry>(itr->second);
@@ -65,7 +67,9 @@ namespace vfs::core {
 			}
 			else
 			{
-				auto new_inode = node->ino->lookup(name);
+
+				std::shared_ptr<inode> the_inode = node->ino.lock();
+				auto new_inode = the_inode->lookup(name);
 				if (new_inode)
 				{
 
@@ -76,6 +80,10 @@ namespace vfs::core {
 
 					node->children.insert(std::make_pair(name, new_dentry));
 					node = wrapped_pointer<dentry>(new_dentry);
+					if (node->ino.expired())
+					{
+						break;
+					}
 				}
 				else
 				{
@@ -83,7 +91,61 @@ namespace vfs::core {
 				}
 			}
 		}
-		return std::make_tuple(node.get(), node->ino.get(), i);
+		return std::make_tuple(node.get(), node->ino.lock(), i);
+	}
+	// ======================================================================
+	void dentry_unlink(dentry* victim)
+	{
+		dentry* parent = victim->parent;
+		if (!parent)
+		{
+			delete victim;
+		}
+		else
+		{
+			for (auto itr = parent->children.begin(); itr != parent->children.end(); itr++)
+			{
+				if (itr->second == victim)
+				{
+					delete itr->second;
+					parent->children.erase(itr);
+					break;
+				}
+			}
+		}
+	}
+	// ======================================================================
+	bool dentry_has_children (dentry* victim)
+	{
+		if (!victim->children.empty())
+		{
+			return true;
+		}
+		if (victim->ino.expired())
+		{
+			return false;
+		}
+		core::stats st;
+		auto inoptr = victim->ino.lock();
+		try
+		{
+			inoptr->stat(st);
+		}
+		catch (...)
+		{
+			return false;
+		}
+		if (st.type == VFS_INODE_DIRECTORY)
+		{
+
+			auto di = inoptr->get_directory_iterator();
+			if (!di)
+			{
+				return false;
+			}
+			return di->has_next();
+		}
+		return false;
 	}
 	// ======================================================================
 	void dentry_init (wrapped_pointer<mount_point> wp)
