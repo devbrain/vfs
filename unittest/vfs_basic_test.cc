@@ -83,7 +83,8 @@ TEST(BasicTest, testMount2) {
 
 	for (const auto d : vfs::open_directory("/a"))
 	{
-		std::cout << std::get<0>(d) << std::endl;
+		EXPECT_EQ(std::get<0>(d), "pizda");
+		EXPECT_EQ(std::get<1>(d).type, vfs::stats::eDIRECTORY);
 	}
 
 	vfs::deinitialize();
