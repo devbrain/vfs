@@ -13,6 +13,8 @@
 #include <string>
 #include <stdexcept>
 #include <algorithm>
+
+#include <iostream>
 #else
 #include <stdint.h>
 #include <stddef.h>
@@ -101,7 +103,7 @@ struct vfs_inode_ops
 	 * implementation specific data
 	 */
 	void* opaque;
-
+	int serial;
 	/*
 	 * de-allocates the victim
 	 */
@@ -207,7 +209,10 @@ namespace vfs
 			explicit inode(vfs_inode_type type);
 			vfs_inode_type type() const;
 
-			virtual ~inode() = default;
+			virtual ~inode() {
+				std::cout << "~ of " << iserial << std::endl;
+
+			}
 
 			virtual void load_stat(stats& /*output*/)
 			{
@@ -228,8 +233,10 @@ namespace vfs
 			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
 			static int _mkdir(void* opaque, char* name);
 			static int  _unlink(void* opaque);
+			int iserial;
+			
 		};
-
+		
 		class filesystem
 		{
 		public:
@@ -354,6 +361,14 @@ namespace vfs
 				return nullptr;
 			}
 			auto res = new vfs_inode_ops;
+			static int k = 0;
+
+			
+
+			res->serial = k++;
+
+			std::cout << "Creat " << res->serial << std::endl;
+			opaque->iserial = res->serial;
 
 			res->opaque = opaque;
 			res->destructor = _destructor;

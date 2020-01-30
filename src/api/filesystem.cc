@@ -1,4 +1,5 @@
 #include "filesystem.hh"
+#include <iostream>
 #include <vfs/api/exception.hh>
 
 namespace vfs::core
@@ -44,13 +45,17 @@ namespace vfs::core
 	stats::stats()
 	: vfs_inode_stats()
 	{
+		destructor = nullptr;
+
 		num_of_additional_attributes = 0;
 		additional_attributes = nullptr;
 	}
 	// ----------------------------------------------------------------------
 	stats::~stats()
 	{
-		destructor(this);
+		if (destructor) {
+			destructor(this);
+		}
 	}
 	// =====================================================================
 	directory_iterator::~directory_iterator()
@@ -94,6 +99,7 @@ namespace vfs::core
 	// ----------------------------------------------------------------------
 	void inode::stat(stats& st) const
 	{
+		std::cout << "stat of " << _ops->serial << std::endl;
 		if (!_ops->stat(_ops->opaque, &st))
 		{
 			throw vfs::exception("failed to load stat");
@@ -111,7 +117,7 @@ namespace vfs::core
 	}
 	// ----------------------------------------------------------------------
 	bool inode::mkdir(const std::string& name)
-	{
+	{	
 		auto res = _ops->mkdir(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
 		if (res)
 		{
@@ -120,18 +126,22 @@ namespace vfs::core
 		return res;
 	}
 	// ----------------------------------------------------------------------
+	static int serial = 0;
 	inode::inode(vfs_inode_ops* ops, filesystem* owner)
 	: _ops(ops),
 	_owner(owner),
-	_dirty(false)
-	{
+	_dirty(false),
+		_serial(serial++)
 
+	{
+		
 	}
 	// ----------------------------------------------------------------------
 	inode::~inode()
 	{
 		if (_ops)
 		{
+			std::cout << "Destroy " << _ops->serial << std::endl;
 			_ops->destructor(_ops);
 		}
 	}

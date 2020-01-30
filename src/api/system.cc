@@ -151,7 +151,7 @@ namespace vfs
 		p.make_directory();
 
 		auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
-
+		
 		if (depth != p.depth())
 		{
 			return std::nullopt;
