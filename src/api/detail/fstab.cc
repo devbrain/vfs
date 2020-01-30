@@ -1,5 +1,6 @@
 #include "fstab.hh"
 #include <vfs/api/exception.hh>
+#include <iostream>
 
 namespace
 {
@@ -32,12 +33,20 @@ namespace vfs::core
 	fstab::entry::entry(filesystem* fs, const path& pth, const std::string& args)
 	: _type(fs->type()),
 	_args(args),
-	_path(pth)
+	_path(pth),
+	_fs(fs)
 	{
 		_mount_point = std::make_unique<mount_point>(std::move(fs->load_root(args)));
 	}
 	// -------------------------------------------------------------------------------------
-	fstab::entry::~entry() = default;
+	fstab::entry::~entry()
+	{
+		int err = _fs->sync();
+		if (err != 1)
+		{
+			std::cout << "FS SYNC ERR " << err << std::endl;
+		}
+	}
 	// -------------------------------------------------------------------------------------
 	path fstab::entry::mount_path() const noexcept
 	{

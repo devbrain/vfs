@@ -30,6 +30,16 @@ namespace vfs::core
 		_module->get_name(_module->opaque, name, sizeof(name));
 		return name;
 	}
+	// ---------------------------------------------------------------------
+	int filesystem::sync ()
+	{
+		return _module->sync_filesystem(_module);
+	}
+	// ---------------------------------------------------------------------
+	int filesystem::sync (inode* ino)
+	{
+		return _module->sync_inode(_module->opaque, ino->_ops->opaque);
+	}
 	// ======================================================================
 	stats::stats()
 	: vfs_inode_stats()
@@ -134,5 +144,20 @@ namespace vfs::core
 	bool inode::dirty() const noexcept
 	{
 		return _dirty;
+	}
+	// ----------------------------------------------------------------------
+	int inode::sync()
+	{
+		return _owner->sync(this);
+	}
+	// ----------------------------------------------------------------------
+	int inode::unlink()
+	{
+		auto res = _ops->unlink(_ops->opaque);
+		if (res)
+		{
+			_dirty = true;
+		}
+		return res;
 	}
 } // ns vfs

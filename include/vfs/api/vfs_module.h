@@ -127,6 +127,7 @@ struct vfs_inode_ops
 	struct vfs_directory_iterator* (*get_directory_iterator) (void* opaque);
 
 	int (* mkdir)(void* opaque, char* name);
+	int (* unlink)(void* opaque);
 };
 
 struct vfs_module
@@ -146,6 +147,9 @@ struct vfs_module
 	size_t (* maximal_name_length)(void* opaque);
 
 	size_t (* get_name)(void* opaque, char* output, size_t output_size);
+
+	int (* sync_inode) (void* opaque, void* inode_opaque);
+	int (* sync_filesystem) (struct vfs_module* fsys);
 };
 
 #define VFS_MODULE_REGISTER_NAME "vfs_module_register"
@@ -212,6 +216,7 @@ namespace vfs
 			virtual directory_iterator* get_directory_iterator() = 0;
 			virtual uint64_t size() = 0;
 			virtual bool mkdir(const char* name) = 0;
+			virtual int unlink() = 0;
 		public:
 			static vfs_inode_ops* inode_create(vfs::module::inode* opaque);
 		private:
@@ -222,6 +227,7 @@ namespace vfs
 			static int _stat(void* opaque, struct vfs_inode_stats* output);
 			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
 			static int _mkdir(void* opaque, char* name);
+			static int  _unlink(void* opaque);
 		};
 
 		class filesystem
@@ -232,8 +238,11 @@ namespace vfs
 
 			virtual inode* load_root(const std::string& params) = 0;
 			virtual size_t max_name_length() = 0;
+			virtual int sync() = 0;
+			virtual int sync_inode(inode* inod) = 0;
 
 			virtual void setup(struct vfs_module* output);
+
 		private:
 			const std::string _name;
 
@@ -241,6 +250,10 @@ namespace vfs
 			static struct vfs_inode_ops* _load_root(void* opaque, char* params);
 			static size_t _maximal_name_length(void* opaque);
 			static size_t _get_name(void* opaque, char* output, size_t output_size);
+			static int _sync_inode (void* opaque, void* inode_opaque);
+			static int _sync_filesystem (struct vfs_module* victim);
+
+
 		};
 /* ============================================================================
 	Implementation
@@ -348,6 +361,7 @@ namespace vfs
 			res->get_directory_iterator = _get_directory_iterator;
 			res->stat = _stat;
 			res->mkdir = _mkdir;
+			res->unlink = _unlink;
 			return res;
 		}
 		/* ----------------------------------------------------------------------------- */
@@ -395,6 +409,13 @@ namespace vfs
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline
+		int inode::_unlink(void* opaque)
+		{
+			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+			return ino->unlink();
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
 		struct vfs_directory_iterator* inode::_get_directory_iterator(void* opaque)
 		{
 			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
@@ -423,6 +444,8 @@ namespace vfs
 			output->load_root = _load_root;
 			output->maximal_name_length = _maximal_name_length;
 			output->get_name = _get_name;
+			output->sync_filesystem = _sync_filesystem;
+			output->sync_inode = _sync_inode;
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline
@@ -454,6 +477,21 @@ namespace vfs
 			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
 			std::memcpy(output, fs->_name.c_str(), std::min(output_size, fs->_name.size()));
 			return fs->_name.size();
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
+		int filesystem::_sync_inode (void* opaque, void* inode_opaque)
+		{
+			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+			auto* ino = reinterpret_cast<vfs::module::inode*> (inode_opaque);
+			return fs->sync_inode(ino);
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
+		int filesystem::_sync_filesystem (struct vfs_module* fsys)
+		{
+			auto* fs = reinterpret_cast<vfs::module::filesystem*> (fsys->opaque);
+			return fs->sync();
 		}
 		/* ============================================================================= */
 		inline

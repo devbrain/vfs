@@ -156,6 +156,7 @@ namespace vfs
 		{
 			return std::nullopt;
 		}
+
 		core::stats st;
 		ino->stat(st);
 
@@ -203,5 +204,26 @@ namespace vfs
 		{
 			throw exception("failed to create directory");
 		}
+	}
+	// --------------------------------------------------------------------------------
+	void unlink (const std::string& pth)
+	{
+		path p (pth);
+		p.make_directory();
+
+		auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
+		if (depth != p.depth())
+		{
+			throw exception("path not found");
+		}
+		if (dentry_has_children (dent))
+		{
+			throw exception("path not empty");
+		}
+		if (!ino->unlink())
+		{
+			throw exception("failed to unlink");
+		}
+		dentry_unlink(dent);
 	}
 } // ns vfs

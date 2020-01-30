@@ -25,6 +25,15 @@ private:
 	{
 		return 64;
 	}
+	int sync() override
+	{
+		return 1;
+	}
+
+	int sync_inode(vfs::module::inode* inod)
+	{
+		return 1;
+	}
 };
 
 

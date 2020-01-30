@@ -38,6 +38,7 @@ namespace vfs::core
 			std::string _type;
 			std::string _args;
 			path _path;
+			filesystem* _fs;
 		};
 
 		wrapped_pointer<mount_point> mount(filesystem* module, const path& mount_path, const std::string& args);

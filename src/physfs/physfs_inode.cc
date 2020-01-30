@@ -75,4 +75,12 @@ bool physfs_inode::mkdir (const char* name)
 	}
 	return stdfs::create_directory(child);
 }
-
+// -----------------------------------------------------------------------------------
+int physfs_inode::unlink()
+{
+	if (!stdfs::exists(_path))
+	{
+		return 0;
+	}
+	return stdfs::remove(_path) ? 1 : 0;
+}

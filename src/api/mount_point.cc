@@ -60,7 +60,11 @@ namespace vfs::core
 	{
 		if (ino->dirty())
 		{
-			// TODO
+			auto err = ino->sync();
+			if (err != 1)
+			{
+				std::cout << "ERROR SYNC " << err << std::endl;
+			}
 		}
 		delete ino;
 	}

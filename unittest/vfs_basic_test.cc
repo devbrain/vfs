@@ -120,5 +120,3 @@ TEST(BasicTest, testMkdir) {
 	vfs::deinitialize();
 }
 
-
-

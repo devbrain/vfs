@@ -27,6 +27,9 @@ namespace vfs::core
 		[[nodiscard]] std::unique_ptr<inode> load_root(const std::string& params);
 		[[nodiscard]] size_t max_name_length() const noexcept ;
 		[[nodiscard]] std::string type() const noexcept ;
+
+		[[nodiscard]] int sync ();
+		[[nodiscard]] int sync (inode* ino);
 	private:
 		~filesystem();
 		vfs_module* _module;
@@ -79,6 +82,8 @@ namespace vfs::core
 		[[nodiscard]] const filesystem* owner() const;
 		[[nodiscard]] bool mkdir(const std::string& name);
 		[[nodiscard]] bool dirty() const noexcept ;
+		[[nodiscard]] int sync();
+		[[nodiscard]] int unlink();
 	private:
 		explicit inode(vfs_inode_ops* ops, filesystem* owner);
 	private:

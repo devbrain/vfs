@@ -19,7 +19,10 @@ namespace vfs::core {
 		{
 			if (mount)
 			{
-				mount->remove(ino.lock().get());
+				if (!ino.expired())
+				{
+					mount->remove(ino.lock().get());
+				}
 			}
 			for (const auto& kv : children)
 			{
@@ -90,6 +93,10 @@ namespace vfs::core {
 					break;
 				}
 			}
+		}
+		if (node->ino.expired())
+		{
+			return std::make_tuple(node.get(), nullptr, i);
 		}
 		return std::make_tuple(node.get(), node->ino.lock(), i);
 	}
