@@ -14,7 +14,6 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <iostream>
 #else
 #include <stdint.h>
 #include <stddef.h>
@@ -103,7 +102,6 @@ struct vfs_inode_ops
 	 * implementation specific data
 	 */
 	void* opaque;
-	int serial;
 	/*
 	 * de-allocates the victim
 	 */
@@ -210,8 +208,6 @@ namespace vfs
 			vfs_inode_type type() const;
 
 			virtual ~inode() {
-				std::cout << "~ of " << iserial << std::endl;
-
 			}
 
 			virtual void load_stat(stats& /*output*/)
@@ -361,14 +357,6 @@ namespace vfs
 				return nullptr;
 			}
 			auto res = new vfs_inode_ops;
-			static int k = 0;
-
-			
-
-			res->serial = k++;
-
-			std::cout << "Creat " << res->serial << std::endl;
-			opaque->iserial = res->serial;
 
 			res->opaque = opaque;
 			res->destructor = _destructor;

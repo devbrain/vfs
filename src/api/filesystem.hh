@@ -90,7 +90,6 @@ namespace vfs::core
 		vfs_inode_ops* _ops;
 		filesystem* _owner;
 		bool _dirty;
-		int _serial;
 	};
 }
 

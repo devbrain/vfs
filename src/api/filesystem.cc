@@ -99,7 +99,6 @@ namespace vfs::core
 	// ----------------------------------------------------------------------
 	void inode::stat(stats& st) const
 	{
-		std::cout << "stat of " << _ops->serial << std::endl;
 		if (!_ops->stat(_ops->opaque, &st))
 		{
 			throw vfs::exception("failed to load stat");
@@ -126,13 +125,10 @@ namespace vfs::core
 		return res;
 	}
 	// ----------------------------------------------------------------------
-	static int serial = 0;
 	inode::inode(vfs_inode_ops* ops, filesystem* owner)
 	: _ops(ops),
 	_owner(owner),
-	_dirty(false),
-		_serial(serial++)
-
+	_dirty(false)
 	{
 		
 	}
@@ -141,7 +137,6 @@ namespace vfs::core
 	{
 		if (_ops)
 		{
-			std::cout << "Destroy " << _ops->serial << std::endl;
 			_ops->destructor(_ops);
 		}
 	}

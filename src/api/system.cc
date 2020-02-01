@@ -158,7 +158,13 @@ namespace vfs
 		}
 
 		core::stats st;
-		ino->stat(st);
+		try
+		{
+			ino->stat(st);
+		} catch (...)
+		{
+			return std::nullopt;
+		}
 
 		auto res = convert(st);
 
@@ -224,6 +230,9 @@ namespace vfs
 		{
 			throw exception("failed to unlink");
 		}
-		dentry_unlink(dent);
+		if (dentry_unlink(dent))
+		{
+			fstab->unmount(pth);
+		}
 	}
 } // ns vfs

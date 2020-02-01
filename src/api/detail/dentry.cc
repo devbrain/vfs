@@ -10,7 +10,8 @@ namespace vfs::core {
 		dentry(dentry* dparent, wrapped_pointer<mount_point> mp, std::weak_ptr<inode> pino)
 		: parent(dparent),
 		mount (mp),
-		ino(pino)
+		ino(pino),
+		is_mount(false)
 		{
 
 		}
@@ -39,6 +40,7 @@ namespace vfs::core {
 		std::weak_ptr<inode> ino;
 
 		std::map<std::string, dentry*> children;
+		bool is_mount;
 	};
 
 	static dentry* root = nullptr;
@@ -101,8 +103,9 @@ namespace vfs::core {
 		return std::make_tuple(node.get(), node->ino.lock(), i);
 	}
 	// ======================================================================
-	void dentry_unlink(dentry* victim)
+	bool dentry_unlink(dentry* victim)
 	{
+		bool is_mount = victim->is_mount;
 		dentry* parent = victim->parent;
 		if (!parent)
 		{
@@ -120,6 +123,7 @@ namespace vfs::core {
 				}
 			}
 		}
+		return is_mount;
 	}
 	// ======================================================================
 	bool dentry_has_children (dentry* victim)
@@ -162,6 +166,7 @@ namespace vfs::core {
 			throw vfs::exception("dentry is already initialized");
 		}
 		root = new dentry(nullptr, wp, wp->root());
+		root->is_mount = true;
 	}
 	// ======================================================================
 	void dentry_mount(wrapped_pointer<mount_point> wp, dentry* node)
@@ -169,6 +174,7 @@ namespace vfs::core {
 		node->release();
 		node->mount = wp;
 		node->ino = wp->root();
+		node->is_mount = true;
 	}
 	// ======================================================================
 	void dentry_done ()
