@@ -40,5 +40,5 @@ set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 add_subdirectory(unittest)
 add_subdirectory(src/api)
 add_subdirectory(src/physfs)
-#add_subdirectory(src/swig)
+add_subdirectory(src/ext)
 

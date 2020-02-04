@@ -70,8 +70,8 @@ namespace vfs
         };
     };
 
-    VFS_API [[nodiscard]] mounts::iterator begin(mounts& m);
-    VFS_API [[nodiscard]] mounts::iterator end(mounts& m);
+    VFS_API mounts::iterator begin(mounts& m);
+    VFS_API mounts::iterator end(mounts& m);
 
     VFS_API std::ostream& operator << (std::ostream&, const mounts::data&);
 } // ns vfs

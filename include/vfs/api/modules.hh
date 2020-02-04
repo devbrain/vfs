@@ -68,8 +68,8 @@ namespace vfs
 		};
     };
 
-    VFS_API [[nodiscard]] modules::iterator begin(modules& m);
-    VFS_API [[nodiscard]] modules::iterator end(modules& m);
+    VFS_API modules::iterator begin(modules& m);
+    VFS_API modules::iterator end(modules& m);
 
     VFS_API std::ostream& operator << (std::ostream&, const modules::data&);
 } // ns vfs

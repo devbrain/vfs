@@ -84,3 +84,8 @@ int physfs_inode::unlink()
 	}
 	return stdfs::remove(_path) ? 1 : 0;
 }
+// -----------------------------------------------------------------------------------
+vfs::module::file* open_file(open_mode_type mode_type)
+{
+	return nullptr;
+}

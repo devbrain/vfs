@@ -96,6 +96,34 @@ struct vfs_directory_iterator
 	size_t (* next)(void* opaque, char* name, size_t max_name_length);
 };
 
+enum whence_type
+{
+	eSEEK_START,
+	eSEEK_SET,
+	eSEEK_END
+};
+
+struct vfs_file_ops
+{
+	void* opaque;
+
+	void (* destructor)(struct vfs_file_ops* victim);
+
+	ssize_t (*read)  (void* opaque, void* buff, size_t len);
+	ssize_t (*write) (void* opaque, void* buff, size_t len);
+	/*
+	 * Upon successful completion, lseek() returns the resulting offset location as measured in bytes
+	 * from the beginning of the file.  On error, the value (uint64_t) -1
+	 */
+	uint64_t (*seek) (void* opaque, uint64_t pos, enum whence_type whence);
+};
+
+enum open_mode_type
+{
+	eREAD,
+	eWRITE
+};
+
 struct vfs_inode_ops
 {
 	/*
@@ -128,6 +156,8 @@ struct vfs_inode_ops
 
 	int (* mkdir)(void* opaque, char* name);
 	int (* unlink)(void* opaque);
+
+	struct vfs_file_ops* (*open_file)(void* opaque, enum open_mode_type mode_type);
 };
 
 struct vfs_module
@@ -186,6 +216,26 @@ namespace vfs
 			static size_t _next(void* opaque, char* name, size_t max_name_length);
 		};
 
+		class inode;
+
+		class file
+		{
+		public:
+			virtual ~file() = default;
+
+			virtual ssize_t read  (void* buff, size_t len) = 0;
+			virtual ssize_t write (void* buff, size_t len) = 0;
+			virtual uint64_t seek (uint64_t pos, enum whence_type whence) = 0;
+		public:
+			static struct vfs_file_ops* vfs_file_ops_create(file* obj);
+		private:
+			static void _destructor(struct vfs_file_ops* victim);
+
+			static ssize_t _read (void* opaque, void* buff, size_t len);
+			static ssize_t _write (void* opaque, void* buff, size_t len);
+			static uint64_t _seek (void* opaque, uint64_t pos, enum whence_type whence);
+		};
+
 		class inode
 		{
 			friend class filesystem;
@@ -218,6 +268,8 @@ namespace vfs
 			virtual uint64_t size() = 0;
 			virtual bool mkdir(const char* name) = 0;
 			virtual int unlink() = 0;
+
+			virtual file* open_file(open_mode_type mode_type) = 0;
 		public:
 			static vfs_inode_ops* inode_create(vfs::module::inode* opaque);
 		private:
@@ -229,8 +281,7 @@ namespace vfs
 			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
 			static int _mkdir(void* opaque, char* name);
 			static int  _unlink(void* opaque);
-			int iserial;
-			
+			static vfs_file_ops* _open_file(void* opaque, enum open_mode_type mode_type);
 		};
 		
 		class filesystem
@@ -419,6 +470,13 @@ namespace vfs
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline
+		vfs_file_ops* inode::_open_file(void* opaque, enum open_mode_type mode_type)
+		{
+			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+			return file::vfs_file_ops_create(ino->open_file(mode_type));
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
 		struct vfs_directory_iterator* inode::_get_directory_iterator(void* opaque)
 		{
 			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
@@ -536,6 +594,55 @@ namespace vfs
 				std::memcpy(name, nm.c_str(), std::min(max_name_length, nm.size()));
 			}
 			return nm.size();
+		}
+		// =================================================================================
+		inline
+		vfs_file_ops* file::vfs_file_ops_create(file* obj)
+		{
+			if (!obj)
+			{
+				return nullptr;
+			}
+			vfs_file_ops* ret = new vfs_file_ops;
+			ret->opaque = obj;
+			ret->destructor = _destructor;
+			ret->read = _read;
+			ret->write = _write;
+			ret->seek = _seek;
+
+			return ret;
+		}
+		// ---------------------------------------------------------------------------------
+		inline
+		void file::_destructor(struct vfs_file_ops* victim)
+		{
+			if (victim)
+			{
+				auto* obj = reinterpret_cast<vfs::module::file*>(victim->opaque);
+				delete obj;
+			}
+			delete victim;
+		}
+		// ---------------------------------------------------------------------------------
+		inline
+		ssize_t file::_read (void* opaque, void* buff, size_t len)
+		{
+			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+			return obj->read(buff, len);
+		}
+		// ---------------------------------------------------------------------------------
+		inline
+		ssize_t file::_write (void* opaque, void* buff, size_t len)
+		{
+			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+			return obj->write(buff, len);
+		}
+		// ---------------------------------------------------------------------------------
+		inline
+		uint64_t file::_seek (void* opaque, uint64_t pos, enum whence_type whence)
+		{
+			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+			return obj->seek(pos, whence);
 		}
 	} /* ns module */
 }
