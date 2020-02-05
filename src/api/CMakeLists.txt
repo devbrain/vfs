@@ -74,13 +74,15 @@ target_compile_options(vfs_api PRIVATE
 
 target_link_libraries(vfs_api PUBLIC
             Threads::Threads
-            std::filesystem
+            bsw::bsw
         )
 
 find_library(DL_LIBRARY dl)
 if(DL_LIBRARY)
     target_link_libraries(vfs_api PRIVATE ${DL_LIBRARY})
 endif()
+
+add_dependencies(vfs_api bsw_project)
 
 configure_file(vfs_config.h.in  ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h)
 
