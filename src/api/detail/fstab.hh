@@ -1,7 +1,7 @@
 #ifndef VFS_DETAIL_FSTAB_HH
 #define VFS_DETAIL_FSTAB_HH
 
-#include "api/hasher.hh"
+
 #include "api/filesystem.hh"
 #include "api/mount_point.hh"
 #include "api/detail/wrapped_pointer.hh"
@@ -44,7 +44,7 @@ namespace vfs::core
 		wrapped_pointer<mount_point> mount(filesystem* module, const path& mount_path, const std::string& args);
 		void unmount (const path& mount_path);
 	private:
-		using entry_map_t = std::map<core::hash_t, entry>;
+		using entry_map_t = std::map<std::string, entry>;
 		entry_map_t _fstab;
 	};
 } // ns vfs

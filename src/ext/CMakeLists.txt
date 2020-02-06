@@ -1,12 +1,12 @@
 include(ExternalProject)
 
-if (CMAKE_CONFIGURATION_TYPES)
-	set(propagate_build_type --config $<CONFIG>)
+if (NOT IS_SINGLE_CONFIGURATION)
+	set(propagate_build_type --config $<CONFIG> -DCMAKE_BUILD_TYPE=$<CONFIG>)
 else()
 	set(propagate_build_type -DCMAKE_BUILD_TYPE=$<CONFIG>)
 endif()
 
-set (BSW_INSTALL_ROOT ${CMAKE_BINARY_DIR}/ext/bsw)
+set (BSW_INSTALL_ROOT ${CMAKE_BINARY_DIR})
 ExternalProject_Add(bsw_ext
 		GIT_REPOSITORY git@github.com:devbrain/bsw.git
 		INSTALL_DIR    ${BSW_INSTALL_ROOT}
@@ -26,6 +26,8 @@ else ()
   set (BSW_LIB libbsw.so)
 endif()
 
+#make cmake happy about INTERFACE_INCLUDE_DIRECTORIES
+file (MAKE_DIRECTORY ${BSW_INSTALL_ROOT}/include)
 
 if (NOT IS_SINGLE_CONFIGURATION)
 set_target_properties(

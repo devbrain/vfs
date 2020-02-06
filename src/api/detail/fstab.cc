@@ -70,8 +70,8 @@ namespace vfs::core
 	// =====================================================================================
 	wrapped_pointer<mount_point> fstab::mount(filesystem* module, const path& mount_path, const std::string& args)
 	{
-		auto key = hash(mount_path);
-		auto [itr, result] = _fstab.try_emplace(key, lazy_convert_construct([&]{return entry(module, mount_path, args);}));
+		
+		auto [itr, result] = _fstab.try_emplace(mount_path.to_string(), lazy_convert_construct([&]{return entry(module, mount_path, args);}));
 		if (!result)
 		{
 			throw vfs::exception("this path is already mounted");
@@ -81,8 +81,8 @@ namespace vfs::core
 	// ------------------------------------------------------------------------------------
 	void fstab::unmount(const path& pth)
 	{
-		auto key = hash(pth);
-		auto itr = _fstab.find(key);
+		
+		auto itr = _fstab.find(pth.to_string());
 
 		if (itr == _fstab.end())
 		{

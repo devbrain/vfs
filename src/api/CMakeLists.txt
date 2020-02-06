@@ -1,12 +1,10 @@
 set (src
-        detail/spooky.cc
         detail/modules_table.cc
         detail/module_loader.cc
         detail/fstab.cc
         detail/dentry.cc
         detail/stats_converter.cc
 
-        hasher.cc
         system.cc
         path.cc
         filesystem.cc
@@ -19,8 +17,6 @@ set (src
 )
 
 set(hdr
-        detail/lru.hh
-        detail/spooky.hh
         detail/module_loader.hh
         detail/modules_table.hh
         detail/fstab.hh
@@ -43,7 +39,6 @@ set(hdr
         ${PROJECT_ROOT}/include/vfs/api/directory_iterator.hh
         ${PROJECT_ROOT}/include/vfs/api/detail/wrapped_iterator.hh
 
-        hasher.hh
         filesystem.hh
         mount_point.hh
 
