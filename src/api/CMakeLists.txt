@@ -74,7 +74,8 @@ target_compile_options(vfs_api PRIVATE
 
 target_link_libraries(vfs_api PUBLIC
             Threads::Threads
-            bsw::bsw
+
+            #bsw::bsw
         )
 
 find_library(DL_LIBRARY dl)
@@ -82,7 +83,6 @@ if(DL_LIBRARY)
     target_link_libraries(vfs_api PRIVATE ${DL_LIBRARY})
 endif()
 
-add_dependencies(vfs_api bsw_project)
 
 configure_file(vfs_config.h.in  ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h)
 
@@ -96,8 +96,4 @@ target_compile_definitions(vfs_api
                         NOMINMAX >
         )
 target_compile_features(vfs_api PUBLIC cxx_std_17)
-set_target_properties(vfs_api PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
+

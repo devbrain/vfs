@@ -12,7 +12,7 @@
 #include "api/detail/dentry.hh"
 #include "api/detail/stats_converter.hh"
 
-#include "bsw/logger/system.hh"
+//#include "bsw/logger/system.hh"
 
 namespace vfs
 {
