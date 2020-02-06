@@ -74,8 +74,7 @@ target_compile_options(vfs_api PRIVATE
 
 target_link_libraries(vfs_api PUBLIC
             Threads::Threads
-
-            #bsw::bsw
+            bsw::bsw
         )
 
 find_library(DL_LIBRARY dl)
@@ -87,7 +86,8 @@ endif()
 configure_file(vfs_config.h.in  ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h)
 
 target_compile_definitions(vfs_api
-                PRIVATE
+  PRIVATE
+  ONYX_MODULE_NAME=vfs_api
                 $<$<CXX_COMPILER_ID:MSVC>:
                         _CRT_SECURE_NO_WARNINGS
                         _SCL_SECURE_NO_WARNINGS

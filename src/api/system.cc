@@ -12,7 +12,7 @@
 #include "api/detail/dentry.hh"
 #include "api/detail/stats_converter.hh"
 
-//#include "bsw/logger/system.hh"
+#include <bsw/logger/logger.hh>
 
 namespace vfs
 {
@@ -73,6 +73,7 @@ namespace vfs
 	{
 		if (system == nullptr)
 		{
+		    EVLOG_TRACE(EVLOG_INFO, "Initializing");
 			system = new core::system(path_to_module);
 			std::atexit(system_destructor);
 		}
