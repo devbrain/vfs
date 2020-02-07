@@ -8,7 +8,7 @@
 #include "vfs/api/vfs_module.h"
 #include "vfs/api/stdfilesystem.hh"
 #include "api/detail/module_loader.hh"
-#include "api/filesystem.hh"
+#include "filesystem.hh"
 
 #include <map>
 #include <string>

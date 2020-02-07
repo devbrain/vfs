@@ -2,7 +2,6 @@ add_executable(unittest
         sandbox.cc
         sandbox.hh
         main.cpp
-        path_test.cc
         vfs_basic_test.cc
         vfs_unlink_test.cc
         )

@@ -8,7 +8,7 @@
 
 namespace vfs
 {
-	class VFS_API path
+	class path
 	{
 	public:
 		typedef std::vector<std::string> string_vec_t;

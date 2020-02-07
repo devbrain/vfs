@@ -2,7 +2,7 @@
 #define VFS_DETAIL_STATS_CONVERTER_HH
 
 #include <vfs/api/stats.hh>
-#include "api/filesystem.hh"
+#include "filesystem.hh"
 
 namespace vfs
 {

@@ -1,5 +1,5 @@
 #include <ostream>
-#include "vfs/api/path.hh"
+#include "api/detail/path.hh"
 
 namespace vfs
 {

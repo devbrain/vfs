@@ -2,11 +2,11 @@
 #define VFS_DETAIL_FSTAB_HH
 
 
-#include "api/filesystem.hh"
-#include "api/mount_point.hh"
+#include "filesystem.hh"
+#include "mount_point.hh"
 #include "api/detail/wrapped_pointer.hh"
 
-#include "vfs/api/path.hh"
+#include "path.hh"
 
 #include <memory>
 #include <map>
@@ -28,11 +28,11 @@ namespace vfs::core
 			entry(filesystem* fs, const path& pth, const std::string& args);
 			~entry();
 
-			path mount_path() const noexcept;
-			std::string args () const noexcept;
-			std::string type () const noexcept;
+			[[nodiscard]] path mount_path() const noexcept;
+            [[nodiscard]] std::string args () const noexcept;
+            [[nodiscard]] std::string type () const noexcept;
 
-			wrapped_pointer<mount_point> get() const;
+            [[nodiscard]] wrapped_pointer<mount_point> get() const;
 		private:
 			std::unique_ptr<mount_point> _mount_point;
 			std::string _type;
