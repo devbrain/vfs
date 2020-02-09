@@ -100,7 +100,7 @@ namespace vfs
 
 		if (core::is_root (mount_point))
 		{
-			auto mountedfs = fstab->mount(fs, mount_point, args);
+			auto mountedfs = fstab->mount(fs, path(mount_point), args);
 			core::dentry_init(mountedfs);
 		}
 		else
@@ -114,7 +114,7 @@ namespace vfs
 			{
                 THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", mount_point);
 			}
-			auto mountedfs = fstab->mount(fs, mount_point, args);
+			auto mountedfs = fstab->mount(fs, path(mount_point), args);
 			core::dentry_mount(mountedfs, dent);
 		}
 	}
@@ -125,7 +125,7 @@ namespace vfs
 		{
             THROW_EXCEPTION_EX(vfs::exception, "no mounted filesystems found");
 		}
-		fstab->unmount(mount_point);
+		fstab->unmount(path(mount_point));
 	}
     // -------------------------------------------------------------------------------------
 	modules get_modules()
@@ -233,7 +233,7 @@ namespace vfs
 		}
 		if (dentry_unlink(dent))
 		{
-			fstab->unmount(pth);
+			fstab->unmount(p);
 		}
 	}
 } // ns vfs
