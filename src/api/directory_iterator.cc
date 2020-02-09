@@ -1,9 +1,8 @@
 #include <vfs/api/directory_iterator.hh>
 #include <vfs/api/exception.hh>
 #include "api/detail/filesystem.hh"
-#include "api/detail/wrapped_pointer.hh"
 #include "api/detail/stats_converter.hh"
-
+#include <bsw/errors.hh>
 
 namespace vfs
 {
@@ -15,7 +14,7 @@ namespace vfs
 		{
 			if (!di)
 			{
-				throw exception("failed to get_directory_iterator");
+			    THROW_EXCEPTION_EX(vfs::exception, "failed to obtain directory iterator");
 			}
 		}
 		std::unique_ptr<core::directory_iterator> di;

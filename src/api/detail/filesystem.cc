@@ -1,6 +1,6 @@
 #include "filesystem.hh"
-#include <iostream>
 #include <vfs/api/exception.hh>
+#include <bsw/errors.hh>
 
 namespace vfs::core
 {
@@ -102,7 +102,7 @@ namespace vfs::core
     {
         if (!_ops->stat(_ops->opaque, &st))
         {
-            throw vfs::exception("failed to load stat");
+            THROW_EXCEPTION_EX(vfs::exception, "failed to load stat");
         }
     }
     // ----------------------------------------------------------------------

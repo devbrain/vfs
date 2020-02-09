@@ -30,16 +30,14 @@ namespace vfs
 
 	VFS_API void mount(const std::string& fstype, const std::string& args, const std::string& mount_point);
 	VFS_API mounts get_mounts();
-
 	VFS_API void unmount (const std::string& mount_point);
 
 
 	VFS_API std::optional<stats> get_stats(const std::string& pth);
-
 	VFS_API  directory open_directory (const std::string& pth);
-
 	VFS_API void create_directory (const std::string& pth);
 	VFS_API void unlink (const std::string& pth);
+
 } // ns vfs
 
 #if defined(_MSC_VER)

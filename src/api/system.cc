@@ -2,17 +2,16 @@
 // Created by igor on 26/12/2019.
 //
 
-#include <cstdlib>
-
-#include "vfs/api/system.hh"
-#include "vfs/api/exception.hh"
+#include <vfs/api/system.hh>
+#include <vfs/api/exception.hh>
 
 #include "api/detail/modules_table.hh"
 #include "api/detail/fstab.hh"
 #include "api/detail/dentry.hh"
 #include "api/detail/stats_converter.hh"
 
-#include <bsw/logger/logger.hh>
+#include <bsw/object_manager.hh>
+#include <bsw/errors.hh>
 
 namespace vfs
 {
@@ -73,9 +72,8 @@ namespace vfs
 	{
 		if (system == nullptr)
 		{
-		    EVLOG_TRACE(EVLOG_INFO, "Initializing");
 			system = new core::system(path_to_module);
-			std::atexit(system_destructor);
+            ::core::object_manager::instance().call_on_exit(system_destructor);
 		}
 		else
 		{
@@ -93,7 +91,7 @@ namespace vfs
 		auto* fs = system->get_module(fstype);
 		if (!fs)
 		{
-			throw vfs::exception("Can not find module");
+		    THROW_EXCEPTION_EX(vfs::exception, "Can not find module ", fstype);
 		}
 		if (fstab == nullptr)
 		{
@@ -114,7 +112,7 @@ namespace vfs
 
 			if (depth != p.depth())
 			{
-				throw vfs::exception("Path does not exists");
+                THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", mount_point);
 			}
 			auto mountedfs = fstab->mount(fs, mount_point, args);
 			core::dentry_mount(mountedfs, dent);
@@ -123,9 +121,9 @@ namespace vfs
 	// -------------------------------------------------------------------------------------
 	void unmount (const std::string& mount_point)
 	{
-		if (fstab == nullptr)
+		if (!fstab)
 		{
-			throw exception("no mounted filesystems found");
+            THROW_EXCEPTION_EX(vfs::exception, "no mounted filesystems found");
 		}
 		fstab->unmount(mount_point);
 	}
@@ -134,7 +132,7 @@ namespace vfs
     {
         if (!system)
         {
-            throw std::runtime_error("No modules loaded");
+            THROW_EXCEPTION_EX(vfs::exception, "no modules loaded");
         }
         return modules(&system->_all_modules);
     }
@@ -143,7 +141,7 @@ namespace vfs
     {
         if (!fstab)
         {
-            throw std::runtime_error("No modules loaded");
+            THROW_EXCEPTION_EX(vfs::exception, "no mounted filesystems found");
         }
         return mounts(fstab);
     }
@@ -182,15 +180,14 @@ namespace vfs
 		auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
 		if (depth != p.depth())
 		{
-			throw exception("path not found");
+            THROW_EXCEPTION_EX(vfs::exception, "path not found ", pth);
 		}
 		core::stats st;
 		ino->stat(st);
 		if (st.type != VFS_INODE_DIRECTORY)
 		{
-			throw exception("path is not a directory");
+            THROW_EXCEPTION_EX(vfs::exception, "path ", pth, " is not directory");
 		}
-
 		return directory(ino);
 	}
 	// ---------------------------------------------------------------------------------
@@ -202,16 +199,16 @@ namespace vfs
 		auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
 		if (depth == p.depth())
 		{
-			throw exception("path already exists");
+            THROW_EXCEPTION_EX(vfs::exception, "path ", pth, " already exists");
 		}
 		if (depth != p.depth() - 1)
 		{
-			throw exception("path not exists");
+            THROW_EXCEPTION_EX(vfs::exception, "path ", pth, "has to many non existing components");
 		}
 		p.make_file();
 		if (!ino->mkdir(p.get_file_name()))
 		{
-			throw exception("failed to create directory");
+            THROW_EXCEPTION_EX(vfs::exception, "failed to create directory ", pth);
 		}
 	}
 	// --------------------------------------------------------------------------------
@@ -223,15 +220,16 @@ namespace vfs
 		auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
 		if (depth != p.depth())
 		{
-			throw exception("path not found");
+            THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
 		}
 		if (dentry_has_children (dent))
 		{
-			throw exception("path not empty");
+            THROW_EXCEPTION_EX(vfs::exception, "path ", pth, " is non empty directory");
+
 		}
 		if (!ino->unlink())
 		{
-			throw exception("failed to unlink");
+            THROW_EXCEPTION_EX(vfs::exception, "failed to unlink ", pth);
 		}
 		if (dentry_unlink(dent))
 		{

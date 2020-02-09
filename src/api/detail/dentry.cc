@@ -3,6 +3,8 @@
 #include "api/detail/mount_point.hh"
 #include "api/detail/dentry.hh"
 
+#include "bsw/errors.hh"
+
 namespace vfs::core
 {
     struct dentry
@@ -51,7 +53,7 @@ namespace vfs::core
     {
         if (!root)
         {
-            throw vfs::exception("dentry is not initialized");
+            THROW_EXCEPTION_EX(vfs::exception, "dentry is not initialized");
         }
 
         wrapped_pointer<mount_point> current_mount = root->mount;
@@ -165,7 +167,7 @@ namespace vfs::core
     {
         if (root != nullptr)
         {
-            throw vfs::exception("dentry is already initialized");
+            THROW_EXCEPTION_EX(vfs::exception, "dentry is already initialized");
         }
         root = new dentry(nullptr, wp, wp->root());
         root->is_mount = true;

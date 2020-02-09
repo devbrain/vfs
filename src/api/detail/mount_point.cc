@@ -1,6 +1,6 @@
-#include "mount_point.hh"
 #include <algorithm>
-#include <iostream>
+#include "mount_point.hh"
+#include <bsw/logger/logger.hh>
 
 namespace vfs::core
 {
@@ -22,11 +22,10 @@ namespace vfs::core
 			{
 				if (x.use_count() > 1)
 				{
-					std::cout << "(mount point) MEMORY LEAK" << std::endl;
+				    EVLOG_TRACE(EVLOG_ERROR, "Memory leak");
 				}
 			}
 			);
-	//	std::cout << "mount_point::~mount_point()";
 	}
 	// ---------------------------------------------------------------------------
 	std::weak_ptr<inode> mount_point::root()  const noexcept
@@ -63,7 +62,7 @@ namespace vfs::core
 			auto err = ino->sync();
 			if (err != 1)
 			{
-				std::cout << "ERROR SYNC " << err << std::endl;
+			    EVLOG_TRACE(EVLOG_ERROR, "Error syncing inode");
 			}
 		}
 		delete ino;

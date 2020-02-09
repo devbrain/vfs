@@ -1,6 +1,7 @@
 #include "fstab.hh"
 #include <vfs/api/exception.hh>
-#include <iostream>
+#include <bsw/errors.hh>
+#include <bsw/logger/logger.hh>
 
 namespace
 {
@@ -44,7 +45,7 @@ namespace vfs::core
         int err = _fs->sync();
         if (err != 1)
         {
-            std::cout << "FS SYNC ERR " << err << std::endl;
+            EVLOG_TRACE(EVLOG_ERROR, "Failed to sync FS ", _fs->type());
         }
     }
     // -------------------------------------------------------------------------------------
@@ -75,7 +76,7 @@ namespace vfs::core
                                                lazy_convert_construct([&] { return entry(module, mount_path, args); }));
         if (!result)
         {
-            throw vfs::exception("this path is already mounted");
+            THROW_EXCEPTION_EX(vfs::exception, "this path is already mounted");
         }
         return itr->second.get();
     }
@@ -87,7 +88,7 @@ namespace vfs::core
 
         if (itr == _fstab.end())
         {
-            throw vfs::exception("no mount point found");
+            THROW_EXCEPTION_EX(vfs::exception, "no mount point found");
         }
         _fstab.erase(itr);
     }
