@@ -116,6 +116,16 @@ namespace vfs::core
         return std::unique_ptr<directory_iterator>(new directory_iterator(itr, this));
     }
     // ----------------------------------------------------------------------
+    std::unique_ptr<file_ops> inode::get_file_ops(open_mode_type mode_type) const
+    {
+        vfs_file_ops* ops = _ops->open_file(_ops->opaque, mode_type);
+        if (!ops)
+        {
+            return nullptr;
+        }
+        return std::unique_ptr<file_ops>(new file_ops(ops, const_cast<inode*>(this)));
+    }
+    // ----------------------------------------------------------------------
     bool inode::mkdir(const std::string& name)
     {
         auto res = _ops->mkdir(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
@@ -165,5 +175,42 @@ namespace vfs::core
             _dirty = true;
         }
         return res;
+    }
+    // ========================================================================
+    uint64_t file_ops::seek (uint64_t pos, enum whence_type whence)
+    {
+        return _ops->seek(_ops->opaque, pos, whence);
+    }
+    // ------------------------------------------------------------------------
+    ssize_t file_ops::read (void* buff, size_t len)
+    {
+        return _ops->read(_ops->opaque, buff, len);
+    }
+    // ------------------------------------------------------------------------
+    ssize_t file_ops::write (const void* buff, size_t len)
+    {
+        const ssize_t rc = _ops->write(_ops->opaque, const_cast<void*>(buff), len);
+        if (rc > 0)
+        {
+            _owner->_dirty = true;
+        }
+        return rc;
+    }
+    // ------------------------------------------------------------------------
+    file_ops::~file_ops()
+    {
+        _ops->destructor(_ops);
+    }
+    // ------------------------------------------------------------------------
+    const inode* file_ops::owner() const
+    {
+        return _owner;
+    }
+    // ------------------------------------------------------------------------
+    file_ops::file_ops (vfs_file_ops* ops, inode* owner)
+    : _ops (ops),
+    _owner(owner)
+    {
+
     }
 } // ns vfs

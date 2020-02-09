@@ -38,6 +38,46 @@ namespace vfs
 	VFS_API void create_directory (const std::string& pth);
 	VFS_API void unlink (const std::string& pth);
 
+
+
+	enum class creation_disposition
+    {
+        /*
+         * Creates a new file, always.
+         * If the specified file exists and is writable, the function overwrites the file, the function succeeds, and last-error code is set to ERROR_ALREADY_EXISTS (183).
+         * If the specified file does not exist and is a valid path, a new file is created, the function succeeds, and the last-error code is set to zero.
+        */
+        CREATE_ALWAYS,
+        /*
+         * Creates a new file, only if it does not already exist.
+         * If the specified file exists, the function fails and the last-error code is set to ERROR_FILE_EXISTS (80).
+         * If the specified file does not exist and is a valid path to a writable location, a new file is created.
+         */
+        CREATE_NEW,
+        /*
+         * Opens a file, always.
+         * If the specified file exists, the function succeeds and the last-error code is set to ERROR_ALREADY_EXISTS (183).
+         * If the specified file does not exist and is a valid path to a writable location, the function creates a file and the last-error code is set to zero.
+         */
+        OPEN_ALWAYS,
+        /*
+         * Opens a file or device, only if it exists.
+         * If the specified file or device does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
+         */
+        OPEN_EXISTING,
+        /* Opens a file and truncates it so that its size is zero bytes, only if it exists.
+         * If the specified file does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
+         */
+        TRUNCATE_EXISTING
+    };
+
+    class file;
+    VFS_API file* open(const std::string& path, creation_disposition cd, bool readonly);
+    void close(file* f);
+
+    VFS_API size_t read(file* f, void* buff, size_t len);
+    VFS_API size_t write(file* f, const void* buff, size_t len);
+
 } // ns vfs
 
 #if defined(_MSC_VER)

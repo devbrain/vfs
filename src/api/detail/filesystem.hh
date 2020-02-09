@@ -63,17 +63,36 @@ namespace vfs::core
 
         [[nodiscard]] const inode* owner() const;
     private:
-        explicit directory_iterator(vfs_directory_iterator* ops, const inode* owner);
+        directory_iterator(vfs_directory_iterator* ops, const inode* owner);
     private:
         vfs_directory_iterator* _ops;
         const inode* _owner;
+    };
 
+    // -------------------------------------------------------------
+    class file_ops
+    {
+        friend class inode;
+
+    public:
+        [[nodiscard]] uint64_t seek(uint64_t pos, enum whence_type whence);
+        [[nodiscard]] ssize_t read(void* buff, size_t len);
+        [[nodiscard]] ssize_t write(const void* buff, size_t len);
+        ~file_ops();
+        [[nodiscard]] const inode* owner() const;
+    private:
+        file_ops(vfs_file_ops* ops, inode* owner);
+    private:
+        vfs_file_ops* _ops;
+        inode* _owner;
     };
 
     // -------------------------------------------------------------
     class inode
     {
         friend class filesystem;
+
+        friend class file_ops;
 
     public:
         inode(const inode&) = delete;
@@ -90,6 +109,8 @@ namespace vfs::core
         [[nodiscard]] bool dirty() const noexcept;
         [[nodiscard]] int sync();
         [[nodiscard]] int unlink();
+
+        [[nodiscard]] std::unique_ptr<file_ops> get_file_ops(open_mode_type mode_type) const;
     private:
         explicit inode(vfs_inode_ops* ops, filesystem* owner);
     private:
