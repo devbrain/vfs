@@ -128,12 +128,7 @@ namespace vfs
 	{
 		return int(_dirs.size());
 	}
-	// -----------------------------------------------------------------------------
-	std::ostream& operator<<(std::ostream& os, const path& pth)
-	{
-		os << pth.to_string();
-		return os;
-	}
+	
 
 } // namespace bsw
 
