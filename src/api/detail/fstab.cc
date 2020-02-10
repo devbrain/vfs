@@ -3,6 +3,8 @@
 #include <bsw/errors.hh>
 #include <bsw/logger/logger.hh>
 
+
+
 namespace
 {
     // http://jguegant.github.io/blogs/tech/performing-try-emplace.html
@@ -71,8 +73,8 @@ namespace vfs::core
     // =====================================================================================
     wrapped_pointer<mount_point> fstab::mount(filesystem* module, const path& mount_path, const std::string& args)
     {
-
-        auto[itr, result] = _fstab.try_emplace(mount_path.to_string(),
+        auto key = mount_path.hash();
+        auto[itr, result] = _fstab.try_emplace(key,
                                                lazy_convert_construct([&] { return entry(module, mount_path, args); }));
         if (!result)
         {
@@ -83,8 +85,8 @@ namespace vfs::core
     // ------------------------------------------------------------------------------------
     void fstab::unmount(const path& pth)
     {
-
-        auto itr = _fstab.find(pth.to_string());
+        auto key = pth.hash();
+        auto itr = _fstab.find(key);
 
         if (itr == _fstab.end())
         {

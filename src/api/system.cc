@@ -114,7 +114,7 @@ namespace vfs
 			{
                 THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", mount_point);
 			}
-			auto mountedfs = fstab->mount(fs, path(mount_point), args);
+			auto mountedfs = fstab->mount(fs, p, args);
 			core::dentry_mount(mountedfs, dent);
 		}
 	}
@@ -233,6 +233,7 @@ namespace vfs
 		}
 		if (dentry_unlink(dent))
 		{
+		    p.make_directory();
 			fstab->unmount(p);
 		}
 	}

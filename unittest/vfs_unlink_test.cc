@@ -145,7 +145,7 @@ TEST(UnlinkTest, testUnlinkFileInMount) {
 	bool a_found = false;
 	for (const auto& m : vfs::get_mounts())
 	{
-		if (m.path() == "/a")
+		if (m.path() == "/a/")
 		{
 			a_found = true;
 			break;
@@ -156,7 +156,7 @@ TEST(UnlinkTest, testUnlinkFileInMount) {
 	a_found = false;
 	for (const auto& m : vfs::get_mounts())
 	{
-		if (m.path() == "/a")
+		if (m.path() == "/a/")
 		{
 			a_found = true;
 			break;

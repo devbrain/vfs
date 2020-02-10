@@ -131,7 +131,7 @@ namespace vfs::core
         auto res = _ops->mkdir(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
         if (res)
         {
-            _dirty = true;
+            _make_dirty();
         }
         return res;
     }
@@ -172,9 +172,14 @@ namespace vfs::core
         auto res = _ops->unlink(_ops->opaque);
         if (res)
         {
-            _dirty = true;
+            _make_dirty();
         }
         return res;
+    }
+    // ----------------------------------------------------------------------
+    void inode::_make_dirty()
+    {
+        _dirty = true;
     }
     // ========================================================================
     uint64_t file_ops::seek (uint64_t pos, enum whence_type whence)
@@ -192,9 +197,19 @@ namespace vfs::core
         const ssize_t rc = _ops->write(_ops->opaque, const_cast<void*>(buff), len);
         if (rc > 0)
         {
-            _owner->_dirty = true;
+            _owner->_make_dirty();
         }
         return rc;
+    }
+    // ------------------------------------------------------------------------
+    bool file_ops::truncate()
+    {
+        if (_ops->truncate(_ops->opaque))
+        {
+            _owner->_make_dirty();
+            return true;
+        }
+        return false;
     }
     // ------------------------------------------------------------------------
     file_ops::~file_ops()

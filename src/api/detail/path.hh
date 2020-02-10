@@ -63,7 +63,7 @@ namespace vfs
 		[[nodiscard]] const std::string& get_file_name() const;
 
 
-
+        size_t hash () const;
 
 	protected:
         /**

@@ -1,4 +1,5 @@
 #include "api/detail/path.hh"
+#include <functional>
 
 namespace vfs
 {
@@ -39,6 +40,20 @@ namespace vfs
 			return _name;
 	}
 	// -----------------------------------------------------------------------------
+    size_t path::hash () const
+    {
+	    std::size_t seed = _dirs.size();
+        for (int i=0; i<= static_cast<int>(_dirs.size()); i++)
+        {
+            const std::string v = (*this)[i];
+            if (!v.empty())
+            {
+                seed ^= std::hash<std::string>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            }
+        }
+        return seed;
+    }
+    // -----------------------------------------------------------------------------
 	void path::push_directory(const std::string& dir)
 	{
 		if (!dir.empty() && dir != ".")

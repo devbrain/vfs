@@ -37,7 +37,7 @@ private:
 };
 
 
-REGISTER_FVS_MODULE(physfs)
+REGISTER_VFS_MODULE(physfs)
 
 
 
