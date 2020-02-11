@@ -58,6 +58,16 @@ namespace vfs
 		}
 	}
 	//-----------------------------------------------------------------------------------
+	directory_iterator& directory_iterator::operator = (directory_iterator& other)
+	{
+		if (this != &other)
+		{
+			_directory = other._directory;
+			_ino_stats = other._ino_stats;
+		}
+		return *this;
+	}
+	//-----------------------------------------------------------------------------------
 	directory_iterator::directory_iterator(const directory_iterator& other)
 		:_directory(other._directory),
 		_ino_stats(other._ino_stats)

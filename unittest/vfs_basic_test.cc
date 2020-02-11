@@ -11,23 +11,11 @@ TEST(BasicTest, testMount) {
 
 
     vfs::load_module(stdfs::path("."));
-	/*
-    for (const auto& x : vfs::get_modules())
-    {
-        std::cout << x << std::endl;
-    }
-	*/
+	
 
     EXPECT_THROW(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
 
     vfs::mount("physfs", sbox.root(), "/");
-
-    /*
-    for (const auto& x : vfs::get_mounts())
-    {
-        std::cout << x << std::endl;
-    }
-	*/
 
     auto st = vfs::get_stats("/zopa");
     EXPECT_TRUE(st);

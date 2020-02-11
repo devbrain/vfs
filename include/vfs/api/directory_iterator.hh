@@ -55,6 +55,7 @@ namespace vfs
 		directory_iterator();
 
 		directory_iterator(directory& directoryToWrap);
+		directory_iterator& operator = (directory_iterator& other);
 		directory_iterator(const directory_iterator& other);
 		reference operator*() const;
 		pointer operator->() const;
