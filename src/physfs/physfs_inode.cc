@@ -4,12 +4,12 @@
 
 #include <stdio.h>
 #if !defined(WIN32)
-#define  _XOPEN_SOURCE  500
 #include <unistd.h>
 #else
 #include <io.h>
 #endif
 
+#include <bsw/macros.hh>
 #include "physfs_inode.hh"
 
 class file : public vfs::module::file
@@ -112,19 +112,22 @@ vfs::module::file* physfs_inode::open_file(open_mode_type mode_type)
     FILE* f = nullptr;
 #if defined(WIN32)
 #define fopen _wfopen
+#define SLIT(X) CONCATENATE(L, X)
+#else
+#define SLIT(X) X
 #endif
     if (mode_type == eVFS_OPEN_MODE_READ)
     {
-        f = fopen(_path.c_str(), L"rb");
+        f = fopen(_path.c_str(), SLIT("rb"));
     }
     else
     {
         if (!stdfs::exists(_path))
         {
-            f = fopen(_path.c_str(), L"wb");
+            f = fopen(_path.c_str(), SLIT("wb"));
         } else
         {
-            f = fopen(_path.c_str(), L"ab");
+            f = fopen(_path.c_str(), SLIT("ab"));
         }
     }
     if (!f)
