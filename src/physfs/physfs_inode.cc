@@ -1,9 +1,14 @@
 //
 // Created by igor on 02/01/2020.
 //
-#define  _XOPEN_SOURCE  500
+
 #include <stdio.h>
+#if !defined(WIN32)
+#define  _XOPEN_SOURCE  500
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #include "physfs_inode.hh"
 
@@ -105,18 +110,21 @@ int physfs_inode::unlink()
 vfs::module::file* physfs_inode::open_file(open_mode_type mode_type)
 {
     FILE* f = nullptr;
+#if defined(WIN32)
+#define fopen _wfopen
+#endif
     if (mode_type == eVFS_OPEN_MODE_READ)
     {
-        f = fopen(_path.c_str(), "rb");
+        f = fopen(_path.c_str(), L"rb");
     }
     else
     {
         if (!stdfs::exists(_path))
         {
-            f = fopen(_path.c_str(), "wb");
+            f = fopen(_path.c_str(), L"wb");
         } else
         {
-            f = fopen(_path.c_str(), "ab");
+            f = fopen(_path.c_str(), L"ab");
         }
     }
     if (!f)
@@ -162,10 +170,17 @@ uint64_t file::seek (uint64_t pos, enum whence_type whence)
             w = SEEK_CUR;
             break;
     }
+#if defined(WIN32)
+#define fseek _fseeki64
+#endif
     return fseek (_file, pos, w);
 }
 // -----------------------------------------------------------------------------------
 bool file::truncate()
 {
+#if !defined(WIN32)
     return ftruncate(fileno(_file), 0) == 0;
+#else
+	return _chsize(fileno(_file), 0) == 0;
+#endif
 }
