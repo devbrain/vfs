@@ -58,7 +58,7 @@ namespace vfs
 		}
 	}
 	//-----------------------------------------------------------------------------------
-	directory_iterator& directory_iterator::operator = (directory_iterator& other)
+	directory_iterator directory_iterator::operator = (directory_iterator& other)
 	{
 		if (this != &other)
 		{
@@ -94,7 +94,9 @@ namespace vfs
 		}
 		else
 		{
-			*this = directory_iterator();
+		    // invalidate
+		    this->_directory = nullptr;
+		    this->_ino_stats = value_type {};
 		}
 		return *this;
 	}
