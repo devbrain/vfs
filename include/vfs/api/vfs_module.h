@@ -105,9 +105,9 @@ struct vfs_directory_iterator
 
 enum whence_type
 {
-	eSEEK_START,
-	eSEEK_SET,
-	eSEEK_END
+	eVFS_SEEK_CUR,
+	eVFS_SEEK_SET,
+	eVFS_SEEK_END
 };
 
 struct vfs_file_ops
@@ -128,8 +128,8 @@ struct vfs_file_ops
 
 enum open_mode_type
 {
-	eREAD,
-	eWRITE
+	eVFS_OPEN_MODE_READ,
+	eVFS_OPEN_MODE_WRITE
 };
 
 struct vfs_inode_ops

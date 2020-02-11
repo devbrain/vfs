@@ -1,8 +1,25 @@
 //
 // Created by igor on 02/01/2020.
 //
+#define  _XOPEN_SOURCE  500
+#include <stdio.h>
+#include <unistd.h>
 
 #include "physfs_inode.hh"
+
+class file : public vfs::module::file
+{
+public:
+    explicit file (FILE* f);
+private:
+    ~file () override ;
+    ssize_t read  (void* buff, size_t len) override ;
+    ssize_t write (void* buff, size_t len) override ;
+    uint64_t seek (uint64_t pos, enum whence_type whence) override ;
+    bool truncate() override ;
+private:
+    FILE* _file;
+};
 
 class directory_iterator : public vfs::module::directory_iterator
 {
@@ -85,7 +102,70 @@ int physfs_inode::unlink()
 	return stdfs::remove(_path) ? 1 : 0;
 }
 // -----------------------------------------------------------------------------------
-vfs::module::file* physfs_inode::open_file(open_mode_type /*mode_type*/)
+vfs::module::file* physfs_inode::open_file(open_mode_type mode_type)
 {
-	return nullptr;
+    FILE* f = nullptr;
+    if (mode_type == eVFS_OPEN_MODE_READ)
+    {
+        f = fopen(_path.c_str(), "rb");
+    }
+    else
+    {
+        if (!stdfs::exists(_path))
+        {
+            f = fopen(_path.c_str(), "wb");
+        } else
+        {
+            f = fopen(_path.c_str(), "ab");
+        }
+    }
+    if (!f)
+    {
+        return nullptr;
+    }
+	return new file (f);
+}
+// ===========================================================================================
+file::file (FILE* f)
+: _file(f)
+{
+
+}
+// -----------------------------------------------------------------------------------
+file::~file ()
+{
+    fclose(_file);
+}
+// -----------------------------------------------------------------------------------
+ssize_t file::read  (void* buff, size_t len)
+{
+    return fread(buff, len, 1, _file);
+}
+// -----------------------------------------------------------------------------------
+ssize_t file::write (void* buff, size_t len)
+{
+    return fwrite(buff, len, 1, _file);
+}
+// -----------------------------------------------------------------------------------
+uint64_t file::seek (uint64_t pos, enum whence_type whence)
+{
+    int w = SEEK_SET;
+    switch (whence)
+    {
+        case eVFS_SEEK_SET:
+            w = SEEK_SET;
+            break;
+        case eVFS_SEEK_END:
+            w = SEEK_END;
+            break;
+        case eVFS_SEEK_CUR:
+            w = SEEK_CUR;
+            break;
+    }
+    return fseek (_file, pos, w);
+}
+// -----------------------------------------------------------------------------------
+bool file::truncate()
+{
+    return ftruncate(fileno(_file), 0) == 0;
 }
