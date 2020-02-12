@@ -14,7 +14,8 @@ public:
 	uint64_t size() override ;
 	vfs::module::directory_iterator* get_directory_iterator() override;
 	bool mkdir (const char* name) override ;
-	int unlink() override;
+    bool mkfile(const char* name) override ;
+    int unlink() override;
 
 	vfs::module::file* open_file(open_mode_type mode_type) override ;
 private:

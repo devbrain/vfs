@@ -163,6 +163,8 @@ struct vfs_inode_ops
 	struct vfs_directory_iterator* (*get_directory_iterator) (void* opaque);
 
 	int (* mkdir)(void* opaque, char* name);
+    int (* mkfile)(void* opaque, char* name);
+
 	int (* unlink)(void* opaque);
 
 	struct vfs_file_ops* (*open_file)(void* opaque, enum open_mode_type mode_type);
@@ -277,6 +279,7 @@ namespace vfs
 			virtual directory_iterator* get_directory_iterator() = 0;
 			virtual uint64_t size() = 0;
 			virtual bool mkdir(const char* name) = 0;
+            virtual bool mkfile(const char* name) = 0;
 			virtual int unlink() = 0;
 
 			virtual file* open_file(open_mode_type mode_type) = 0;
@@ -290,6 +293,7 @@ namespace vfs
 			static int _stat(void* opaque, struct vfs_inode_stats* output);
 			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
 			static int _mkdir(void* opaque, char* name);
+			static int _mkfile(void* opaque, char* name);
 			static int  _unlink(void* opaque);
 			static vfs_file_ops* _open_file(void* opaque, enum open_mode_type mode_type);
 		};
@@ -425,7 +429,9 @@ namespace vfs
 			res->get_directory_iterator = _get_directory_iterator;
 			res->stat = _stat;
 			res->mkdir = _mkdir;
+			res->mkfile = _mkfile;
 			res->unlink = _unlink;
+            res->open_file = _open_file;
 			return res;
 		}
 		/* ----------------------------------------------------------------------------- */
@@ -471,6 +477,13 @@ namespace vfs
 			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
 			return ino->mkdir(name) ? 1 : 0;
 		}
+        /* ----------------------------------------------------------------------------- */
+        inline
+		int inode::_mkfile(void* opaque, char* name)
+        {
+            auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+            return ino->mkfile(name) ? 1 : 0;
+        }
 		/* ----------------------------------------------------------------------------- */
 		inline
 		int inode::_unlink(void* opaque)

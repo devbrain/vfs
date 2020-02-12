@@ -136,6 +136,16 @@ namespace vfs::core
         return res;
     }
     // ----------------------------------------------------------------------
+    bool inode::mkfile(const std::string& name)
+    {
+        auto res = _ops->mkfile(_ops->opaque, const_cast<char*>(name.c_str())) == 1;
+        if (res)
+        {
+            _make_dirty();
+        }
+        return res;
+    }
+    // ----------------------------------------------------------------------
     inode::inode(vfs_inode_ops* ops, filesystem* owner)
             : _ops(ops),
               _owner(owner),

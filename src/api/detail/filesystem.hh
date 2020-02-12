@@ -107,6 +107,7 @@ namespace vfs::core
 
         [[nodiscard]] const filesystem* owner() const;
         [[nodiscard]] bool mkdir(const std::string& name);
+        [[nodiscard]] bool mkfile(const std::string& name);
         [[nodiscard]] bool dirty() const noexcept;
         [[nodiscard]] int sync();
         [[nodiscard]] int unlink();

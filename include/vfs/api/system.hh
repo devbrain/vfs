@@ -2,8 +2,8 @@
 // Created by igor on 26/12/2019.
 //
 
-#ifndef SYSTEM_HH
-#define SYSTEM_HH
+#ifndef VFS_SYSTEM_HH
+#define VFS_SYSTEM_HH
 
 #include <map>
 #include <optional>
@@ -33,7 +33,7 @@ namespace vfs
     VFS_API void unmount(const std::string& mount_point);
 
     VFS_API std::optional<stats> get_stats(const std::string& pth);
-    VFS_API  directory open_directory(const std::string& pth);
+    VFS_API directory open_directory(const std::string& pth);
     VFS_API void create_directory(const std::string& pth);
     VFS_API void unlink(const std::string& pth);
 
@@ -52,12 +52,6 @@ namespace vfs
          */
                 eCREATE_NEW,
         /*
-         * Opens a file, always.
-         * If the specified file exists, the function succeeds and the last-error code is set to ERROR_ALREADY_EXISTS (183).
-         * If the specified file does not exist and is a valid path to a writable location, the function creates a file and the last-error code is set to zero.
-         */
-                eOPEN_ALWAYS,
-        /*
          * Opens a file or device, only if it exists.
          * If the specified file or device does not exist, the function fails and the last-error code is set to ERROR_FILE_NOT_FOUND (2).
          */
@@ -68,10 +62,10 @@ namespace vfs
                 eTRUNCATE_EXISTING
     };
 
-    class file;
+    struct file;
 
     VFS_API file* open(const std::string& path, creation_disposition cd, bool readonly);
-    void close(file* f);
+    VFS_API void close(file* f);
 
     VFS_API size_t read(file* f, void* buff, size_t len);
     VFS_API size_t write(file* f, const void* buff, size_t len);
@@ -79,7 +73,7 @@ namespace vfs
 
     enum class seek_type
     {
-        eSTART,
+        eCUR,
         eSET,
         eEND
     };
@@ -92,4 +86,4 @@ namespace vfs
 #pragma warning(pop)
 #endif
 
-#endif //SYSTEM_HH
+#endif //VFS_SYSTEM_HH

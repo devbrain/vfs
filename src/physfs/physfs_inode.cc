@@ -12,6 +12,13 @@
 #include <bsw/macros.hh>
 #include "physfs_inode.hh"
 
+#if defined(WIN32)
+#define fopen _wfopen
+#define SLIT(X) CONCATENATE(L, X)
+#else
+#define SLIT(X) X
+#endif
+
 class file : public vfs::module::file
 {
 public:
@@ -98,6 +105,22 @@ bool physfs_inode::mkdir (const char* name)
 	return stdfs::create_directory(child);
 }
 // -----------------------------------------------------------------------------------
+bool physfs_inode::mkfile(const char* name)
+{
+    const stdfs::path child = _path / name;
+    if (stdfs::exists(child))
+    {
+        return false;
+    }
+    FILE* f = fopen(child.c_str(), SLIT("wb"));
+    if (!f)
+    {
+        return false;
+    }
+    fclose(f);
+    return true;
+}
+// -----------------------------------------------------------------------------------
 int physfs_inode::unlink()
 {
 	if (!stdfs::exists(_path))
@@ -110,12 +133,7 @@ int physfs_inode::unlink()
 vfs::module::file* physfs_inode::open_file(open_mode_type mode_type)
 {
     FILE* f = nullptr;
-#if defined(WIN32)
-#define fopen _wfopen
-#define SLIT(X) CONCATENATE(L, X)
-#else
-#define SLIT(X) X
-#endif
+
     if (mode_type == eVFS_OPEN_MODE_READ)
     {
         f = fopen(_path.c_str(), SLIT("rb"));
