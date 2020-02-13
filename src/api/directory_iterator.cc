@@ -9,7 +9,7 @@ namespace vfs
 	struct directory::impl
 	{
 		impl(std::shared_ptr<core::inode> ino)
-		: di (std::move(ino->get_directory_iterator())),
+		: di (ino->get_directory_iterator()),
 		  node(ino)
 		{
 			if (!di)
