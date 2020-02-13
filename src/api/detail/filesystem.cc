@@ -192,9 +192,14 @@ namespace vfs::core
         _dirty = true;
     }
     // ========================================================================
-    uint64_t file_ops::seek (uint64_t pos, enum whence_type whence)
+    bool file_ops::seek (uint64_t pos, enum whence_type whence)
     {
-        return _ops->seek(_ops->opaque, pos, whence);
+        return _ops->seek(_ops->opaque, pos, whence) == 1;
+    }
+    // ------------------------------------------------------------------------
+    uint64_t file_ops::tell() const
+    {
+        return _ops->tell(_ops->opaque);
     }
     // ------------------------------------------------------------------------
     ssize_t file_ops::read (void* buff, size_t len)

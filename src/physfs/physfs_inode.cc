@@ -27,8 +27,9 @@ private:
     ~file () override ;
     ssize_t read  (void* buff, size_t len) override ;
     ssize_t write (void* buff, size_t len) override ;
-    uint64_t seek (uint64_t pos, enum whence_type whence) override ;
+    bool seek (uint64_t pos, enum whence_type whence) override ;
     bool truncate() override ;
+    uint64_t tell() const override ;
 private:
     FILE* _file;
 };
@@ -176,7 +177,7 @@ ssize_t file::write (void* buff, size_t len)
     return fwrite(buff, len, 1, _file);
 }
 // -----------------------------------------------------------------------------------
-uint64_t file::seek (uint64_t pos, enum whence_type whence)
+bool file::seek (uint64_t pos, enum whence_type whence)
 {
     int w = SEEK_SET;
     switch (whence)
@@ -194,7 +195,7 @@ uint64_t file::seek (uint64_t pos, enum whence_type whence)
 #if defined(WIN32)
 #define fseek _fseeki64
 #endif
-    return fseek (_file, pos, w);
+    return fseek (_file, pos, w) == 0;
 }
 // -----------------------------------------------------------------------------------
 bool file::truncate()
@@ -204,4 +205,9 @@ bool file::truncate()
 #else
 	return _chsize(fileno(_file), 0) == 0;
 #endif
+}
+// -----------------------------------------------------------------------------------
+uint64_t file::tell() const
+{
+    return ftell(_file);
 }

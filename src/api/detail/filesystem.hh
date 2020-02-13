@@ -75,7 +75,8 @@ namespace vfs::core
         friend class inode;
 
     public:
-        [[nodiscard]] uint64_t seek(uint64_t pos, enum whence_type whence);
+        [[nodiscard]] bool seek(uint64_t pos, enum whence_type whence);
+        [[nodiscard]] uint64_t tell() const;
         [[nodiscard]] ssize_t read(void* buff, size_t len);
         [[nodiscard]] ssize_t write(const void* buff, size_t len);
         [[nodiscard]] bool truncate();

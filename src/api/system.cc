@@ -264,6 +264,7 @@ namespace vfs
             {
                 THROW_EXCEPTION_EX(vfs::exception, "Mismatched arguments TRUNCATE_EXISTING and readonly");
             }
+
         }
         // TODO check read only fs
         auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
@@ -312,8 +313,9 @@ namespace vfs
                 {
                     THROW_EXCEPTION_EX(vfs::exception, "can not create new file ", pth);
                 }
+                p.make_directory();
                 auto [dent_new, ino_new, depth_new] = core::dentry_resolve(p, 0, p.depth());
-                if (depth_new == p.depth())
+                if (depth_new < p.depth())
                 {
                     THROW_EXCEPTION_EX(vfs::exception, "can not resolve new file ", pth);
                 }
@@ -376,7 +378,7 @@ namespace vfs
         THROW_EXCEPTION_EX(vfs::exception, "Invalid file handle");
     }
     // ---------------------------------------------------------------------------------------------------------------
-    uint64_t seek(file* f, uint64_t pos, seek_type whence)
+    void seek(file* f, uint64_t pos, seek_type whence)
     {
         if (f && f->file_ops)
         {
@@ -394,9 +396,25 @@ namespace vfs
                     break;
             }
             auto rc = f->file_ops->seek(pos, wt);
-            if (rc == static_cast<uint64_t>(-1))
+            if (!rc)
             {
                 THROW_EXCEPTION_EX(vfs::exception, "seek to ", pos, " failed in ", f->file_path);
+            }
+
+        } else
+        {
+            THROW_EXCEPTION_EX(vfs::exception, "Invalid file handle");
+        }
+    }
+    // ---------------------------------------------------------------------------------
+    uint64_t tell (file* f)
+    {
+        if (f && f->file_ops)
+        {
+            auto rc = f->file_ops->tell();
+            if (rc == static_cast<uint64_t>(-1))
+            {
+                THROW_EXCEPTION_EX(vfs::exception, "tell failed for ", f->file_path);
             }
             return rc;
         }

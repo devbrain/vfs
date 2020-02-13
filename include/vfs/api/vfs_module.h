@@ -119,11 +119,8 @@ struct vfs_file_ops
 	ssize_t (*read)  (void* opaque, void* buff, size_t len);
 	ssize_t (*write) (void* opaque, void* buff, size_t len);
 	int (*truncate) (void* opaque);
-	/*
-	 * Upon successful completion, lseek() returns the resulting offset location as measured in bytes
-	 * from the beginning of the file.  On error, the value (uint64_t) -1
-	 */
-	uint64_t (*seek) (void* opaque, uint64_t pos, enum whence_type whence);
+	int (*seek) (void* opaque, uint64_t pos, enum whence_type whence);
+	uint64_t (*tell)(void* opaque);
 };
 
 enum open_mode_type
@@ -235,7 +232,8 @@ namespace vfs
 
 			virtual ssize_t read  (void* buff, size_t len) = 0;
 			virtual ssize_t write (void* buff, size_t len) = 0;
-			virtual uint64_t seek (uint64_t pos, enum whence_type whence) = 0;
+			virtual bool seek (uint64_t pos, enum whence_type whence) = 0;
+			virtual uint64_t tell() const = 0;
 			virtual bool truncate() = 0;
 		public:
 			static struct vfs_file_ops* vfs_file_ops_create(file* obj);
@@ -244,7 +242,8 @@ namespace vfs
 
 			static ssize_t _read (void* opaque, void* buff, size_t len);
 			static ssize_t _write (void* opaque, void* buff, size_t len);
-			static uint64_t _seek (void* opaque, uint64_t pos, enum whence_type whence);
+			static int _seek (void* opaque, uint64_t pos, enum whence_type whence);
+            static uint64_t _tell (void* opaque);
             static int _truncate (void* opaque);
 		};
 
@@ -632,6 +631,7 @@ namespace vfs
 			ret->read = _read;
 			ret->write = _write;
 			ret->seek = _seek;
+			ret->tell = _tell;
 			ret->truncate = _truncate;
 
 			return ret;
@@ -670,11 +670,18 @@ namespace vfs
         }
 		// ---------------------------------------------------------------------------------
 		inline
-		uint64_t file::_seek (void* opaque, uint64_t pos, enum whence_type whence)
+		int file::_seek (void* opaque, uint64_t pos, enum whence_type whence)
 		{
 			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
-			return obj->seek(pos, whence);
+			return obj->seek(pos, whence) ? 1 : 0;
 		}
+        // ---------------------------------------------------------------------------------
+        inline
+        uint64_t file::_tell (void* opaque)
+        {
+            auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+            return obj->tell();
+        }
 	} /* ns module */
 }
 /* forward declaration */

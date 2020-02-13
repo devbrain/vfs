@@ -78,7 +78,8 @@ namespace vfs
         eEND
     };
 
-    VFS_API uint64_t seek(file* f, uint64_t pos, seek_type whence);
+    VFS_API void seek(file* f, uint64_t pos, seek_type whence);
+    VFS_API uint64_t tell (file* f);
 
 } // ns vfs
 
