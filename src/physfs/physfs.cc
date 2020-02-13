@@ -30,7 +30,7 @@ private:
 		return 1;
 	}
 
-	int sync_inode(vfs::module::inode* /*inod*/)
+	int sync_inode(vfs::module::inode* /*inod*/) override 
 	{
 		return 1;
 	}

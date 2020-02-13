@@ -39,7 +39,7 @@ namespace vfs::core
               _path(pth),
               _fs(fs)
     {
-        _mount_point = std::make_unique<mount_point>(std::move(fs->load_root(args)));
+        _mount_point = std::make_unique<mount_point>(fs->load_root(args));
     }
     // -------------------------------------------------------------------------------------
     fstab::entry::~entry()

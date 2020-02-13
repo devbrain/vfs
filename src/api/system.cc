@@ -275,7 +275,7 @@ namespace vfs
             {
                 case creation_disposition::eCREATE_ALWAYS:
                 case creation_disposition::eTRUNCATE_EXISTING:
-                    fops = std::move(ino->get_file_ops(eVFS_OPEN_MODE_WRITE));
+                    fops = ino->get_file_ops(eVFS_OPEN_MODE_WRITE);
                     if (!fops)
                     {
                         THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth);
@@ -287,7 +287,7 @@ namespace vfs
                     return new file(std::move(fops), pth);
                 case creation_disposition::eCREATE_NEW:
                 case creation_disposition::eOPEN_EXISTING:
-                    fops = std::move(ino->get_file_ops(readonly ? eVFS_OPEN_MODE_READ : eVFS_OPEN_MODE_WRITE));
+                    fops = ino->get_file_ops(readonly ? eVFS_OPEN_MODE_READ : eVFS_OPEN_MODE_WRITE);
                     if (!fops)
                     {
                         THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth);
@@ -319,7 +319,7 @@ namespace vfs
                 {
                     THROW_EXCEPTION_EX(vfs::exception, "can not resolve new file ", pth);
                 }
-                fops = std::move(ino_new->get_file_ops(eVFS_OPEN_MODE_WRITE));
+                fops = ino_new->get_file_ops(eVFS_OPEN_MODE_WRITE);
                 if (!fops)
                 {
                     THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for writing");

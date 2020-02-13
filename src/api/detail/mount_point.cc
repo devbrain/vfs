@@ -18,7 +18,7 @@ namespace vfs::core
 	mount_point::~mount_point()
 	{
 		std::for_each(_allocated_nodes.begin(), _allocated_nodes.end(),
-			[this](const std::shared_ptr<inode>& x) -> void
+			[](const std::shared_ptr<inode>& x) -> void
 			{
 				if (x.use_count() > 1)
 				{
