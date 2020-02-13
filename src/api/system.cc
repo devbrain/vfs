@@ -382,7 +382,7 @@ namespace vfs
     {
         if (f && f->file_ops)
         {
-            whence_type wt;
+            whence_type wt = eVFS_SEEK_CUR;
             switch (whence)
             {
                 case seek_type::eCUR:
