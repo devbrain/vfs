@@ -5,6 +5,7 @@ add_executable(unittest
         vfs_basic_test.cc
         vfs_unlink_test.cc
         vfs_open_file_test.cc
+        vfs_read_write_test.cc
         )
 
 target_link_libraries(unittest PRIVATE CONAN_PKG::gtest vfs_api::vfs_api)

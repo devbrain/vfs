@@ -169,12 +169,15 @@ file::~file ()
 // -----------------------------------------------------------------------------------
 ssize_t file::read  (void* buff, size_t len)
 {
-    return fread(buff, len, 1, _file);
+    return fread(buff, 1, len, _file);
+
 }
 // -----------------------------------------------------------------------------------
 ssize_t file::write (void* buff, size_t len)
 {
-    return fwrite(buff, len, 1, _file);
+    return fwrite(buff,  1, len, _file);
+
+
 }
 // -----------------------------------------------------------------------------------
 bool file::seek (uint64_t pos, enum whence_type whence)

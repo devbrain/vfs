@@ -240,14 +240,16 @@ namespace vfs
     // ------------------------------------------------------------------------------------------
     struct file
     {
-        file(std::unique_ptr<core::file_ops>&& fops, const std::string& pth)
+        file(std::unique_ptr<core::file_ops>&& fops, const std::string& pth, bool ro)
         : file_ops(std::move(fops)),
-          file_path (pth)
+          file_path (pth),
+          read_only (ro)
         {
 
         }
         std::unique_ptr<core::file_ops> file_ops;
         std::string file_path;
+        bool read_only;
 	};
     // ------------------------------------------------------------------------------------------
 	file* open(const std::string& pth, creation_disposition cd, bool readonly)
@@ -284,7 +286,7 @@ namespace vfs
                     {
                         THROW_EXCEPTION_EX(vfs::exception, "failed to truncate file ", pth);
                     }
-                    return new file(std::move(fops), pth);
+                    return new file(std::move(fops), pth, readonly);
                 case creation_disposition::eCREATE_NEW:
                 case creation_disposition::eOPEN_EXISTING:
                     fops = ino->get_file_ops(readonly ? eVFS_OPEN_MODE_READ : eVFS_OPEN_MODE_WRITE);
@@ -292,7 +294,7 @@ namespace vfs
                     {
                         THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth);
                     }
-                    return new file(std::move(fops), pth);
+                    return new file(std::move(fops), pth, readonly);
             }
         }
         else
@@ -324,7 +326,7 @@ namespace vfs
                 {
                     THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for writing");
                 }
-                return new file(std::move(fops), pth);
+                return new file(std::move(fops), pth, readonly);
             } else
             {
                 THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
@@ -359,6 +361,10 @@ namespace vfs
     {
         if (f && f->file_ops)
         {
+            if (f->read_only)
+            {
+                THROW_EXCEPTION_EX(vfs::exception, "the file ", f->file_path, " is opened in read only mode");
+            }
             auto rc = f->file_ops->write(buff, len);
             if (rc < 0)
             {
