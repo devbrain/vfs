@@ -141,13 +141,7 @@ vfs::module::file* physfs_inode::open_file(open_mode_type mode_type)
     }
     else
     {
-        if (!stdfs::exists(_path))
-        {
-            f = fopen(_path.c_str(), SLIT("wb"));
-        } else
-        {
-            f = fopen(_path.c_str(), SLIT("ab"));
-        }
+       f = fopen(_path.c_str(), SLIT("rb+"));
     }
     if (!f)
     {
@@ -169,15 +163,15 @@ file::~file ()
 // -----------------------------------------------------------------------------------
 ssize_t file::read  (void* buff, size_t len)
 {
+
     return fread(buff, 1, len, _file);
 
 }
 // -----------------------------------------------------------------------------------
 ssize_t file::write (void* buff, size_t len)
 {
-    return fwrite(buff,  1, len, _file);
-
-
+   auto rc = fwrite(buff, 1, len, _file);
+   return rc;
 }
 // -----------------------------------------------------------------------------------
 bool file::seek (uint64_t pos, enum whence_type whence)
