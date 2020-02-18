@@ -7,6 +7,7 @@ namespace vfs::core
     filesystem::filesystem(vfs_module* ops)
             : _module(ops)
     {
+        _is_readonly = _module->is_readonly(_module->opaque);
     }
     // ---------------------------------------------------------------------
     filesystem::~filesystem()
@@ -32,14 +33,26 @@ namespace vfs::core
         return name;
     }
     // ---------------------------------------------------------------------
+    bool filesystem::is_readonly() const
+    {
+        return _is_readonly;
+    }
     int filesystem::sync()
     {
-        return _module->sync_filesystem(_module);
+        if (!_is_readonly)
+        {
+            return _module->sync_filesystem(_module);
+        }
+        return 1;
     }
     // ---------------------------------------------------------------------
     int filesystem::sync(inode* ino)
     {
-        return _module->sync_inode(_module->opaque, ino->_ops->opaque);
+        if (!_is_readonly)
+        {
+            return _module->sync_inode(_module->opaque, ino->_ops->opaque);
+        }
+        return 1;
     }
     // ======================================================================
     stats::stats()
@@ -174,7 +187,11 @@ namespace vfs::core
     // ----------------------------------------------------------------------
     int inode::sync()
     {
-        return _owner->sync(this);
+        if (!is_readonly())
+        {
+            return _owner->sync(this);
+        }
+        return 1;
     }
     // ----------------------------------------------------------------------
     int inode::unlink()
@@ -189,7 +206,15 @@ namespace vfs::core
     // ----------------------------------------------------------------------
     void inode::_make_dirty()
     {
-        _dirty = true;
+        if (!is_readonly())
+        {
+            _dirty = true;
+        }
+    }
+    // ----------------------------------------------------------------------
+    bool inode::is_readonly() const
+    {
+        return _owner->is_readonly();
     }
     // ========================================================================
     bool file_ops::seek (uint64_t pos, enum whence_type whence)
@@ -235,6 +260,11 @@ namespace vfs::core
     const inode* file_ops::owner() const
     {
         return _owner;
+    }
+    // ------------------------------------------------------------------------
+    bool file_ops::is_readonly() const
+    {
+        return _owner->is_readonly();
     }
     // ------------------------------------------------------------------------
     file_ops::file_ops (vfs_file_ops* ops, inode* owner)

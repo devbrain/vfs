@@ -1,4 +1,5 @@
 #include <ostream>
+#include <iomanip>
 #include <vfs/api/mounts.hh>
 #include "api/detail/fstab.hh"
 
@@ -58,7 +59,10 @@ namespace vfs
 	}
 	// ===================================================================================
 	mounts::data::data(const wrapper& w)
-		: _path(w.itr->second.mount_path().to_string()), _type(w.itr->second.type()), _args(w.itr->second.args())
+		: _path(w.itr->second.mount_path().to_string()),
+		_type(w.itr->second.type()),
+		_args(w.itr->second.args()),
+		_readonly(w.itr->second.is_readonly())
 	{
 
 	}
@@ -79,6 +83,11 @@ namespace vfs
 	{
 		return _path;
 	}
+	// -----------------------------------------------------------------------------------
+	bool mounts::data::is_readonly() const noexcept
+	{
+		return _readonly;
+	}
 	// ===================================================================================
 	mounts::iterator begin(mounts& m)
 	{
@@ -91,7 +100,7 @@ namespace vfs
 	}
 	std::ostream& operator<<(std::ostream& os, const mounts::data& d)
 	{
-		os << d.type() << "\t" << d.path() << "\t" << d.args();
+		os << d.type() << "\t" << d.path() << "\t" << d.args() << "\tro: " << std::boolalpha << d.is_readonly();
 		return os;
 	}
 }

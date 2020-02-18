@@ -31,9 +31,12 @@ namespace vfs::core
 
         [[nodiscard]] int sync();
         [[nodiscard]] int sync(inode* ino);
+
+        [[nodiscard]] bool is_readonly() const;
     private:
         ~filesystem();
         vfs_module* _module;
+        bool _is_readonly;
     };
 
     // -------------------------------------------------------------
@@ -82,6 +85,7 @@ namespace vfs::core
         [[nodiscard]] bool truncate();
         ~file_ops();
         [[nodiscard]] const inode* owner() const;
+        [[nodiscard]] bool is_readonly() const;
     private:
         file_ops(vfs_file_ops* ops, inode* owner);
     private:
@@ -114,6 +118,7 @@ namespace vfs::core
         [[nodiscard]] int unlink();
 
         [[nodiscard]] std::unique_ptr<file_ops> get_file_ops(open_mode_type mode_type) const;
+        [[nodiscard]] bool is_readonly() const;
     private:
         explicit inode(vfs_inode_ops* ops, filesystem* owner);
     private:

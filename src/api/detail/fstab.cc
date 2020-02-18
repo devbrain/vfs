@@ -65,6 +65,10 @@ namespace vfs::core
     {
         return _type;
     }
+    bool fstab::entry::is_readonly() const noexcept
+    {
+        return _fs->is_readonly();
+    }
     // -------------------------------------------------------------------------------------
     wrapped_pointer<mount_point> fstab::entry::get() const
     {

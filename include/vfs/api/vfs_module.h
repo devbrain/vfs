@@ -185,8 +185,11 @@ struct vfs_module
 
 	size_t (* get_name)(void* opaque, char* output, size_t output_size);
 
+	int (*is_readonly)(void* opaque);
+
 	int (* sync_inode) (void* opaque, void* inode_opaque);
 	int (* sync_filesystem) (struct vfs_module* fsys);
+
 };
 
 #define VFS_MODULE_REGISTER_NAME "vfs_module_register"
@@ -307,7 +310,7 @@ namespace vfs
 			virtual size_t max_name_length() = 0;
 			virtual int sync() = 0;
 			virtual int sync_inode(inode* inod) = 0;
-
+            virtual bool is_readonly() const = 0;
 			virtual void setup(struct vfs_module* output);
 
 		private:
@@ -319,6 +322,7 @@ namespace vfs
 			static size_t _get_name(void* opaque, char* output, size_t output_size);
 			static int _sync_inode (void* opaque, void* inode_opaque);
 			static int _sync_filesystem (struct vfs_module* victim);
+            static int _is_readonly(void* opaque);
 
 
 		};
@@ -529,6 +533,7 @@ namespace vfs
 			output->get_name = _get_name;
 			output->sync_filesystem = _sync_filesystem;
 			output->sync_inode = _sync_inode;
+			output->is_readonly = _is_readonly;
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline
@@ -576,6 +581,13 @@ namespace vfs
 			auto* fs = reinterpret_cast<vfs::module::filesystem*> (fsys->opaque);
 			return fs->sync();
 		}
+        /* ----------------------------------------------------------------------------- */
+        inline
+        int filesystem::_is_readonly(void* opaque)
+        {
+            auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+            return fs->is_readonly() ? 1 : 0;
+        }
 		/* ============================================================================= */
 		inline
 		struct vfs_directory_iterator* directory_iterator::vfs_directory_iterator_create(directory_iterator* obj)

@@ -4,6 +4,7 @@
 #include "api/detail/stats_converter.hh"
 #include <bsw/errors.hh>
 
+
 namespace vfs
 {
 	struct directory::impl

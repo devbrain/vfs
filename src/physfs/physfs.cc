@@ -34,6 +34,11 @@ private:
 	{
 		return 1;
 	}
+
+	bool is_readonly() const override
+    {
+	    return false;
+    }
 };
 
 

@@ -45,11 +45,13 @@ namespace vfs
 			std::string _path;
 			std::string _type;
 			std::string _args;
+			bool        _readonly;
 		public:
 
 			[[nodiscard]] std::string type() const noexcept ;
 			[[nodiscard]] std::string args() const noexcept ;
 			[[nodiscard]] std::string path() const noexcept ;
+            [[nodiscard]] bool is_readonly() const noexcept ;
 		private:
 
 			explicit data(const wrapper& itr);

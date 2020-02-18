@@ -205,6 +205,10 @@ namespace vfs
 		{
             THROW_EXCEPTION_EX(vfs::exception, "path ", pth, "has to many non existing components");
 		}
+		if (ino->is_readonly())
+        {
+            THROW_EXCEPTION_EX(vfs::exception, "failed to create directory ", pth, " Read only file system");
+        }
 		p.make_file();
 		if (!ino->mkdir(p.get_file_name()))
 		{
@@ -227,6 +231,10 @@ namespace vfs
             THROW_EXCEPTION_EX(vfs::exception, "path ", pth, " is non empty directory");
 
 		}
+        if (ino->is_readonly())
+        {
+            THROW_EXCEPTION_EX(vfs::exception, "failed to unlink ", pth, " Read only file system");
+        }
 		if (!ino->unlink())
 		{
             THROW_EXCEPTION_EX(vfs::exception, "failed to unlink ", pth);
@@ -271,12 +279,17 @@ namespace vfs
         // TODO check read only fs
         auto [dent, ino, depth] = core::dentry_resolve(p, 0, p.depth());
         std::unique_ptr<core::file_ops> fops;
+
         if (depth == p.depth())
         {
             switch (cd)
             {
                 case creation_disposition::eCREATE_ALWAYS:
                 case creation_disposition::eTRUNCATE_EXISTING:
+                    if (ino->is_readonly())
+                    {
+                        THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " Read only file system");
+                    }
                     fops = ino->get_file_ops(eVFS_OPEN_MODE_WRITE);
                     if (!fops)
                     {
@@ -364,6 +377,10 @@ namespace vfs
             if (f->read_only)
             {
                 THROW_EXCEPTION_EX(vfs::exception, "the file ", f->file_path, " is opened in read only mode");
+            }
+            if (f->file_ops->is_readonly())
+            {
+                THROW_EXCEPTION_EX(vfs::exception, "the file ", f->file_path, " is opened in read only file system");
             }
             auto rc = f->file_ops->write(buff, len);
             if (rc < 0)

@@ -31,6 +31,7 @@ namespace vfs::core
 			[[nodiscard]] path mount_path() const noexcept;
             [[nodiscard]] std::string args () const noexcept;
             [[nodiscard]] std::string type () const noexcept;
+            [[nodiscard]] bool is_readonly () const noexcept;
 
             [[nodiscard]] wrapped_pointer<mount_point> get() const;
 		private:

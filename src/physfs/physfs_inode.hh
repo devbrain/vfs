@@ -17,6 +17,7 @@ public:
     bool mkfile(const char* name) override ;
     int unlink() override;
 
+
 	vfs::module::file* open_file(open_mode_type mode_type) override ;
 private:
 	const stdfs::path _path;

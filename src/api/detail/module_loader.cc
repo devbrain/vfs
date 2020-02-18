@@ -3,34 +3,9 @@
 //
 
 #include "module_loader.hh"
+#include <bsw/dlfcn.hh>
 
-#if !defined(WIN32)
-#include <dlfcn.h>
-#else
-#include <windows.h>
 
-#define RTLD_LAZY 0
-
-namespace
-{
-	void* dlopen(const std::filesystem::path::value_type* path, int)
-	{
-		return LoadLibraryW(path);
-	}
-
-	void* dlsym(void* dll,const char* symbol)
-	{
-		return GetProcAddress(reinterpret_cast<HMODULE>(dll), symbol);
-	}
-
-	void dlclose(void* dll)
-	{
-		FreeLibrary(reinterpret_cast<HMODULE>(dll));
-	}
-
-}
-
-#endif
 
 
 namespace
