@@ -3,7 +3,7 @@
 //
 
 #include "modules_table.hh"
-
+#include "physfs/physfs.hh"
 
 namespace vfs::core
 {
@@ -33,7 +33,11 @@ namespace vfs::core
 	// ------------------------------------------------------------------------------------
 	stdfs::path modules_table::entry::path() const
 	{
-		return _dll->path();
+	    if (_dll)
+        {
+            return _dll->path();
+        }
+	    return stdfs::path();
 	}
 	// ------------------------------------------------------------------------------------
 	int modules_table::entry::ref_count() const
@@ -51,8 +55,19 @@ namespace vfs::core
 		delete _fs;
 	}
 	// ===================================================================================
+
 	modules_table::modules_table(const stdfs::path& path)
 	{
+        vfs::detail::physfs* fs = new vfs::detail::physfs();
+        std::unique_ptr<vfs_module> impl_module = std::make_unique<vfs_module>();
+        fs->setup(impl_module.get());
+        if (impl_module->get_name)
+        {
+            char name[128] = { 0 };
+            impl_module->get_name(impl_module->opaque, name, sizeof(name));
+            std::string key(name);
+            _entries[name] = new entry(impl_module.release(), nullptr);
+        }
 		add(path);
 	}
 	// -----------------------------------------------------------------------------------

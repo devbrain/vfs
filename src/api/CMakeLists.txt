@@ -8,6 +8,9 @@ set(src
         detail/filesystem.cc
         detail/mount_point.cc
 
+        physfs/physfs.cc
+        physfs/physfs_inode.cc
+
         system.cc
         modules.cc
         mounts.cc
@@ -24,6 +27,9 @@ set(hdr
         detail/path.hh
         detail/filesystem.hh
         detail/mount_point.hh
+
+        physfs/physfs_inode.hh
+        physfs/physfs.hh
 
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
         ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h
