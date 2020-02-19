@@ -65,7 +65,6 @@ namespace vfs::core
         {
             char name[128] = { 0 };
             impl_module->get_name(impl_module->opaque, name, sizeof(name));
-            std::string key(name);
             _entries[name] = new entry(impl_module.release(), nullptr);
         }
 		add(path);
@@ -124,8 +123,8 @@ namespace vfs::core
 			{
 				char name[128] = { 0 };
 				impl_module->get_name(impl_module->opaque, name, sizeof(name));
-				std::string key(name);
 
+				std::string key(name);
 				auto itr = _entries.find(key);
 				if (itr == _entries.end())
 				{
@@ -144,7 +143,4 @@ namespace vfs::core
 		}
 		return itr->second->module();
 	}
-	// ====================================================================================
-
-
 } // ns vfs::detail

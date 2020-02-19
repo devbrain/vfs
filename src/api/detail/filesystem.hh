@@ -28,7 +28,7 @@ namespace vfs::core
         [[nodiscard]] std::unique_ptr<inode> load_root(const std::string& params);
         [[nodiscard]] size_t max_name_length() const noexcept;
         [[nodiscard]] std::string type() const noexcept;
-
+        [[nodiscard]] std::string description() const noexcept;
         [[nodiscard]] int sync();
         [[nodiscard]] int sync(inode* ino);
 

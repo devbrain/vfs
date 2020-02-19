@@ -1,6 +1,7 @@
 #include "filesystem.hh"
 #include <vfs/api/exception.hh>
 #include <bsw/errors.hh>
+#include <vector>
 
 namespace vfs::core
 {
@@ -31,6 +32,23 @@ namespace vfs::core
         char name[128] = {0};
         _module->get_name(_module->opaque, name, sizeof(name));
         return name;
+    }
+    // ---------------------------------------------------------------------
+    std::string filesystem::description() const noexcept
+    {
+        std::size_t n = 1024;
+        std::vector<char> out(n, '\0');
+        while (true)
+        {
+            auto rc = _module->get_description(_module->opaque, out.data(), out.size());
+            if (rc < out.size())
+            {
+                break;
+            }
+            n += 128;
+            out.resize(n, '\0');
+        }
+        return std::string(out.data());
     }
     // ---------------------------------------------------------------------
     bool filesystem::is_readonly() const

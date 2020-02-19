@@ -184,6 +184,7 @@ struct vfs_module
 	size_t (* maximal_name_length)(void* opaque);
 
 	size_t (* get_name)(void* opaque, char* output, size_t output_size);
+	size_t (* get_description)(void* opaque, char* output, size_t output_size);
 
 	int (*is_readonly)(void* opaque);
 
@@ -304,6 +305,7 @@ namespace vfs
 		{
 		public:
 			explicit filesystem(const std::string& name);
+			filesystem(const std::string& name, const std::string& descr);
 			virtual ~filesystem() = default;
 
 			virtual inode* load_root(const std::string& params) = 0;
@@ -311,15 +313,18 @@ namespace vfs
 			virtual int sync() = 0;
 			virtual int sync_inode(inode* inod) = 0;
             virtual bool is_readonly() const = 0;
+
 			virtual void setup(struct vfs_module* output);
 
 		private:
 			const std::string _name;
+			const std::string _descr;
 
 			static void _destructor(struct vfs_module* victim);
 			static struct vfs_inode_ops* _load_root(void* opaque, char* params);
 			static size_t _maximal_name_length(void* opaque);
 			static size_t _get_name(void* opaque, char* output, size_t output_size);
+			static size_t _get_description(void* opaque, char* output, size_t output_size);
 			static int _sync_inode (void* opaque, void* inode_opaque);
 			static int _sync_filesystem (struct vfs_module* victim);
             static int _is_readonly(void* opaque);
@@ -517,7 +522,14 @@ namespace vfs
 		/* ============================================================================= */
 		inline
 		filesystem::filesystem(const std::string& name)
-			: _name(name)
+			: _name(name), _descr("")
+		{
+
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
+		filesystem::filesystem(const std::string& name, const std::string& descr)
+				: _name(name), _descr(descr)
 		{
 
 		}
@@ -531,6 +543,7 @@ namespace vfs
 			output->load_root = _load_root;
 			output->maximal_name_length = _maximal_name_length;
 			output->get_name = _get_name;
+			output->get_description = _get_description;
 			output->sync_filesystem = _sync_filesystem;
 			output->sync_inode = _sync_inode;
 			output->is_readonly = _is_readonly;
@@ -565,6 +578,14 @@ namespace vfs
 			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
 			std::memcpy(output, fs->_name.c_str(), std::min(output_size, fs->_name.size()));
 			return fs->_name.size();
+		}
+		/* ----------------------------------------------------------------------------- */
+		inline
+		size_t filesystem::_get_description(void* opaque, char* output, size_t output_size)
+		{
+			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+			std::memcpy(output, fs->_descr.c_str(), std::min(output_size, fs->_descr.size()));
+			return fs->_descr.size();
 		}
 		/* ----------------------------------------------------------------------------- */
 		inline
