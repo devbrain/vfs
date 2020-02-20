@@ -1,23 +1,25 @@
 include(ExternalProject)
 
-if (NOT IS_SINGLE_CONFIGURATION)
-	set(propagate_build_type --config $<CONFIG> -DCMAKE_BUILD_TYPE=$<CONFIG>)
-else()
-	set(propagate_build_type -DCMAKE_BUILD_TYPE=$<CONFIG>)
-endif()
+if (NOT BSW_INSTALL_ROOT)
+	if (NOT IS_SINGLE_CONFIGURATION)
+		set(propagate_build_type --config $<CONFIG> -DCMAKE_BUILD_TYPE=$<CONFIG>)
+	else()
+		set(propagate_build_type -DCMAKE_BUILD_TYPE=$<CONFIG>)
+	endif()
 
-set (BSW_INSTALL_ROOT ${CMAKE_BINARY_DIR})
-ExternalProject_Add(bsw_ext
-		GIT_REPOSITORY git@github.com:devbrain/bsw.git
-		INSTALL_DIR    ${BSW_INSTALL_ROOT}
-		CMAKE_ARGS 
-			-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-			-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-			-DBUILD_TEST:BOOL=OFF
-			${propagate_build_type}
-		UPDATE_COMMAND    ""
-		BUILD_ALWAYS      OFF
-	)
+	set (BSW_INSTALL_ROOT ${CMAKE_BINARY_DIR})
+	ExternalProject_Add(bsw_ext
+			GIT_REPOSITORY git@github.com:devbrain/bsw.git
+			INSTALL_DIR    ${BSW_INSTALL_ROOT}
+			CMAKE_ARGS
+				-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+				-DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+				-DBUILD_TEST:BOOL=OFF
+				${propagate_build_type}
+			UPDATE_COMMAND    ""
+			BUILD_ALWAYS      OFF
+		)
+endif()
 
 add_library(bsw::bsw SHARED IMPORTED GLOBAL)
 

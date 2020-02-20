@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.11)
 project(vfs)
 
 option(BUILD_SHARED_LIBS "Build shared library" ON)
+option(BUILD_TEST "Build unittests" ON)
+
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 string(COMPARE EQUAL "${CMAKE_CFG_INTDIR}" "." IS_SINGLE_CONFIGURATION)
 
@@ -61,7 +63,11 @@ endif()
 # ===========================================================
 set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 # ===========================================================
-add_subdirectory(unittest)
 add_subdirectory(src/api)
 add_subdirectory(src/ext)
+
+if (BUILD_TEST)
+    add_subdirectory(unittest)
+endif()
+
 

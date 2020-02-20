@@ -94,3 +94,26 @@ target_compile_definitions(vfs_api
         )
 target_compile_features(vfs_api PUBLIC cxx_std_17)
 
+# ==================================================================
+# Installation
+# ==================================================================
+include(GNUInstallDirs)
+
+message ("ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}")
+message ("LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}")
+message ("INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}")
+
+install (TARGETS vfs_api
+        EXPORT vfs_api-targets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        )
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/vfs
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        )
+install(DIRECTORY ${CMAKE_BINARY_DIR}/include/vfs
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        )
