@@ -18,7 +18,9 @@ if (NOT BSW_INSTALL_ROOT)
 				${propagate_build_type}
 			UPDATE_COMMAND    ""
 			BUILD_ALWAYS      OFF
-		)
+			)
+      set_target_properties(bsw_ext PROPERTIES FOLDER ${DEPENDENCY_FOLDER})
+      add_dependencies(vfs_api bsw_ext)
 endif()
 
 add_library(bsw::bsw SHARED IMPORTED GLOBAL)
@@ -52,5 +54,4 @@ else ()
   )
 endif()
 # ==============================================================================
-set_target_properties(bsw_ext PROPERTIES FOLDER ${DEPENDENCY_FOLDER})
-add_dependencies(vfs_api bsw_ext)
+
