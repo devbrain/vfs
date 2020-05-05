@@ -63,8 +63,11 @@ endif()
 # ===========================================================
 set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 # ===========================================================
+
+find_package(bsw REQUIRED)
 add_subdirectory(src/api)
-add_subdirectory(src/ext)
+
+#add_subdirectory(src/ext)
 
 if (BUILD_TEST)
     add_subdirectory(unittest)
