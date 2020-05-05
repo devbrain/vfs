@@ -33,6 +33,18 @@ namespace
 
 namespace vfs::core
 {
+    /*
+    fstab::entry::entry(const entry& other)
+        : _mount_point(other._mount_point),
+        _type(other._type),
+        _args(other._args),
+        _path(other._path),
+        _fs(other._fs)
+    {
+
+    }
+    */
+    // --------------------------------------------------------------------------
     fstab::entry::entry(filesystem* fs, const path& pth, const std::string& args)
             : _type(fs->type()),
               _args(args),
@@ -79,7 +91,8 @@ namespace vfs::core
     {
         auto key = mount_path.hash();
         auto[itr, result] = _fstab.try_emplace(key,
-                                               lazy_convert_construct([&] { return entry(module, mount_path, args); }));
+                                               lazy_convert_construct([&] { 
+                return std::move(entry(module, mount_path, args)); }));
         if (!result)
         {
             THROW_EXCEPTION_EX(vfs::exception, "this path is already mounted");

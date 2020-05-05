@@ -70,7 +70,6 @@ target_compile_options(vfs_api PRIVATE
 
 
 target_link_libraries(vfs_api PUBLIC
-        Threads::Threads
         bsw::bsw
         )
 

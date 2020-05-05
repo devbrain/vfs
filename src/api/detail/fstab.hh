@@ -26,6 +26,7 @@ namespace vfs::core
 		{
 		public:
 			entry(filesystem* fs, const path& pth, const std::string& args);
+			entry(entry&& other) = default;
 			~entry();
 
 			[[nodiscard]] path mount_path() const noexcept;

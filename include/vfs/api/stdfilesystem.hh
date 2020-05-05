@@ -14,8 +14,8 @@
 #	endif
 # endif
 #endif
+#include <bsw/filesystem.hh>
 
-#include VFS_FS_HEADER
-#define stdfs  VFS_FS_NAMESPACE
+namespace stdfs = bsw::filesystem;
 
 #endif //STDFILESYSTEM_HH

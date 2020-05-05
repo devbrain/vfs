@@ -35,7 +35,6 @@ conan_basic_setup(NO_OUTPUT_DIRS)
 include(GenerateExportHeader)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
-find_package(Filesystem REQUIRED Experimental Final)
 # ===========================================================
 
 # Organize unrelated targets to clean IDE hierarchy.
