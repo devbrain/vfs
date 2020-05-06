@@ -1,9 +1,9 @@
-#include <gtest/gtest.h>
+#include <doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
 #include "sandbox.hh"
 
-TEST(OpenFileTest, openExisting) {
+TEST_CASE("openExisting") {
     sandbox sbox;
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
@@ -20,7 +20,7 @@ TEST(OpenFileTest, openExisting) {
     vfs::deinitialize();
 }
 
-TEST(OpenFileTest, openNonExisting) {
+TEST_CASE("openNonExisting") {
     sandbox sbox;
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
@@ -29,13 +29,13 @@ TEST(OpenFileTest, openNonExisting) {
     vfs::load_module(stdfs::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
-    EXPECT_THROW(vfs::open("/zopa/pizda/for-read.txt", vfs::creation_disposition::eOPEN_EXISTING, true), vfs::exception);
-    EXPECT_THROW(vfs::open("/zopa/pizda/for-write.txt", vfs::creation_disposition::eOPEN_EXISTING, false), vfs::exception);
+    REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/for-read.txt", vfs::creation_disposition::eOPEN_EXISTING, true), vfs::exception);
+    REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/for-write.txt", vfs::creation_disposition::eOPEN_EXISTING, false), vfs::exception);
 
     vfs::deinitialize();
 }
 
-TEST(OpenFileTest, openTruncate) {
+TEST_CASE("openTruncate") {
     sandbox sbox;
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
@@ -47,23 +47,23 @@ TEST(OpenFileTest, openTruncate) {
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
     vfs::seek(f, 0, vfs::seek_type::eEND);
     auto sz = vfs::tell(f);
-    EXPECT_EQ(3, sz);
+    REQUIRE(3 == sz);
     vfs::close(f);
 
     // throw here because readonly
-    EXPECT_THROW(vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eTRUNCATE_EXISTING, true), vfs::exception);
+    REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eTRUNCATE_EXISTING, true), vfs::exception);
 
     f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eTRUNCATE_EXISTING, false);
     vfs::close(f);
 
 
     auto st = vfs::get_stats("/zopa/pizda/1.txt");
-    EXPECT_TRUE(st);
-    EXPECT_EQ(0, st->size);
+    REQUIRE(st);
+    REQUIRE(0 == st->size);
     vfs::deinitialize();
 }
 
-TEST(OpenFileTest, CreateNew) {
+TEST_CASE("CreateNew") {
     sandbox sbox;
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
@@ -72,26 +72,26 @@ TEST(OpenFileTest, CreateNew) {
     vfs::load_module(stdfs::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
-    EXPECT_THROW(vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_NEW, true), vfs::exception);
+    REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_NEW, true), vfs::exception);
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eCREATE_NEW, true);
     vfs::seek(f, 0, vfs::seek_type::eEND);
     auto sz = vfs::tell(f);
-    EXPECT_EQ(3, sz);
+    REQUIRE(3 == sz);
     vfs::close(f);
 
     f = vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_NEW, false);
     vfs::write(f, "1", 1);
     vfs::seek(f, 0, vfs::seek_type::eEND);
     sz = vfs::tell(f);
-    EXPECT_EQ(1, sz);
+    REQUIRE(1 == sz);
     vfs::close(f);
 
     vfs::deinitialize();
 }
 
 
-TEST(OpenFileTest, CreateAlways) {
+TEST_CASE("CreateAlways") {
     sandbox sbox;
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
@@ -100,18 +100,18 @@ TEST(OpenFileTest, CreateAlways) {
     vfs::load_module(stdfs::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
-    EXPECT_THROW(vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_ALWAYS, true), vfs::exception);
+    REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_ALWAYS, true), vfs::exception);
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eCREATE_ALWAYS, false);
     vfs::seek(f, 0, vfs::seek_type::eEND);
     auto sz = vfs::tell(f);
-    EXPECT_EQ(0, sz);
+    REQUIRE(0 == sz);
     vfs::close(f);
 
     f = vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_ALWAYS, false);
     vfs::seek(f, 0, vfs::seek_type::eEND);
     sz = vfs::tell(f);
-    EXPECT_EQ(0, sz);
+    REQUIRE(0 == sz);
     vfs::close(f);
 
     vfs::deinitialize();

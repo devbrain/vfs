@@ -1,10 +1,14 @@
 #include <vector>
 
-#include <gtest/gtest.h>
+#include <doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
-
+#include <bsw/macros.hh>
 #include "sandbox.hh"
+
+#define EXPECT_EQ(A,B) REQUIRE(A == B)
+#define TEST(A,B) TEST_CASE(STRINGIZE(B))
+#define EXPECT_THROW(A,B) REQUIRE_THROWS_AS(A, B)
 
 TEST(ReadWriteTest, SimpleRead) {
     sandbox sbox;

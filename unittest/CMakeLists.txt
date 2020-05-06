@@ -1,5 +1,3 @@
-find_package(gtest CONFIG)
-
 add_executable(unittest
         sandbox.cc
         sandbox.hh
@@ -10,7 +8,7 @@ add_executable(unittest
         vfs_read_write_test.cc
         )
 
-target_link_libraries(unittest PRIVATE gtest::gtest vfs_api::vfs_api)
+target_link_libraries(unittest PRIVATE doctest::doctest vfs_api::vfs_api)
 target_include_directories(unittest PRIVATE ${PROJECT_ROOT}/src)
 
 

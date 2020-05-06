@@ -14,7 +14,7 @@ include("onyx")
 onyx_setup_conan(
   REQUIRES
   bsw/0.0.1@devbrain/stable
-  gtest/1.8.1@bincrafters/stable
+  doctest/2.3.4@bincrafters/stable
   OPTIONS
   bsw:shared=True
 )
@@ -25,13 +25,6 @@ include(GenerateExportHeader)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
 # ===========================================================
-
-# Organize unrelated targets to clean IDE hierarchy.
-set(DEPENDENCY_FOLDER "Dependencies")
-
-# This will also clean up the CMake ALL_BUILD, INSTALL, RUN_TESTS and ZERO_CHECK projects.
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER ${DEPENDENCY_FOLDER})
 
 # Output binary to predictable location.
 set(BINARY_OUT_DIR ${CMAKE_BINARY_DIR}/bin)
@@ -45,17 +38,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUT_DIR})
 set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 # ===========================================================
 
-#message (STATUS "CMAKE_MODULE_PATH == ${CMAKE_MODULE_PATH}")
-
-
 find_package(bsw REQUIRED)
-#find_package(gtest REQUIRED)
+find_package(doctest REQUIRED)
 
 add_subdirectory(src/api)
 
 
 if (BUILD_TEST)
-#    add_subdirectory(unittest)
+    add_subdirectory(unittest)
 endif()
 
 

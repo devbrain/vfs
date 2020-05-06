@@ -1,7 +1,15 @@
-#include <gtest/gtest.h>
+#include <doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
+#include <bsw/macros.hh>
 #include "sandbox.hh"
+
+#define EXPECT_EQ(A,B) REQUIRE(A == B)
+#define EXPECT_FALSE(A) REQUIRE(!(A))
+#define EXPECT_TRUE(A) REQUIRE(A)
+#define TEST(A,B) TEST_CASE(STRINGIZE(B))
+#define EXPECT_THROW(A,B) REQUIRE_THROWS_AS(A, B)
+#define EXPECT_ANY_THROW(A) REQUIRE_THROWS(A)
 
 TEST(UnlinkTest, testUnlinkFile) {
 	sandbox sbox;
