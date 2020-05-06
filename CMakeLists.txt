@@ -5,31 +5,20 @@ project(vfs)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_TEST "Build unittests" ON)
 
-set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set (CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/cmake-scripts")
+set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 string(COMPARE EQUAL "${CMAKE_CFG_INTDIR}" "." IS_SINGLE_CONFIGURATION)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/conan/conan.cmake")
-  if (NOT EXISTS ${CMAKE_BINARY_DIR}/conan.cmake)
-        message(STATUS "Downloading conan.cmake from https://github.com/memsharded/cmake-conan")
-        file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
-                "${CMAKE_BINARY_DIR}/conan.cmake"
-                SHOW_PROGRESS STATUS status)
-        message(STATUS "Download status = ${status}")
-  else ()
-        message (STATUS "Using existing ${CMAKE_BINARY_DIR}/conan.cmake")
-  endif ()
-  include(${CMAKE_BINARY_DIR}/conan.cmake)
-else()
-  include(${CMAKE_SOURCE_DIR}/cmake/conan/conan.cmake)
-endif ()
+include("onyx")
 
-conan_cmake_run(CONANFILE conanfile.txt 
-  BASIC_SETUP CMAKE_TARGETS
-  BUILD missing)
+onyx_setup_conan(
+  REQUIRES
+  bsw/0.0.1@devbrain/stable
+  gtest/1.8.1@bincrafters/stable
+  OPTIONS
+  bsw:shared=True
+)
 
-conan_load_buildinfo ()
-
-conan_basic_setup(NO_OUTPUT_DIRS)
 
 # ===========================================================
 include(GenerateExportHeader)
@@ -51,25 +40,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_OUT_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIB_OUT_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUT_DIR})
 
-if (NOT IS_SINGLE_CONFIGURATION)
-    foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-	    string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIGU)
-	    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIGU} ${BINARY_OUT_DIR}/${OUTPUTCONFIG})
-	    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIGU} ${LIB_OUT_DIR}/${OUTPUTCONFIG})
-	    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIGU} ${LIB_OUT_DIR}/${OUTPUTCONFIG})
-    endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
-endif()
+
 # ===========================================================
 set (PROJECT_ROOT ${CMAKE_SOURCE_DIR})
 # ===========================================================
 
+#message (STATUS "CMAKE_MODULE_PATH == ${CMAKE_MODULE_PATH}")
+
+
 find_package(bsw REQUIRED)
+#find_package(gtest REQUIRED)
+
 add_subdirectory(src/api)
 
-#add_subdirectory(src/ext)
 
 if (BUILD_TEST)
-    add_subdirectory(unittest)
+#    add_subdirectory(unittest)
 endif()
 
 
