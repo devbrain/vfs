@@ -1,9 +1,14 @@
 #include <vector>
+#include <cstring>
+
 
 #include <doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
 #include <bsw/macros.hh>
+
+
+
 #include "sandbox.hh"
 
 #define EXPECT_EQ(A,B) REQUIRE(A == B)
