@@ -10,7 +10,6 @@
 
 #include <vfs/api/stdfilesystem.hh>
 #include <vfs/api/vfs_api.h>
-#include <api/detail/path.hh>
 #include <vfs/api/modules.hh>
 #include <vfs/api/mounts.hh>
 #include <vfs/api/stats.hh>
