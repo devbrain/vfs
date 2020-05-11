@@ -46,6 +46,6 @@ class VFSConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["vfs"]
+        self.cpp_info.libs = ["vfs_api"]
 
 
