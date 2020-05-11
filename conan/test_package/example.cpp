@@ -4,7 +4,6 @@
 
 int main (int argc, char** argv)
 {
-    vfs::initialize();
     vfs::deinitialize();
     return 0;
 }

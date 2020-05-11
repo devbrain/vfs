@@ -3,9 +3,10 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-class BswTestConan(ConanFile):
+class VFSTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package"
+    
 
     def build(self):
         cmake = CMake(self)
@@ -15,6 +16,7 @@ class BswTestConan(ConanFile):
         cmake.build()
 
     def imports(self):
+        print("--------------------------- IMPORTS -------------------")
         self.copy("*.dll", dst="bin", src="bin")
         self.copy("*.dylib*", dst="bin", src="lib")
         self.copy('*.so*', dst='bin', src='lib')
@@ -22,4 +24,4 @@ class BswTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            self.run(".%sexample" % os.sep, run_environment=True)
