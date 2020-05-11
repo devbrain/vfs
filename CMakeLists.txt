@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.11)
 
-project(vfs)
+project(vfs VERSION 0.0.1 LANGUAGES CXX)
 
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_TEST "Build unittests" ON)
