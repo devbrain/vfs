@@ -104,28 +104,6 @@ onyx_install_package(
   TARGETS vfs_api
   )
 
-#include(GNUInstallDirs)
-
-#if(CONAN_EXPORTED)
-#  set(ARCHIVE_DESTINATION ${CMAKE_INSTALL_LIBDIR})
-#  set(LIBRARY_DESTINATION ${CMAKE_INSTALL_LIBDIR})
-#  set(RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
-#  set(INCLUDES_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-#else()
-#  set(ARCHIVE_DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE})
-#  set(LIBRARY_DESTINATION ${CMAKE_INSTALL_LIBDIR}/${CMAKE_BUILD_TYPE})
-#  set(RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR}/${CMAKE_BUILD_TYPE})
-#  set(INCLUDES_DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-#endif()
-
-
-#install (TARGETS vfs_api
-#        EXPORT vfs-targets
-#        ARCHIVE DESTINATION ${ARCHIVE_DESTINATION}
-#        LIBRARY DESTINATION ${LIBRARY_DESTINATION}
-#        RUNTIME DESTINATION ${RUNTIME_DESTINATION}
-#        INCLUDES DESTINATION ${INCLUDES_DESTINATION}
-#        )
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/vfs
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -135,38 +113,3 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/include/vfs
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         )
       
-#set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/vfs)
-
-#install(EXPORT vfs-targets
-#    FILE vfs-targets.cmake
-#    NAMESPACE vfs::
-#    DESTINATION ${INSTALL_CONFIGDIR})
-
-  
-#include(CMakePackageConfigHelpers)
-
-#write_basic_package_version_file(
-#    ${CMAKE_BINARY_DIR}/cmake/vfs-config-version.cmake
-#    VERSION ${VERSION}
-#    COMPATIBILITY AnyNewerVersion
-#)
-
-#configure_package_config_file(
-#    ${CMAKE_SOURCE_DIR}/cmake/vfs-config.cmake.in
-#    ${CMAKE_BINARY_DIR}/cmake/vfs-config.cmake
-#    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-#)
-
-#install(
-#    FILES
-#        ${CMAKE_BINARY_DIR}/cmake/vfs-config.cmake
-#        ${CMAKE_BINARY_DIR}/cmake/vfs-config-version.cmake
-#    DESTINATION ${INSTALL_CONFIGDIR}
-#)
-
-#export(EXPORT vfs-targets
-#    FILE ${CMAKE_BINARY_DIR}/cmake/vfs-targets.cmake
-#    NAMESPACE vfs::
-#    )
-  
-#export(PACKAGE vfs)

@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.11)
 project(PackageTest CXX)
 
-#include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-#conan_basic_setup(TARGETS)
-
 find_package(vfs REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example PRIVATE vfs::vfs)
+target_compile_features(example PUBLIC cxx_std_17)
+target_link_libraries(example PRIVATE vfs::vfs_api)
