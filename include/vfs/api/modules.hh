@@ -38,7 +38,7 @@ namespace vfs
 		std::unique_ptr<impl> _impl;
 
 	public:
-		class data
+		class VFS_API data
 		{
 			friend class detail::iterator<data, wrapper>;
 		private:
