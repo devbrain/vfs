@@ -13,7 +13,7 @@ include("onyx")
 
 onyx_setup_conan(
   REQUIRES
-  bsw/0.0.1@devbrain/stable
+  bsw/0.0.1-1@devbrain/stable
   doctest/2.3.4@bincrafters/stable
   OPTIONS
   bsw:shared=True
