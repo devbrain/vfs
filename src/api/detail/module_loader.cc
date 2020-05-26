@@ -13,6 +13,8 @@ namespace
 		void* dll = dlopen(str.c_str(), RTLD_LAZY);
 		if (!dll)
 		{
+		    const char* error_msg = dlerror();
+
 			return nullptr;
 		}
 
