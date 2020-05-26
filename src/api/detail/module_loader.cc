@@ -5,14 +5,12 @@
 #include "module_loader.hh"
 #include <bsw/dlfcn.hh>
 
-
-
-
 namespace
 {
 	void* probe_module(const stdfs::path& pth)
 	{
-		void* dll = dlopen(pth.c_str(), RTLD_LAZY);
+	    std::string str = pth.string();
+		void* dll = dlopen(str.c_str(), RTLD_LAZY);
 		if (!dll)
 		{
 			return nullptr;
@@ -33,6 +31,7 @@ namespace vfs::core
 
 	std::unique_ptr<shared_module> shared_module::load(const stdfs::path& pth)
 	{
+
 		void* dll = probe_module(pth);
 		if (!dll)
 		{

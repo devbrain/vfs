@@ -26,10 +26,13 @@ namespace vfs
 	{
 		std::string name = _pimpl->di->next();
 		core::stats st;
-		_pimpl->node->stat(st);
-
-
-		return std::make_tuple(name, convert(st));
+		auto child = _pimpl->node->lookup(name);
+		if (child)
+        {
+            child->stat(st);
+            return std::make_tuple(name, convert(st));
+        }
+		throw std::runtime_error(name + " was removed during iteration");
 	}
 	// -----------------------------------------------------------------------------------------
 	bool directory::has_next() const
