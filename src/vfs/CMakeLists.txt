@@ -3,9 +3,10 @@ include(GenerateExportHeader)
 # SOURCES ------------------------------------------------------------------------
 set (src
         ${PROJECT_INCLUDE}/vfs/api/vfs_api.h
-        ${PROJECT_INCLUDE}/vfs/api/vfs_cpp_api.hh
         ${PROJECT_INCLUDE}/vfs/vfs.hh
         vfs.cc
+        error_module.cc
+        error_module.hh
         modules_registry.cc
         modules_registry.hh
         )

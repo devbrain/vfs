@@ -56,6 +56,9 @@ namespace vfs {
    * @return number of modules
    */
   VFS_EXPORT std::size_t enumerate_registered_modules(const std::function<void(const module_meta_data&)>& iterator);
+
+  [[nodiscard]] VFS_EXPORT int get_last_error();
+  [[nodiscard]] VFS_EXPORT std::string error_code_to_string(int error_code);
 }
 
 #endif //INCLUDE_VFS_VFS_HH

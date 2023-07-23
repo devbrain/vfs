@@ -10,6 +10,7 @@
 #include <vfs/vfs.hh>
 
 namespace vfs {
+  class error_module;
 
   struct module_info : public module_meta_data {
     module_info()
@@ -19,6 +20,7 @@ namespace vfs {
 
     void* dll;
     vfs_api_module* fs_module;
+    error_module* error_handler;
   };
 
   class modules_registry {

@@ -4,6 +4,8 @@ set(src
 )
 
 add_library(physfs STATIC ${src})
+target_compile_definitions(physfs PRIVATE BUILD_VFS_MODULE_AS_STATIC)
+target_link_libraries(physfs PUBLIC vfs_api)
 
 target_include_directories(physfs
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

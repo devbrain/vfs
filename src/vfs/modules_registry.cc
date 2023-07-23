@@ -6,6 +6,7 @@
 #include <bsw/macros.hh>
 #include <bsw/exception.hh>
 
+#include "error_module.hh"
 #include "modules_registry.hh"
 
 
@@ -37,6 +38,7 @@ namespace vfs {
     for (const auto& [_, module_data] : m_module_map) {
       if (module_data.fs_module && module_data.fs_module->destroy) {
         module_data.fs_module->destroy(module_data.fs_module);
+        delete module_data.error_handler;
       }
       if (module_data.dll) {
         dlclose (module_data.dll);
@@ -66,13 +68,15 @@ namespace vfs {
       RAISE_EX("Can not find symbol ", STRINGIZE(VFS_MODULE_FACTORY_NAME), " in ", so_path);
     }
     auto fs_module = factory();
-    std::string name = fs_module->get_name();
+    std::string name = fs_module->get_name(fs_module);
     if (m_module_map.find (name) != m_module_map.end()) {
       fs_module->destroy(fs_module);
       return false;
     }
     module_info mi;
     mi.fs_module = fs_module;
+    mi.error_handler = new error_module(name);
+    mi.fs_module->init_error_module(fs_module, mi.error_handler);
     mi.name = name;
     mi.dll = guard.release();
     mi.so_path = path_to_dll;
@@ -82,13 +86,15 @@ namespace vfs {
 
   bool modules_registry::insert (module_factory_method_t factory) {
     auto fs_module = factory();
-    std::string name = fs_module->get_name();
+    std::string name = fs_module->get_name(fs_module);
     if (m_module_map.find (name) != m_module_map.end()) {
       fs_module->destroy(fs_module);
       return false;
     }
     module_info mi;
     mi.fs_module = fs_module;
+    mi.error_handler = new error_module(name);
+    mi.fs_module->init_error_module(fs_module, mi.error_handler);
     mi.name = name;
     m_module_map.insert (std::make_pair(name, mi));
     return true;
