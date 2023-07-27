@@ -8,6 +8,7 @@
 
 #include "error_module.hh"
 #include "modules_registry.hh"
+#include "sanity_check.hh"
 
 
 namespace {
@@ -68,16 +69,15 @@ namespace vfs {
       RAISE_EX("Can not find symbol ", STRINGIZE(VFS_MODULE_FACTORY_NAME), " in ", so_path);
     }
     auto fs_module = factory();
+    sanity_check::test (fs_module);
+
     std::string name = fs_module->get_name(fs_module);
     if (m_module_map.find (name) != m_module_map.end()) {
       fs_module->destroy(fs_module);
       return false;
     }
     module_info mi;
-    mi.fs_module = fs_module;
-    mi.error_handler = new error_module(name);
-    mi.fs_module->init_error_module(fs_module, mi.error_handler);
-    mi.name = name;
+    _setup_module (mi, fs_module);
     mi.dll = guard.release();
     mi.so_path = path_to_dll;
     m_module_map.insert (std::make_pair(name, mi));
@@ -86,16 +86,14 @@ namespace vfs {
 
   bool modules_registry::insert (module_factory_method_t factory) {
     auto fs_module = factory();
+    sanity_check::test (fs_module);
     std::string name = fs_module->get_name(fs_module);
     if (m_module_map.find (name) != m_module_map.end()) {
       fs_module->destroy(fs_module);
       return false;
     }
     module_info mi;
-    mi.fs_module = fs_module;
-    mi.error_handler = new error_module(name);
-    mi.fs_module->init_error_module(fs_module, mi.error_handler);
-    mi.name = name;
+    _setup_module (mi, fs_module);
     m_module_map.insert (std::make_pair(name, mi));
     return true;
   }
@@ -105,5 +103,18 @@ namespace vfs {
       iterator(module_data);
     }
     return m_module_map.size();
+  }
+
+  void modules_registry::set_logger (vfs_logger_module* logger) {
+    m_logger = logger;
+  }
+
+  void modules_registry::_setup_module (module_info& mi, vfs_api_module* fs_module) {
+    std::string name = fs_module->get_name(fs_module);
+    mi.fs_module = fs_module;
+    mi.error_handler = new error_module(name);
+    mi.fs_module->init_logger_module(fs_module, m_logger);
+    mi.fs_module->init_error_module(fs_module, mi.error_handler);
+    mi.name = name;
   }
 } // vfs

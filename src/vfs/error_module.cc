@@ -58,7 +58,7 @@ namespace vfs {
 
     auto fs_module = registry->get (global_error.module_hash);
     if (fs_module) {
-      return fs_module->error_to_string(error_code);
+      return fs_module->error_to_string(fs_module, error_code);
     }
     return "No module specific error conversion found";
   }

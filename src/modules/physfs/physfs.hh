@@ -5,7 +5,7 @@
 #ifndef SRC_MODULES_PHYSFS_PHYSFS_HH
 #define SRC_MODULES_PHYSFS_PHYSFS_HH
 
-#include <vfs/api/vfs_api.h>
+#include <vfs/api/vfs_cxx_api.hh>
 
 vfs_api_module* create_physfs();
 

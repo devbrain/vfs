@@ -30,6 +30,11 @@ namespace vfs::api {
       m_error_module->clear_error(m_error_module);
     }
   }
+
+  void fs_module::set_logger_module(vfs_logger_module* logger_module) {
+    m_logger = logger_module;
+  }
+
   // ========================================================================
   filesystem::filesystem(fs_module* owner)
   : m_owner(owner) {

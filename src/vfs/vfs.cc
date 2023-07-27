@@ -10,10 +10,13 @@
 
 #include "modules_registry.hh"
 #include "error_module.hh"
+#include "default_logger.hh"
+#include "sanity_check.hh"
 
 namespace vfs {
   struct context {
     modules_registry m_modules_registry;
+    default_logger m_logger;
   };
 
   static context* vfs_ctx = nullptr;
@@ -21,6 +24,7 @@ namespace vfs {
   void init() {
     if (!vfs_ctx) {
       vfs_ctx = new context;
+      sanity_check::test (&vfs_ctx->m_logger);
       ENFORCE(vfs_ctx->m_modules_registry.insert (create_physfs));
       ENFORCE(vfs_ctx->m_modules_registry.insert (create_zipfs));
     }
@@ -44,14 +48,14 @@ namespace vfs {
     ENFORCE(vfs_ctx);
     return vfs_ctx->m_modules_registry.enumerate (iterator);
   }
-
+  // ----------------------------------------------------------
   int get_last_error () {
     return error_module::get_last_error();
   }
-
+  // ----------------------------------------------------------
   std::string error_code_to_string (int error_code) {
     ENFORCE(vfs_ctx);
     return error_module::to_string (&vfs_ctx->m_modules_registry, error_code);
   }
-
+  // ----------------------------------------------------------
 }

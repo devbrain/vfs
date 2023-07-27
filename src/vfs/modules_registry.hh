@@ -31,12 +31,17 @@ namespace vfs {
       modules_registry(const modules_registry&) = delete;
       modules_registry& operator = (const modules_registry&) = delete;
 
+      void set_logger(vfs_logger_module* logger);
+
       [[nodiscard]] vfs_api_module* get(const std::string& module_name) const;
       [[nodiscard]] bool insert(const std::filesystem::path& path_to_dll);
       [[nodiscard]] bool insert(module_factory_method_t factory);
       [[nodiscard]] std::size_t enumerate(const std::function<void(const module_meta_data&)>& iterator) const;
     private:
+      void _setup_module(module_info& mi, vfs_api_module* fs_module);
+    private:
       std::map<std::string, module_info> m_module_map;
+      vfs_logger_module* m_logger;
   };
 
 } // vfs

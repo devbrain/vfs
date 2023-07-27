@@ -9,6 +9,10 @@ set (src
         error_module.hh
         modules_registry.cc
         modules_registry.hh
+        sanity_check.cc
+        sanity_check.hh
+        default_logger.cc
+        default_logger.hh
         )
 # --------------------------------------------------------------------------------
 # LIBRARY

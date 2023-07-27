@@ -32,6 +32,19 @@ struct vfs_error_module {
   void (*clear_error)(struct vfs_error_module* self);
 };
 
+struct vfs_logger_module {
+  void* opaque;
+  void (*debug)(struct vfs_logger_module* self, const char* module_name, const char* source_file, int line, const char* string);
+  int (*is_debug_enabled)(struct vfs_logger_module* self);
+  void (*info)(struct vfs_logger_module* self, const char* module_name, const char* source_file, int line, const char* string);
+  int (*is_info_enabled)(struct vfs_logger_module* self);
+  void (*warn)(struct vfs_logger_module* self, const char* module_name, const char* source_file, int line, const char* string);
+  int (*is_warn_enabled)(struct vfs_logger_module* self);
+  void (*error)(struct vfs_logger_module* self, const char* module_name, const char* source_file, int line, const char* string);
+  int (*is_error_enabled)(struct vfs_logger_module* self);
+
+};
+
 struct vfs_api_filesystem;
 struct vfs_api_dentry;
 
@@ -55,12 +68,13 @@ struct vfs_api_module {
   void (*destroy)(struct vfs_api_module* self);
 
   void (*init_error_module)(struct vfs_api_module* self, struct vfs_error_module* error_module);
+  void (*init_logger_module)(struct vfs_api_module* self, struct vfs_logger_module* error_module);
   /**
    * converts module specific errors to strings
    * @param error_code > VFS_ERROR_USER
    * @return non disposable string
    */
-  const char* (*error_to_string) (int error_code);
+  const char* (*error_to_string) (struct vfs_api_module* self, int error_code);
   /**
    * Filesystem constructor
    */
@@ -76,11 +90,6 @@ struct vfs_api_filesystem {
    * Destructor
    */
   void (*destroy)(struct vfs_api_filesystem* self);
-  /**
-   * Returns human readable last error or NULL. This value should be never freed/deleted
-   * @param self
-   */
-  const char* (*get_last_error)(void* self);
 
   struct vfs_api_dentry* get_root(void* self);
 };

@@ -5,7 +5,8 @@
 #ifndef SRC_MODULES_ZIPFS_ZIPFS_HH
 #define SRC_MODULES_ZIPFS_ZIPFS_HH
 
-#include <vfs/api/vfs_api.h>
+
+#include <vfs/api/vfs_cxx_api.hh>
 
 vfs_api_module* create_zipfs();
 
