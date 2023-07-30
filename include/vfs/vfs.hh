@@ -47,6 +47,7 @@ namespace vfs {
 
   struct module_meta_data {
     std::string name;
+    std::string help;
     std::optional<std::filesystem::path> so_path; // this field is set if the module was loaded from SO
   };
 
@@ -59,6 +60,8 @@ namespace vfs {
 
   [[nodiscard]] VFS_EXPORT int get_last_error();
   [[nodiscard]] VFS_EXPORT std::string error_code_to_string(int error_code);
+
+  VFS_EXPORT void mount(const std::string& path, const std::string& module_name, const std::string& parameters);
 }
 
 #endif //INCLUDE_VFS_VFS_HH

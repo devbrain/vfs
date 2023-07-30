@@ -51,6 +51,10 @@ namespace vfs {
       switch (error_code) {
         case VFS_ERROR_NO_ENTRY:
           return "Not found";
+        case VFS_ERROR_DIRECTORY_EXPECTED:
+          return "Directory is expected";
+        case VFS_FILE_EXPECTED:
+          return "File is expected";
         default:
           ENFORCE(false)
       }

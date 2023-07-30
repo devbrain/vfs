@@ -116,5 +116,6 @@ namespace vfs {
     mi.fs_module->init_logger_module(fs_module, m_logger);
     mi.fs_module->init_error_module(fs_module, mi.error_handler);
     mi.name = name;
+    mi.help = mi.fs_module->describe_parameters(mi.fs_module);
   }
 } // vfs

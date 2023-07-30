@@ -16,8 +16,10 @@ int main(int args, char* argv[]) {
       if (md.so_path) {
         std::cout << " @ " << md.so_path->u8string();
       }
+      std::cout << " ARGS: " << md.help;
       std::cout << std::endl;
     });
+    vfs::mount ("/", "physfs", "/tmp --read-only");
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }

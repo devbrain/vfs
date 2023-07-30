@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <memory>
 #include <chrono>
+#include <utility>
 #include <optional>
 
 #include <vfs/api/vfs_api.h>
@@ -241,10 +242,10 @@ namespace vfs::api {
       }
   };
 
-#define LOG_DEBUG(...) this->log_debug(__FILE__, __LINE__, ##__VA_ARGS__)
-#define LOG_INFO(...)  this->log_info(__FILE__, __LINE__, ##__VA_ARGS__)
-#define LOG_WARN(...)  this->log_warn(__FILE__, __LINE__, ##__VA_ARGS__)
-#define LOG_ERROR(...) this->log_error(__FILE__, __LINE__, ##__VA_ARGS__)
+#define VFS_LOG_DEBUG(...) this->log_debug(__FILE__, __LINE__, ##__VA_ARGS__)
+#define VFS_LOG_INFO(...)  this->log_info(__FILE__, __LINE__, ##__VA_ARGS__)
+#define VFS_LOG_WARN(...)  this->log_warn(__FILE__, __LINE__, ##__VA_ARGS__)
+#define VFS_LOG_ERROR(...) this->log_error(__FILE__, __LINE__, ##__VA_ARGS__)
   // ====================================================================================
   // Implementation
   // ====================================================================================
@@ -272,8 +273,8 @@ namespace vfs::api {
 #define d_DECLARE_LOGGER_CALL(CLASS, MEMBER, METHOD)                              \
   template <typename ... Args>                                                    \
   inline                                                                          \
-  void CLASS::METHOD(const char* src_file, int line, Args...args) {               \
-    MEMBER->METHOD (src_file, line, std::forward<Args...>(args...));              \
+  void CLASS::METHOD(const char* src_file, int line, Args... args) {              \
+    MEMBER->METHOD (src_file, line, std::forward<Args>(args)...);                 \
   }
 
   d_DECLARE_LOGGER_CALL(filesystem, m_owner, log_debug)
@@ -292,6 +293,27 @@ namespace vfs::api {
   d_DECLARE_LOGGER_CALL(file_object, m_metadata, log_error)
 
 #undef d_DECLARE_LOGGER_CALL
+  // ===============================================================================
+  namespace cmd_opts {
+    class cmd_line {
+      public:
+        cmd_line();
+        ~cmd_line();
+
+        cmd_line& add_switch(const std::string& short_name, const std::string& long_name);
+        cmd_line& add_parameter(const std::string& short_name, const std::string& long_name);
+        cmd_line& add_positional(const std::string& short_name);
+
+        void parse(const std::string& args);
+
+        [[nodiscard]] std::optional<std::string> get(const std::string& short_name) const;
+
+        [[nodiscard]] const std::string& describe() const;
+      private:
+        struct impl;
+        std::unique_ptr<impl> m_pimpl;
+    };
+  }
   // ===============================================================================
   namespace detail {
 
@@ -338,6 +360,9 @@ namespace vfs::api {
 
         static struct vfs_api_filesystem* _create_fs(struct vfs_api_module* self, const char* params) {
           auto fs_ptr = reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->create_filesystem (params);
+          if (!fs_ptr) {
+            return nullptr;
+          }
           return new filesystem_bridge(std::move(fs_ptr));
         }
 

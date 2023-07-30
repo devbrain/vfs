@@ -13,6 +13,9 @@ set (src
         sanity_check.hh
         default_logger.cc
         default_logger.hh
+        path.hh
+        fs_tree.cc
+        fs_tree.hh
         )
 # --------------------------------------------------------------------------------
 # LIBRARY

@@ -36,3 +36,9 @@ void vfs::sanity_check::test(const vfs_logger_module* obj) {
   ASSERT_LOGGER_MODULE(is_error_enabled);
 #undef ASSERT_LOGGER_MODULE
 }
+
+void vfs::sanity_check::test(const vfs_api_filesystem* obj) {
+#define ASSERT_VFS_FILESYSTEM(METHOD) ASSERT_METHOD(vfs_api_filesystem, obj, METHOD)
+  ASSERT_VFS_FILESYSTEM(destroy);
+#undef ASSERT_VFS_FILESYSTEM
+}
