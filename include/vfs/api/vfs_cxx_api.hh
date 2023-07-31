@@ -173,8 +173,13 @@ namespace vfs::api {
     private:
       fs_module* m_owner;
   };
-
+  namespace detail {
+    struct fs_module_bridge;
+    struct filesystem_bridge;
+  }
   class fs_module {
+      friend struct detail::fs_module_bridge;
+      friend struct detail::filesystem_bridge;
     public:
       explicit fs_module(const char* name);
       virtual ~fs_module() = default;
@@ -208,6 +213,7 @@ namespace vfs::api {
       std::string m_name;
       vfs_error_module* m_error_module;
       vfs_logger_module* m_logger;
+      vfs_api_module* m_module;
   };
 
   class logger : public vfs_logger_module {
@@ -279,6 +285,85 @@ namespace vfs::api {
 #define VFS_LOG_INFO(...)  this->log_info(__FILE__, __LINE__, ##__VA_ARGS__)
 #define VFS_LOG_WARN(...)  this->log_warn(__FILE__, __LINE__, ##__VA_ARGS__)
 #define VFS_LOG_ERROR(...) this->log_error(__FILE__, __LINE__, ##__VA_ARGS__)
+
+
+
+  // ===============================================================================
+  namespace cmd_opts {
+    class cmd_line {
+      public:
+        cmd_line();
+        ~cmd_line();
+
+        cmd_line& add_switch(const std::string& short_name, const std::string& long_name);
+        cmd_line& add_parameter(const std::string& short_name, const std::string& long_name);
+        cmd_line& add_positional(const std::string& short_name);
+
+        void parse(const std::string& args);
+
+        [[nodiscard]] std::optional<std::string> get(const std::string& short_name) const;
+
+        [[nodiscard]] const std::string& describe() const;
+      private:
+        struct impl;
+        std::unique_ptr<impl> m_pimpl;
+    };
+  }
+  // ===============================================================================
+  namespace detail {
+
+    struct metadata_bridge : public vfs_api_dentry {
+      public:
+        explicit metadata_bridge(std::unique_ptr<file_object_metadata> impl);
+        explicit metadata_bridge(file_object_metadata* impl);
+        ~metadata_bridge();
+      private:
+        void _setup (const file_object_metadata* impl);
+      private:
+        static vfs_api_dentry_type _get_type(struct vfs_api_dentry* self);
+
+        static time_t _get_ctime(struct vfs_api_dentry* self);
+        static time_t _get_mtime(struct vfs_api_dentry* self);
+
+        static uint64_t _get_size(struct vfs_api_dentry* self);
+
+        static const char* _get_target(struct vfs_api_dentry* self);
+
+        static void _iterate(struct vfs_api_dentry* self, void* context, vfs_api_directory_iterator_t iterator);
+
+        static vfs_api_dentry* _load_dentry(struct vfs_api_dentry* self, const char* name);
+        static void _destroy(vfs_api_dentry* self);
+      private:
+        std::unique_ptr<file_object_metadata> m_impl;
+        bool m_is_owner;
+    };
+
+    struct filesystem_bridge : public vfs_api_filesystem {
+      explicit filesystem_bridge(std::unique_ptr<filesystem> impl);
+      private:
+        static void _destroy(vfs_api_filesystem* self);
+        static vfs_api_dentry* _get_root(struct vfs_api_filesystem* self);
+        static vfs_api_module* _get_module(struct vfs_api_filesystem* self);
+      private:
+        std::unique_ptr<filesystem> m_impl;
+    };
+
+    struct fs_module_bridge : vfs_api_module {
+      explicit fs_module_bridge(std::unique_ptr<fs_module> impl);
+      private:
+        static const char* _describe_parameters(struct vfs_api_module* self);
+        static const char* _get_name(struct vfs_api_module* self);
+        static void _destructor(struct vfs_api_module* self);
+        static struct vfs_api_filesystem* _create_fs(struct vfs_api_module* self, const char* params);
+        static void _init_error_module(struct vfs_api_module* self, struct vfs_error_module* error_module);
+        static void _init_logger_module(struct vfs_api_module* self, struct vfs_logger_module* logger_module);
+        static const char* _error_to_string (struct vfs_api_module* self, int error_code);
+        static vfs_error_module* _get_error_module(struct vfs_api_module* self);
+      private:
+        std::unique_ptr<fs_module> m_pimpl;
+    };
+  } // ns detail
+
   // ====================================================================================
   // Implementation
   // ====================================================================================
@@ -326,196 +411,6 @@ namespace vfs::api {
   d_DECLARE_LOGGER_CALL(file_object, m_metadata, log_error)
 
 #undef d_DECLARE_LOGGER_CALL
-  // ===============================================================================
-  namespace cmd_opts {
-    class cmd_line {
-      public:
-        cmd_line();
-        ~cmd_line();
-
-        cmd_line& add_switch(const std::string& short_name, const std::string& long_name);
-        cmd_line& add_parameter(const std::string& short_name, const std::string& long_name);
-        cmd_line& add_positional(const std::string& short_name);
-
-        void parse(const std::string& args);
-
-        [[nodiscard]] std::optional<std::string> get(const std::string& short_name) const;
-
-        [[nodiscard]] const std::string& describe() const;
-      private:
-        struct impl;
-        std::unique_ptr<impl> m_pimpl;
-    };
-  }
-  // ===============================================================================
-  namespace detail {
-
-    struct metadata_bridge : public vfs_api_dentry {
-      public:
-        explicit metadata_bridge(std::unique_ptr<file_object_metadata> impl)
-        : m_impl(std::move(impl)), m_is_owner(true) {
-          _setup(m_impl.get());
-        }
-
-        explicit metadata_bridge(file_object_metadata* impl)
-            : m_impl(impl), m_is_owner(false) {
-          _setup(m_impl.get());
-        }
-
-        ~metadata_bridge() {
-          if (!m_is_owner) {
-            (void)m_impl.release();
-          }
-        }
-      private:
-        void _setup (const file_object_metadata* impl) {
-          opaque = this;
-          destroy = _destroy;
-          get_type = _get_type;
-          get_ctime = _get_ctime;
-          get_mtime = _get_mtime;
-          if (dynamic_cast<const directory_metadata*>(impl)) {
-            iterate = _iterate;
-            load_dentry = _load_dentry;
-            get_size = nullptr;
-            get_target = nullptr;
-          } else if (dynamic_cast<const file_metadata*>(impl)) {
-            iterate = nullptr;
-            get_size = _get_size;
-            get_target = nullptr;
-          } else {
-            iterate = nullptr;
-            get_size = nullptr;
-            get_target = _get_target;
-          }
-        }
-      private:
-        static vfs_api_dentry_type _get_type(struct vfs_api_dentry* self) {
-          auto my_type = reinterpret_cast<metadata_bridge*>(self)->m_impl->get_type();
-          switch (my_type) {
-            case file_object_metadata::type_t::DIRECTORY:
-              return VFS_API_DIRECTORY;
-            case file_object_metadata::type_t::FILE:
-              return VFS_API_FILE;
-            case file_object_metadata::type_t::LINK:
-              return VFS_API_LINK;
-          }
-          return VFS_API_LINK; // Should not be here
-        }
-
-        static time_t _get_ctime(struct vfs_api_dentry* self) {
-          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_creation_time();
-        }
-
-        static time_t _get_mtime(struct vfs_api_dentry* self) {
-          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_modification_time();
-        }
-
-        static uint64_t _get_size(struct vfs_api_dentry* self) {
-          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_size();
-        }
-
-        static const char* _get_target(struct vfs_api_dentry* self) {
-          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_target();
-        }
-
-        static void _iterate(struct vfs_api_dentry* self, void* context, vfs_api_directory_iterator_t iterator) {
-          reinterpret_cast<metadata_bridge*>(self)->m_impl->iterate ([context, iterator](const std::string& name, const file_object_metadata& md) {
-            metadata_bridge d(const_cast<file_object_metadata*>(&md));
-            iterator(context, name.c_str(), &d);
-          });
-        }
-
-        static vfs_api_dentry* _load_dentry(struct vfs_api_dentry* self, const char* name) {
-          auto e = reinterpret_cast<metadata_bridge*>(self)->m_impl->load_entry(name);
-          if (e) {
-            return new metadata_bridge(std::move(e));
-          }
-          return nullptr;
-        }
-        static void _destroy(vfs_api_dentry* self) {
-          delete reinterpret_cast<metadata_bridge*>(self);
-        }
-      private:
-        std::unique_ptr<file_object_metadata> m_impl;
-        bool m_is_owner;
-    };
-
-    struct filesystem_bridge : public vfs_api_filesystem {
-      explicit filesystem_bridge(std::unique_ptr<filesystem> impl)
-      : vfs_api_filesystem {},
-        m_impl(std::move(impl)) {
-        destroy = _destroy;
-        get_root = _get_root;
-      }
-      private:
-        static void _destroy(vfs_api_filesystem* self) {
-          delete reinterpret_cast<filesystem_bridge*>(self);
-        }
-
-        static vfs_api_dentry* _get_root(struct vfs_api_filesystem* self) {
-          auto root = reinterpret_cast<filesystem_bridge*>(self)->m_impl->get_root();
-          if (!root) {
-            return nullptr;
-          }
-          return new metadata_bridge(std::move(root));
-        }
-      private:
-        std::unique_ptr<filesystem> m_impl;
-    };
-
-    struct fs_module_bridge : vfs_api_module {
-      explicit fs_module_bridge(std::unique_ptr<fs_module> impl)
-      : vfs_api_module {},
-        m_pimpl(std::move(impl)) {
-        opaque = this;
-        describe_parameters = _describe_parameters;
-        get_name = _get_name;
-        destroy = _destructor;
-        create_filesystem = _create_fs;
-        init_error_module = _init_error_module;
-        error_to_string = _error_to_string;
-        init_logger_module = _init_logger_module;
-      }
-
-      private:
-        static const char* _describe_parameters(struct vfs_api_module* self) {
-          return reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->describe_parameters();
-        }
-
-        static const char* _get_name(struct vfs_api_module* self) {
-          return reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->get_name();
-        }
-
-        static void _destructor(struct vfs_api_module* self) {
-          delete reinterpret_cast<fs_module_bridge*>(self);
-        }
-
-        static struct vfs_api_filesystem* _create_fs(struct vfs_api_module* self, const char* params) {
-          auto fs_ptr = reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->create_filesystem (params);
-          if (!fs_ptr) {
-            return nullptr;
-          }
-          return new filesystem_bridge(std::move(fs_ptr));
-        }
-
-        static void _init_error_module(struct vfs_api_module* self, struct vfs_error_module* error_module) {
-          reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->set_error_module (error_module);
-        }
-
-        static void _init_logger_module(struct vfs_api_module* self, struct vfs_logger_module* logger_module) {
-          reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->set_logger_module (logger_module);
-        }
-
-        static const char* _error_to_string (struct vfs_api_module* self, int error_code) {
-          return reinterpret_cast<fs_module_bridge*>(self)->m_pimpl->error_to_string (error_code);
-        }
-      private:
-        std::unique_ptr<fs_module> m_pimpl;
-    };
-
-
-  } // ns detail
 
   template <typename ModuleProvider>
   vfs_api_module* create_module() {

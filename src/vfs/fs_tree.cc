@@ -48,6 +48,16 @@ namespace vfs {
       m_filesystem->destroy(m_filesystem);
     }
   }
+
+  static void set_error(fs_tree_node* node, int err) {
+    ENFORCE(node);
+    auto* m = node->m_filesystem->get_module(node->m_filesystem);
+    ENFORCE(m);
+    auto* errm = m->get_error_module(m);
+    if (errm) {
+      errm->set_error(errm, err);
+    }
+  }
   // ===================================================================================
   static fs_tree_node* resolve(fs_tree_node* root, const std::vector<std::string>& path_components) {
     fs_tree_node* node = root;
@@ -61,6 +71,7 @@ namespace vfs {
         if (type == VFS_API_DIRECTORY) {
           vfs_api_dentry* de = node->m_dentry->load_dentry(node->m_dentry, name.c_str());
           if (!de) {
+            set_error (node, VFS_ERROR_NO_ENTRY);
             return nullptr;
           }
           auto* new_node = new fs_tree_node(node, de);
@@ -72,9 +83,11 @@ namespace vfs {
           auto link_components = path::normalize (path(target)).split();
           node = resolve(root, link_components);
           if (!node) {
+            set_error (node, VFS_ERROR_NO_ENTRY);
             return nullptr;
           }
         } else {
+          set_error (node, VFS_ERROR_NO_ENTRY);
           return nullptr;
         }
       }

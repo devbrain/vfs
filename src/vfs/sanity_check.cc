@@ -21,6 +21,7 @@ void vfs::sanity_check::test (const vfs_api_module* obj) {
   ASSERT_API_MODULE(get_name);
   ASSERT_API_MODULE(describe_parameters);
   ASSERT_API_MODULE(init_logger_module);
+  ASSERT_API_MODULE(get_error_module);
 #undef ASSERT_API_MODULE
 }
 

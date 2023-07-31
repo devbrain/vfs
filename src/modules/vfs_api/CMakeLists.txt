@@ -1,6 +1,7 @@
 set(src
         ${PROJECT_INCLUDE}/vfs/api/vfs_cxx_api.hh
         vfs_cxx_api.cc
+        vfs_cxx_bridge.cc
         cmd_opts.cc
         argh.h
         )

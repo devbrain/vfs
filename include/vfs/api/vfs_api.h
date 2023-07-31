@@ -79,6 +79,7 @@ struct vfs_api_module {
    * @return non disposable string
    */
   const char* (*error_to_string) (struct vfs_api_module* self, int error_code);
+  struct vfs_error_module* (*get_error_module)(struct vfs_api_module* self);
   /**
    * Filesystem constructor
    */
