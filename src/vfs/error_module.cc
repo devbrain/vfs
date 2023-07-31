@@ -22,19 +22,19 @@ namespace vfs {
 
   error_module::error_module(const std::string& module_hash)
   : vfs_error_module {},
-    m_module_hash(module_hash) {
+    m_module_name(module_hash) {
     opaque = this;
     set_error = _set_error;
     clear_error = _clear_error;
   }
 
   void error_module::_set_error(struct vfs_error_module* self, int error_code) {
-    global_error.module_hash = reinterpret_cast<error_module*>(self)->m_module_hash;
+    global_error.module_hash = reinterpret_cast<error_module*>(self)->m_module_name;
     global_error.error_code = error_code;
   }
 
   void error_module::_clear_error(struct vfs_error_module* self) {
-    global_error.module_hash = reinterpret_cast<error_module*>(self)->m_module_hash;
+    global_error.module_hash = reinterpret_cast<error_module*>(self)->m_module_name;
     global_error.error_code = VFS_ERROR_OK;
   }
 
@@ -55,6 +55,8 @@ namespace vfs {
           return "Directory is expected";
         case VFS_FILE_EXPECTED:
           return "File is expected";
+        case VFS_RECURSION_TOO_DEEP:
+          return "Recursion is too deep";
         default:
           ENFORCE(false)
       }

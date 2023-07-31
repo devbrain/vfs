@@ -22,7 +22,7 @@ namespace vfs {
       static void _set_error(struct vfs_error_module* self, int error_code);
       static void _clear_error(struct vfs_error_module* self);
     private:
-      std::string m_module_hash;
+      std::string m_module_name;
   };
 }
 

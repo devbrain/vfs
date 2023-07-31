@@ -59,7 +59,7 @@ namespace vfs {
     }
   }
   // ===================================================================================
-  static fs_tree_node* resolve(fs_tree_node* root, const std::vector<std::string>& path_components) {
+  static fs_tree_node* resolve(fs_tree_node* root, const std::vector<std::string>& path_components, int count) {
     fs_tree_node* node = root;
     for (const auto& name : path_components) {
       auto itr = node->m_children.find (name);
@@ -81,7 +81,11 @@ namespace vfs {
           const char* target = node->m_dentry->get_target(node->m_dentry);
           ENFORCE(target);
           auto link_components = path::normalize (path(target)).split();
-          node = resolve(root, link_components);
+          if (count >= 16) {
+            set_error (node, VFS_RECURSION_TOO_DEEP);
+            return nullptr;
+          }
+          node = resolve(root, link_components, count+1);
           if (!node) {
             set_error (node, VFS_ERROR_NO_ENTRY);
             return nullptr;
@@ -111,7 +115,7 @@ namespace vfs {
       return nullptr;
     }
     auto components = path::normalize (pth).split();
-    fs_tree_node* node = vfs::resolve(m_root.get(), components);
+    fs_tree_node* node = vfs::resolve(m_root.get(), components, 0);
     if (node) {
       ENFORCE(node->m_dentry);
       return node->m_dentry;
