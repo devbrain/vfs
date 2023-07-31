@@ -10,9 +10,9 @@
 #include <cstdint>
 #include <cstddef>
 #include <memory>
-#include <chrono>
 #include <utility>
 #include <optional>
+#include <functional>
 
 #include <vfs/api/vfs_api.h>
 
@@ -25,7 +25,7 @@ namespace vfs::api {
 
   class file_object_metadata {
     public:
-      using time_stamp_t = std::chrono::time_point<std::chrono::system_clock>;
+      using time_stamp_t = time_t;
       enum class type_t {
           DIRECTORY,
           FILE,
@@ -35,11 +35,13 @@ namespace vfs::api {
       explicit file_object_metadata(filesystem* owner);
       virtual ~file_object_metadata() = default;
 
-      virtual type_t get_type() const = 0;
-      virtual uint64_t get_size() const = 0;
-      virtual time_stamp_t get_creation_time() const = 0;
-      virtual time_stamp_t get_modification_time() const = 0;
-
+      [[nodiscard]] virtual type_t get_type() const = 0;
+      [[nodiscard]] virtual uint64_t get_size() const = 0;
+      [[nodiscard]] virtual time_stamp_t get_creation_time() const = 0;
+      [[nodiscard]] virtual time_stamp_t get_modification_time() const = 0;
+      [[nodiscard]] virtual const char* get_target() = 0;
+      virtual void iterate(std::function<void(const std::string& name, const file_object_metadata& md)> itr) = 0;
+      [[nodiscard]] virtual std::unique_ptr<file_object_metadata> load_entry(const std::string& name) = 0;
       virtual std::unique_ptr<file_object> open() = 0;
 
       [[nodiscard]] const filesystem* get_filesystem() const;
@@ -63,6 +65,35 @@ namespace vfs::api {
       filesystem* m_owner;
   };
 
+  class directory_metadata : public file_object_metadata {
+    public:
+      explicit directory_metadata(filesystem* owner);
+      [[nodiscard]] type_t get_type() const override;
+      [[nodiscard]] uint64_t get_size() const override;
+      const char* get_target() override;
+      std::unique_ptr<file_object> open() override;
+  };
+
+  class file_metadata : public file_object_metadata {
+    public:
+      explicit file_metadata(filesystem* owner);
+      [[nodiscard]] type_t get_type() const override;
+      const char* get_target() override;
+      void iterate(std::function<void(const std::string& name, const file_object_metadata& md)> itr) override;
+      [[nodiscard]] std::unique_ptr<file_object_metadata> load_entry(const std::string& name) override;
+  };
+
+  class link_metadata : public file_object_metadata {
+    public:
+      explicit link_metadata (filesystem* owner);
+
+      [[nodiscard]] type_t get_type () const override;
+      [[nodiscard]] uint64_t get_size () const override;
+      void iterate (std::function<void (const std::string& name, const file_object_metadata& md)> itr) override;
+      std::unique_ptr<file_object> open () override;
+      [[nodiscard]] std::unique_ptr<file_object_metadata> load_entry(const std::string& name) override;
+  };
+  // =====================================================================================
   class file_object {
     public:
       explicit file_object(file_object_metadata* metadata);
@@ -137,6 +168,8 @@ namespace vfs::api {
 
       template <typename ... Args>
       void log_error(const char* src_file, int line, Args...args);
+
+      fs_module* get_module();
     private:
       fs_module* m_owner;
   };
@@ -317,15 +350,115 @@ namespace vfs::api {
   // ===============================================================================
   namespace detail {
 
-    struct filesystem_bridge : vfs_api_filesystem {
+    struct metadata_bridge : public vfs_api_dentry {
+      public:
+        explicit metadata_bridge(std::unique_ptr<file_object_metadata> impl)
+        : m_impl(std::move(impl)), m_is_owner(true) {
+          _setup(m_impl.get());
+        }
+
+        explicit metadata_bridge(file_object_metadata* impl)
+            : m_impl(impl), m_is_owner(false) {
+          _setup(m_impl.get());
+        }
+
+        ~metadata_bridge() {
+          if (!m_is_owner) {
+            (void)m_impl.release();
+          }
+        }
+      private:
+        void _setup (const file_object_metadata* impl) {
+          opaque = this;
+          destroy = _destroy;
+          get_type = _get_type;
+          get_ctime = _get_ctime;
+          get_mtime = _get_mtime;
+          if (dynamic_cast<const directory_metadata*>(impl)) {
+            iterate = _iterate;
+            load_dentry = _load_dentry;
+            get_size = nullptr;
+            get_target = nullptr;
+          } else if (dynamic_cast<const file_metadata*>(impl)) {
+            iterate = nullptr;
+            get_size = _get_size;
+            get_target = nullptr;
+          } else {
+            iterate = nullptr;
+            get_size = nullptr;
+            get_target = _get_target;
+          }
+        }
+      private:
+        static vfs_api_dentry_type _get_type(struct vfs_api_dentry* self) {
+          auto my_type = reinterpret_cast<metadata_bridge*>(self)->m_impl->get_type();
+          switch (my_type) {
+            case file_object_metadata::type_t::DIRECTORY:
+              return VFS_API_DIRECTORY;
+            case file_object_metadata::type_t::FILE:
+              return VFS_API_FILE;
+            case file_object_metadata::type_t::LINK:
+              return VFS_API_LINK;
+          }
+          return VFS_API_LINK; // Should not be here
+        }
+
+        static time_t _get_ctime(struct vfs_api_dentry* self) {
+          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_creation_time();
+        }
+
+        static time_t _get_mtime(struct vfs_api_dentry* self) {
+          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_modification_time();
+        }
+
+        static uint64_t _get_size(struct vfs_api_dentry* self) {
+          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_size();
+        }
+
+        static const char* _get_target(struct vfs_api_dentry* self) {
+          return reinterpret_cast<metadata_bridge*>(self)->m_impl->get_target();
+        }
+
+        static void _iterate(struct vfs_api_dentry* self, void* context, vfs_api_directory_iterator_t iterator) {
+          reinterpret_cast<metadata_bridge*>(self)->m_impl->iterate ([context, iterator](const std::string& name, const file_object_metadata& md) {
+            metadata_bridge d(const_cast<file_object_metadata*>(&md));
+            iterator(context, name.c_str(), &d);
+          });
+        }
+
+        static vfs_api_dentry* _load_dentry(struct vfs_api_dentry* self, const char* name) {
+          auto e = reinterpret_cast<metadata_bridge*>(self)->m_impl->load_entry(name);
+          if (e) {
+            return new metadata_bridge(std::move(e));
+          }
+          return nullptr;
+        }
+        static void _destroy(vfs_api_dentry* self) {
+          delete reinterpret_cast<metadata_bridge*>(self);
+        }
+      private:
+        std::unique_ptr<file_object_metadata> m_impl;
+        bool m_is_owner;
+    };
+
+    struct filesystem_bridge : public vfs_api_filesystem {
       explicit filesystem_bridge(std::unique_ptr<filesystem> impl)
       : vfs_api_filesystem {},
         m_impl(std::move(impl)) {
         destroy = _destroy;
+        get_root = _get_root;
       }
       private:
         static void _destroy(vfs_api_filesystem* self) {
           delete reinterpret_cast<filesystem_bridge*>(self);
+        }
+
+        static vfs_api_dentry* _get_root(struct vfs_api_filesystem* self) {
+          auto root = reinterpret_cast<filesystem_bridge*>(self)->m_impl->get_root();
+          if (!root) {
+            return nullptr;
+          }
+          return new metadata_bridge(std::move(root));
         }
       private:
         std::unique_ptr<filesystem> m_impl;
@@ -380,6 +513,8 @@ namespace vfs::api {
       private:
         std::unique_ptr<fs_module> m_pimpl;
     };
+
+
   } // ns detail
 
   template <typename ModuleProvider>

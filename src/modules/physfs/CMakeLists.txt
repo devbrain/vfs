@@ -13,9 +13,9 @@ target_include_directories(physfs
             "$<BUILD_INTERFACE:${PROJECT_INCLUDE}>"
             "$<BUILD_INTERFACE:${PROJECT_CONFIG_INCLUDE}>")
 
-if (DEFINED vfs_SHARED_LIBS)
+#if (DEFINED vfs_SHARED_LIBS)
     set_property(TARGET physfs PROPERTY POSITION_INDEPENDENT_CODE ON)
-endif()
+#endif()
 
 if (MSVC)
     target_compile_options(physfs PRIVATE /W4 /WX)

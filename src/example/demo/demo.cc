@@ -19,7 +19,8 @@ int main(int args, char* argv[]) {
       std::cout << " ARGS: " << md.help;
       std::cout << std::endl;
     });
-    vfs::mount ("/", "physfs", "/tmp --read-only");
+    vfs::mount (vfs::path("/"), "physfs", "/tmp --read-only");
+    auto s = vfs::get_stat (vfs::path("/tmpaddon"));
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }

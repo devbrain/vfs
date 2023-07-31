@@ -12,12 +12,13 @@
 #include "error_module.hh"
 #include "default_logger.hh"
 #include "sanity_check.hh"
-#include "path.hh"
+#include "fs_tree.hh"
 
 namespace vfs {
   struct context {
     modules_registry m_modules_registry;
-    default_logger m_logger;
+    default_logger   m_logger;
+    fs_tree          m_fs_tree;
   };
 
   static context* vfs_ctx = nullptr;
@@ -26,6 +27,7 @@ namespace vfs {
     if (!vfs_ctx) {
       vfs_ctx = new context;
       sanity_check::test (&vfs_ctx->m_logger);
+      vfs_ctx->m_modules_registry.set_logger (&vfs_ctx->m_logger);
       ENFORCE(register_module(create_physfs));
       ENFORCE(register_module(create_zipfs));
     }
@@ -59,18 +61,23 @@ namespace vfs {
     return error_module::to_string (&vfs_ctx->m_modules_registry, error_code);
   }
   // ----------------------------------------------------------
-  static std::vector<std::string> transform_path(const std::string& path) {
-    auto npath = path::normpath (path);
-    if (npath.empty()) {
-      RAISE_EX("Empty path is invalid");
+  std::optional<stat> get_stat(const path& path_to_object) {
+    ENFORCE(vfs_ctx);
+    auto* e = vfs_ctx->m_fs_tree.resolve (path_to_object);
+    if (e) {
+      stat out{};
+      out.type = e->get_type(e);
+      out.mtime = e->get_mtime(e);
+      out.ctime = e->get_ctime(e);
+      if (out.type == VFS_API_FILE) {
+        out.size = e->get_size(e);
+      }
+      return out;
     }
-    if (npath[0] != CPPPATH_SEP[0]) {
-      RAISE_EX("Only absolute path is accepted");
-    }
-    return path::split (npath);
+    return std::nullopt;
   }
   // ----------------------------------------------------------
-  void mount([[maybe_unused]] const std::string& path, const std::string& module_name, const std::string& parameters) {
+  void mount(const path& mount_path, const std::string& module_name, const std::string& parameters) {
     ENFORCE(vfs_ctx);
 
     vfs_api_module* api_module = vfs_ctx->m_modules_registry.get (module_name);
@@ -80,15 +87,14 @@ namespace vfs {
     vfs_api_filesystem* fs = api_module->create_filesystem(api_module, parameters.c_str());
     if (!fs) {
       auto err = get_last_error();
-      RAISE_EX("Can not create filesystem with parameters [" + parameters + "], error code ",
-               err, " : ", error_code_to_string (err));
+      RAISE_EX("Can not create filesystem with parameters [" + parameters + "], error code",
+               err, ":", error_code_to_string (err));
     }
     sanity_check::test (fs);
 
-    auto path_components = transform_path (path);
+    auto path_components = path::normalize (mount_path).split();
     if (path_components.empty()) {
-
+      vfs_ctx->m_fs_tree.set_root (fs);
     }
-
   }
 }

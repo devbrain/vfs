@@ -12,7 +12,7 @@
 
 #include <vfs/export.h>
 #include <vfs/api/vfs_api.h>
-
+#include <vfs/vfs_path.hh>
 
 namespace vfs {
   /**
@@ -61,7 +61,16 @@ namespace vfs {
   [[nodiscard]] VFS_EXPORT int get_last_error();
   [[nodiscard]] VFS_EXPORT std::string error_code_to_string(int error_code);
 
-  VFS_EXPORT void mount(const std::string& path, const std::string& module_name, const std::string& parameters);
+  VFS_EXPORT void mount(const path& mount_path, const std::string& module_name, const std::string& parameters);
+
+  struct VFS_EXPORT stat {
+    vfs_api_dentry_type type;
+    time_t mtime;
+    time_t ctime;
+    uint64_t size;
+  };
+
+  [[nodiscard]] VFS_EXPORT std::optional<stat> get_stat(const path& path_to_object);
 }
 
 #endif //INCLUDE_VFS_VFS_HH

@@ -8,9 +8,11 @@
 
 #if defined(__cplusplus)
 #include <cstdint>
+#include <ctime>
 #define VFS_EXTERN_C extern "C"
 #else
 #include <stdint.h>
+#include <time.h>
 #define VFS_EXTERN_C
 #endif
 
@@ -92,8 +94,8 @@ struct vfs_api_filesystem {
    * Destructor
    */
   void (*destroy)(struct vfs_api_filesystem* self);
-
-  struct vfs_api_dentry* get_root(void* self);
+  struct vfs_api_module* (*get_module)(struct vfs_api_filesystem* self);
+  struct vfs_api_dentry* (*get_root)(struct vfs_api_filesystem* self);
 };
 
 typedef enum {
@@ -102,11 +104,18 @@ typedef enum {
   VFS_API_LINK
 } vfs_api_dentry_type;
 
+typedef void (*vfs_api_directory_iterator_t)(void* context, const char* name, const struct vfs_api_dentry* entry);
+
 struct vfs_api_dentry {
   void* opaque;
 
-  vfs_api_dentry_type type;
-
+  vfs_api_dentry_type (*get_type)(struct vfs_api_dentry* self);
+  time_t (*get_ctime)(struct vfs_api_dentry* self);
+  time_t (*get_mtime)(struct vfs_api_dentry* self);
+  uint64_t (*get_size)(struct vfs_api_dentry* self); /* for files only */
+  const char* (*get_target)(struct vfs_api_dentry* self); /* for links only */
+  void (*iterate)(struct vfs_api_dentry* self, void* context, vfs_api_directory_iterator_t iterator); /* for dirs only */
+  vfs_api_dentry* (*load_dentry)(struct vfs_api_dentry* self, const char* name);
   void (* destroy)(struct vfs_api_dentry* victim);
 };
 

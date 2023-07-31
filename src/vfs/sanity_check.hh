@@ -13,6 +13,7 @@ namespace vfs {
       static void test(const vfs_api_module* obj);
       static void test(const vfs_logger_module* obj);
       static void test(const vfs_api_filesystem* obj);
+      static void test(const vfs_api_dentry* obj);
   };
 }
 #endif //SRC_VFS_SANITY_CHECK_HH

@@ -26,6 +26,9 @@ void vfs::sanity_check::test (const vfs_api_module* obj) {
 
 void vfs::sanity_check::test(const vfs_logger_module* obj) {
 #define ASSERT_LOGGER_MODULE(METHOD) ASSERT_METHOD(vfs_logger_module, obj, METHOD)
+  if (!obj) {
+    RAISE_EX("vfs_logger_module is null");
+  }
   ASSERT_LOGGER_MODULE(debug);
   ASSERT_LOGGER_MODULE(is_debug_enabled);
   ASSERT_LOGGER_MODULE(info);
@@ -38,7 +41,33 @@ void vfs::sanity_check::test(const vfs_logger_module* obj) {
 }
 
 void vfs::sanity_check::test(const vfs_api_filesystem* obj) {
+  if (!obj) {
+    RAISE_EX("vfs_api_filesystem is null");
+  }
 #define ASSERT_VFS_FILESYSTEM(METHOD) ASSERT_METHOD(vfs_api_filesystem, obj, METHOD)
   ASSERT_VFS_FILESYSTEM(destroy);
+  ASSERT_VFS_FILESYSTEM(get_root);
+  ASSERT_VFS_FILESYSTEM(get_module);
 #undef ASSERT_VFS_FILESYSTEM
+}
+
+void vfs::sanity_check::test(const vfs_api_dentry* obj) {
+  if (!obj) {
+    RAISE_EX("vfs_api_dentry is null");
+  }
+#define ASSERT_VFS_DENTRY(METHOD) ASSERT_METHOD(vfs_api_filesystem, obj, METHOD)
+  ASSERT_VFS_DENTRY(destroy);
+  ASSERT_VFS_DENTRY(get_type);
+  ASSERT_VFS_DENTRY(get_mtime);
+  ASSERT_VFS_DENTRY(get_ctime);
+  auto type = obj->get_type(const_cast<vfs_api_dentry*>(obj));
+  if (type == VFS_API_DIRECTORY) {
+    ASSERT_VFS_DENTRY(iterate);
+    ASSERT_VFS_DENTRY(load_dentry);
+  } else if (type == VFS_API_FILE) {
+    ASSERT_VFS_DENTRY(get_size);
+  } else {
+    ASSERT_VFS_DENTRY(get_target);
+  }
+#undef ASSERT_VFS_DENTRY
 }

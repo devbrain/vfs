@@ -27,7 +27,7 @@
 #define CPPPATH_SEP "/"
 #endif
 
-namespace vfs::path {
+namespace vfs::detail::path {
 
   namespace detail {
 

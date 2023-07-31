@@ -4,6 +4,8 @@ include(GenerateExportHeader)
 set (src
         ${PROJECT_INCLUDE}/vfs/api/vfs_api.h
         ${PROJECT_INCLUDE}/vfs/vfs.hh
+        ${PROJECT_INCLUDE}/vfs/vfs_path.hh
+        vfs_path.cc
         vfs.cc
         error_module.cc
         error_module.hh
