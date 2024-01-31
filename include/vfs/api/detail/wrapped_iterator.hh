@@ -49,7 +49,7 @@ namespace vfs::detail
 	template <typename Data, typename Wrapper>
 	bool iterator<Data, Wrapper>::operator!=(const iterator& other) const noexcept
 	{
-		return !(*this == other);
+		return !_equals(_value, other._value);
 	}
 	// ---------------------------------------------------------------------
 	template <typename Data, typename Wrapper>

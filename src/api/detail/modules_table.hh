@@ -14,49 +14,49 @@
 #include <string>
 #include <iterator>
 
-namespace vfs
-{
-    class modules;
+namespace vfs {
+	class modules;
 }
 
-namespace vfs::core
-{
+namespace vfs::core {
 
-	class modules_table
-	{
-        friend class vfs::modules;
-	public:
-		explicit modules_table(const std::filesystem::path& path);
-		~modules_table();
+	class modules_table {
+		friend class vfs::modules;
 
-		void add(const std::filesystem::path& path);
+	 public:
+		explicit modules_table (const std::filesystem::path& path);
+		~modules_table ();
+
+		void add (const std::filesystem::path& path);
 		[[nodiscard]] file_system* get (const std::string& type) const;
 
-	private:
-		void _add_file(const std::filesystem::path& path);
-	private:
-		class entry
-		{
+	 private:
+		void _add_file (const std::filesystem::path& path);
+	 private:
+		class entry {
 			friend class modules_table;
-		public:
-			entry(vfs_module* obj, std::unique_ptr<shared_module>&& dll);
 
-			void inc_ref();
-			bool dec_ref();
-			[[nodiscard]] int ref_count() const;
-			[[nodiscard]] std::filesystem::path path() const;
+		 public:
+			entry (vfs_module* obj, std::unique_ptr<shared_module>&& dll);
+
+			void inc_ref ();
+			bool dec_ref ();
+			[[nodiscard]] int ref_count () const;
+			[[nodiscard]] std::filesystem::path path () const;
 			[[nodiscard]] file_system* module () const;
-		private:
-			~entry();
-		private:
+		 private:
+			~entry ();
+		 private:
 			int _ref_count;
 			file_system* _fs;
 			std::unique_ptr<shared_module> _dll;
 		};
+
 		friend class iterator;
+
 		using map_t = std::map<std::string, entry*>;
 		map_t _entries;
-	public:
+	 public:
 
 	};
 

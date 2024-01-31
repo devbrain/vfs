@@ -43,12 +43,12 @@ set(hdr
 
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
         ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
-        ${PROJECT_ROOT}/include/vfs/api/system.hh
-        ${PROJECT_ROOT}/include/vfs/api/modules.hh
-        ${PROJECT_ROOT}/include/vfs/api/mounts.hh
+        ${PROJECT_ROOT}/include/vfs/system.hh
+        ${PROJECT_ROOT}/include/vfs/modules.hh
+        ${PROJECT_ROOT}/include/vfs/mounts.hh
         ${PROJECT_ROOT}/include/vfs/api/exception.hh
-        ${PROJECT_ROOT}/include/vfs/api/stats.hh
-        ${PROJECT_ROOT}/include/vfs/api/directory_iterator.hh
+        ${PROJECT_ROOT}/include/vfs/stats.hh
+        ${PROJECT_ROOT}/include/vfs/directory_iterator.hh
         ${PROJECT_ROOT}/include/vfs/api/detail/wrapped_iterator.hh
         )
 

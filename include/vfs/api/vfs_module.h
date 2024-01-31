@@ -13,6 +13,7 @@
 #include <string>
 #include <stdexcept>
 #include <algorithm>
+#include <utility>
 
 #else
 #include <stdint.h>
@@ -20,7 +21,7 @@
 #endif
 
 #if !defined(ssize_t) && !defined(__MINGW32__) && !defined(__MINGW64__)
-#if defined(_WIN64) 
+#if defined(_WIN64)
 typedef __int64 ssize_t;
 #else
 typedef long ssize_t;
@@ -41,22 +42,19 @@ typedef long ssize_t;
 #define VFS_EXTERN_C
 #endif
 
-enum vfs_inode_type
-{
+enum vfs_inode_type {
 	VFS_INODE_REGULAR,
 	VFS_INODE_DIRECTORY,
 	VFS_INODE_LINK
 };
 
-struct vfs_key_value
-{
+struct vfs_key_value {
 #define VFS_MAX_ATTRIB_LENGTH 64
 	char key[VFS_MAX_ATTRIB_LENGTH];
 	char value[VFS_MAX_ATTRIB_LENGTH];
 };
 
-struct vfs_inode_stats
-{
+struct vfs_inode_stats {
 	enum vfs_inode_type type;
 	/*
 	 * For file - size of the file
@@ -73,14 +71,13 @@ struct vfs_inode_stats
 	/*
 	 * de-allocates the additional_attributes
 	 */
-	void (* destructor)(struct vfs_inode_stats* victim);
+	void (* destructor) (struct vfs_inode_stats* victim);
 };
 
 /*
  * https://stackoverflow.com/questions/47403058/turning-the-next-hasnext-iterator-interface-into-begin-end-interface
  */
-struct vfs_directory_iterator
-{
+struct vfs_directory_iterator {
 	/*
 	 * implementation specific data
 	 */
@@ -89,48 +86,44 @@ struct vfs_directory_iterator
 	/*
 	 * de-allocates the victim
 	 */
-	void (* destructor)(struct vfs_directory_iterator* victim);
+	void (* destructor) (struct vfs_directory_iterator* victim);
 
 	/*
 	 * returns non-zero value if directory traversal not finished
 	 */
-	int (* has_next)(void* opaque);
+	int (* has_next) (void* opaque);
 
 	/*
 	 * populates name with next directory entry name.
 	 * returns length of name, or 0 if traversal finished
 	 */
-	size_t (* next)(void* opaque, char* name, size_t max_name_length);
+	size_t (* next) (void* opaque, char* name, size_t max_name_length);
 };
 
-enum whence_type
-{
+enum whence_type {
 	eVFS_SEEK_CUR,
 	eVFS_SEEK_SET,
 	eVFS_SEEK_END
 };
 
-struct vfs_file_ops
-{
+struct vfs_file_ops {
 	void* opaque;
 
-	void (* destructor)(struct vfs_file_ops* victim);
+	void (* destructor) (struct vfs_file_ops* victim);
 
-	ssize_t (*read)  (void* opaque, void* buff, size_t len);
-	ssize_t (*write) (void* opaque, void* buff, size_t len);
-	int (*truncate) (void* opaque);
-	int (*seek) (void* opaque, uint64_t pos, enum whence_type whence);
-	uint64_t (*tell)(void* opaque);
+	ssize_t (* read) (void* opaque, void* buff, size_t len);
+	ssize_t (* write) (void* opaque, void* buff, size_t len);
+	int (* truncate) (void* opaque);
+	int (* seek) (void* opaque, uint64_t pos, enum whence_type whence);
+	uint64_t (* tell) (void* opaque);
 };
 
-enum open_mode_type
-{
+enum open_mode_type {
 	eVFS_OPEN_MODE_READ,
 	eVFS_OPEN_MODE_WRITE
 };
 
-struct vfs_inode_ops
-{
+struct vfs_inode_ops {
 	/*
 	 * implementation specific data
 	 */
@@ -138,55 +131,51 @@ struct vfs_inode_ops
 	/*
 	 * de-allocates the victim
 	 */
-	void (* destructor)(struct vfs_inode_ops* victim);
-
-
+	void (* destructor) (struct vfs_inode_ops* victim);
 
 	/*
 	 * performs lookup for named entry in this inode.
 	 * return NULL if no such element found
 	 */
-	struct vfs_inode_ops* (* lookup)(void* opaque, char* name);
+	struct vfs_inode_ops* (* lookup) (void* opaque, char* name);
 
 	/*
 	 * populates output structure, returns 1 if OK, 0 on failure
 	 */
-	int (* stat)(void* opaque, struct vfs_inode_stats* output);
-
+	int (* stat) (void* opaque, struct vfs_inode_stats* output);
 
 	/*
 	 * returns directory iterator or NULL if this inode is not directory
 	 */
-	struct vfs_directory_iterator* (*get_directory_iterator) (void* opaque);
+	struct vfs_directory_iterator* (* get_directory_iterator) (void* opaque);
 
-	int (* mkdir)(void* opaque, char* name);
-    int (* mkfile)(void* opaque, char* name);
+	int (* mkdir) (void* opaque, char* name);
+	int (* mkfile) (void* opaque, char* name);
 
-	int (* unlink)(void* opaque);
+	int (* unlink) (void* opaque);
 
-	struct vfs_file_ops* (*open_file)(void* opaque, enum open_mode_type mode_type);
+	struct vfs_file_ops* (* open_file) (void* opaque, enum open_mode_type mode_type);
 };
 
-struct vfs_module
-{
+struct vfs_module {
 	void* opaque;
 
-	void (* destructor)(struct vfs_module* victim);
+	void (* destructor) (struct vfs_module* victim);
 
 	/*
 	 * loads root inode for this file system.
 	 */
-	struct vfs_inode_ops* (* load_root)(void* opaque, char* params);
+	struct vfs_inode_ops* (* load_root) (void* opaque, const char* params);
 
 	/*
 	 * returns maximal length for entry name
 	 */
-	size_t (* maximal_name_length)(void* opaque);
+	size_t (* maximal_name_length) (void* opaque);
 
-	size_t (* get_name)(void* opaque, char* output, size_t output_size);
-	size_t (* get_description)(void* opaque, char* output, size_t output_size);
+	size_t (* get_name) (void* opaque, char* output, size_t output_size);
+	size_t (* get_description) (void* opaque, char* output, size_t output_size);
 
-	int (*is_readonly)(void* opaque);
+	int (* is_readonly) (void* opaque);
 
 	int (* sync_inode) (void* opaque, void* inode_opaque);
 	int (* sync_filesystem) (struct vfs_module* fsys);
@@ -195,9 +184,9 @@ struct vfs_module
 
 #define VFS_MODULE_REGISTER_NAME "vfs_module_register"
 
-typedef void (* vfs_module_register_t)(struct vfs_module* output);
+typedef void (* vfs_module_register_t) (struct vfs_module* output);
 
-VFS_EXTERN_C void VFS_MODULE_API vfs_module_register(struct vfs_module* output);
+VFS_EXTERN_C void VFS_MODULE_API vfs_module_register (struct vfs_module* output);
 /*
  * ==============================================================================
  */
@@ -205,527 +194,496 @@ VFS_EXTERN_C void VFS_MODULE_API vfs_module_register(struct vfs_module* output);
 /*
  * C++ Part
  */
-namespace vfs
-{
-	namespace module
-	{
-		class filesystem;
 
-		class directory_iterator
-		{
-		public:
-			directory_iterator() = default;
-			virtual ~directory_iterator() = default;
+namespace vfs::module {
+	class filesystem;
 
-			virtual bool has_next() = 0;
-			virtual std::string next() = 0;
-		public:
-			static struct vfs_directory_iterator* vfs_directory_iterator_create(directory_iterator* obj);
-		private:
-			static void _destructor(struct vfs_directory_iterator* victim);
-			static int _has_next(void* opaque);
-			static size_t _next(void* opaque, char* name, size_t max_name_length);
+	class directory_iterator {
+	 public:
+		directory_iterator () = default;
+		virtual ~directory_iterator () = default;
+
+		virtual bool has_next () = 0;
+		virtual std::string next () = 0;
+	 public:
+		static struct vfs_directory_iterator* vfs_directory_iterator_create (directory_iterator* obj);
+	 private:
+		static void _destructor (struct vfs_directory_iterator* victim);
+		static int _has_next (void* opaque);
+		static size_t _next (void* opaque, char* name, size_t max_name_length);
+	};
+
+	class inode;
+
+	class file {
+	 public:
+		virtual ~file () = default;
+
+		virtual ssize_t read (void* buff, size_t len) = 0;
+		virtual ssize_t write (void* buff, size_t len) = 0;
+		virtual bool seek (uint64_t pos, enum whence_type whence) = 0;
+		[[nodiscard]] virtual uint64_t tell () const = 0;
+		virtual bool truncate () = 0;
+	 public:
+		static struct vfs_file_ops* vfs_file_ops_create (file* obj);
+	 private:
+		static void _destructor (struct vfs_file_ops* victim);
+
+		static ssize_t _read (void* opaque, void* buff, size_t len);
+		static ssize_t _write (void* opaque, void* buff, size_t len);
+		static int _seek (void* opaque, uint64_t pos, enum whence_type whence);
+		static uint64_t _tell (void* opaque);
+		static int _truncate (void* opaque);
+	};
+
+	class inode {
+		friend class filesystem;
+
+	 public:
+		class stats {
+		 public:
+			stats (vfs_inode_stats& output, vfs_inode_type type, uint64_t length);
+			void attr (const char* key, const char* value);
+		 private:
+			static void _destructor (vfs_inode_stats* out);
+			static void _set_attr (vfs_key_value& out, const char* key, const char* value);
+			static void _init_attr (vfs_key_value& out);
+		 private:
+			vfs_inode_stats& _output;
+			std::size_t _num_atts;
 		};
 
-		class inode;
+	 public:
+		explicit inode (vfs_inode_type type);
+		[[nodiscard]] vfs_inode_type type () const;
 
-		class file
-		{
-		public:
-			virtual ~file() = default;
+		virtual ~inode () = default;
 
-			virtual ssize_t read  (void* buff, size_t len) = 0;
-			virtual ssize_t write (void* buff, size_t len) = 0;
-			virtual bool seek (uint64_t pos, enum whence_type whence) = 0;
-			virtual uint64_t tell() const = 0;
-			virtual bool truncate() = 0;
-		public:
-			static struct vfs_file_ops* vfs_file_ops_create(file* obj);
-		private:
-			static void _destructor(struct vfs_file_ops* victim);
-
-			static ssize_t _read (void* opaque, void* buff, size_t len);
-			static ssize_t _write (void* opaque, void* buff, size_t len);
-			static int _seek (void* opaque, uint64_t pos, enum whence_type whence);
-            static uint64_t _tell (void* opaque);
-            static int _truncate (void* opaque);
+		virtual void load_stat (stats& /*output*/) {
 		};
+		virtual inode* lookup (const char* name) = 0;
+		virtual directory_iterator* get_directory_iterator () = 0;
+		virtual uint64_t size () = 0;
+		virtual bool mkdir (const char* name) = 0;
+		virtual bool mkfile (const char* name) = 0;
+		virtual int unlink () = 0;
 
-		class inode
-		{
-			friend class filesystem;
-		public:
-			class stats
-			{
-			public:
-				stats(vfs_inode_stats& output, vfs_inode_type type, uint64_t length);
-				void attr(const char* key, const char* value);
-			private:
-				static void _destructor(vfs_inode_stats* out);
-				static void _set_attr(vfs_key_value& out, const char* key, const char* value);
-				static void _init_attr(vfs_key_value& out);
-			private:
-				vfs_inode_stats& _output;
-				std::size_t _num_atts;
-			};
-		public:
-			explicit inode(vfs_inode_type type);
-			vfs_inode_type type() const;
+		virtual file* open_file (open_mode_type mode_type) = 0;
+	 public:
+		static vfs_inode_ops* inode_create (vfs::module::inode* opaque);
+	 private:
+		const vfs_inode_type _type;
+	 private:
+		static void _destructor (struct vfs_inode_ops* victim);
+		static struct vfs_inode_ops* _lookup (void* opaque, char* name);
+		static int _stat (void* opaque, struct vfs_inode_stats* output);
+		static struct vfs_directory_iterator* _get_directory_iterator (void* opaque);
+		static int _mkdir (void* opaque, char* name);
+		static int _mkfile (void* opaque, char* name);
+		static int _unlink (void* opaque);
+		static vfs_file_ops* _open_file (void* opaque, enum open_mode_type mode_type);
+	};
 
-			virtual ~inode() {
-			}
+	class filesystem {
+	 public:
+		explicit filesystem (std::string name);
+		filesystem (std::string name, std::string descr);
+		virtual ~filesystem () = default;
 
-			virtual void load_stat(stats& /*output*/)
-			{
-			};
-			virtual inode* lookup(const char* name) = 0;
-			virtual directory_iterator* get_directory_iterator() = 0;
-			virtual uint64_t size() = 0;
-			virtual bool mkdir(const char* name) = 0;
-            virtual bool mkfile(const char* name) = 0;
-			virtual int unlink() = 0;
+		virtual inode* load_root (const std::string& params) = 0;
+		virtual size_t max_name_length () = 0;
+		virtual int sync () = 0;
+		virtual int sync_inode (inode* inod) = 0;
+		[[nodiscard]] virtual bool is_readonly () const = 0;
 
-			virtual file* open_file(open_mode_type mode_type) = 0;
-		public:
-			static vfs_inode_ops* inode_create(vfs::module::inode* opaque);
-		private:
-			const vfs_inode_type _type;
-		private:
-			static void _destructor(struct vfs_inode_ops* victim);
-			static struct vfs_inode_ops* _lookup(void* opaque, char* name);
-			static int _stat(void* opaque, struct vfs_inode_stats* output);
-			static struct vfs_directory_iterator* _get_directory_iterator(void* opaque);
-			static int _mkdir(void* opaque, char* name);
-			static int _mkfile(void* opaque, char* name);
-			static int  _unlink(void* opaque);
-			static vfs_file_ops* _open_file(void* opaque, enum open_mode_type mode_type);
-		};
-		
-		class filesystem
-		{
-		public:
-			explicit filesystem(const std::string& name);
-			filesystem(const std::string& name, const std::string& descr);
-			virtual ~filesystem() = default;
+		virtual void setup (struct vfs_module* output);
 
-			virtual inode* load_root(const std::string& params) = 0;
-			virtual size_t max_name_length() = 0;
-			virtual int sync() = 0;
-			virtual int sync_inode(inode* inod) = 0;
-            virtual bool is_readonly() const = 0;
+	 private:
+		const std::string _name;
+		const std::string _descr;
 
-			virtual void setup(struct vfs_module* output);
+		static void _destructor (struct vfs_module* victim);
+		static struct vfs_inode_ops* _load_root (void* opaque, const char* params);
+		static size_t _maximal_name_length (void* opaque);
+		static size_t _get_name (void* opaque, char* output, size_t output_size);
+		static size_t _get_description (void* opaque, char* output, size_t output_size);
+		static int _sync_inode (void* opaque, void* inode_opaque);
+		static int _sync_filesystem (struct vfs_module* fsys);
+		static int _is_readonly (void* opaque);
 
-		private:
-			const std::string _name;
-			const std::string _descr;
+	};
 
-			static void _destructor(struct vfs_module* victim);
-			static struct vfs_inode_ops* _load_root(void* opaque, char* params);
-			static size_t _maximal_name_length(void* opaque);
-			static size_t _get_name(void* opaque, char* output, size_t output_size);
-			static size_t _get_description(void* opaque, char* output, size_t output_size);
-			static int _sync_inode (void* opaque, void* inode_opaque);
-			static int _sync_filesystem (struct vfs_module* victim);
-            static int _is_readonly(void* opaque);
-
-
-		};
 /* ============================================================================
 	Implementation
    ============================================================================ */
-		inline
-		inode::stats::stats(vfs_inode_stats& output, vfs_inode_type type, uint64_t length)
-			: _output(output),
-			  _num_atts(0)
-		{
-			output.type = type;
-			output.size = length;
-			output.num_of_additional_attributes = 0;
-			_init_attr(output.attr1);
-			_init_attr(output.attr2);
-			output.additional_attributes = nullptr;
-			output.destructor = _destructor;
-		}
-		/* -------------------------------------------------------------------------- */
-		inline
-		void inode::stats::attr(const char* key, const char* value)
-		{
-			switch (_num_atts)
-			{
-			case 0:
-				_set_attr(_output.attr1, key, value);
+	inline
+	inode::stats::stats (vfs_inode_stats& output, vfs_inode_type type, uint64_t length)
+		: _output (output),
+		  _num_atts (0) {
+		output.type = type;
+		output.size = length;
+		output.num_of_additional_attributes = 0;
+		_init_attr (output.attr1);
+		_init_attr (output.attr2);
+		output.additional_attributes = nullptr;
+		output.destructor = _destructor;
+	}
+
+	/* -------------------------------------------------------------------------- */
+	inline
+	void inode::stats::attr (const char* key, const char* value) {
+		switch (_num_atts) {
+			case 0: _set_attr (_output.attr1, key, value);
 				_num_atts++;
 				break;
-			case 1:
-				_set_attr(_output.attr2, key, value);
+			case 1: _set_attr (_output.attr2, key, value);
 				_num_atts++;
 				break;
-			default:
-				_output.num_of_additional_attributes++;
-				if (!_output.additional_attributes)
-				{
-					_output.additional_attributes = static_cast<vfs_key_value*>(malloc(
-						_output.num_of_additional_attributes * sizeof(vfs_key_value)));
-				}
-				else
-				{
-					void* new_ptr = realloc(_output.additional_attributes,
-						_output.num_of_additional_attributes * sizeof(vfs_key_value));
-					if (new_ptr)
-					{
+			default: _output.num_of_additional_attributes++;
+				if (!_output.additional_attributes) {
+					_output.additional_attributes = static_cast<vfs_key_value*>(malloc (
+						_output.num_of_additional_attributes * sizeof (vfs_key_value)));
+				} else {
+					void* new_ptr = realloc (_output.additional_attributes,
+											 _output.num_of_additional_attributes * sizeof (vfs_key_value));
+					if (new_ptr) {
 						_output.additional_attributes =
 							static_cast<vfs_key_value*>(new_ptr);
 					}
 				}
-				if (_output.additional_attributes)
-				{
-					_init_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1]);
-					_set_attr(_output.additional_attributes[_output.num_of_additional_attributes - 1], key, value);
+				if (_output.additional_attributes) {
+					_init_attr (_output.additional_attributes[_output.num_of_additional_attributes - 1]);
+					_set_attr (_output.additional_attributes[_output.num_of_additional_attributes - 1], key, value);
 				}
-			}
 		}
-		/* -------------------------------------------------------------------------- */
-		inline
-		void inode::stats::_destructor(vfs_inode_stats* out)
-		{
-			if (out->additional_attributes != nullptr)
-			{
-				std::free(out->additional_attributes);
-			}
-		}
-		/* -------------------------------------------------------------------------- */
-		inline
-		void inode::stats::_set_attr(vfs_key_value& out, const char* key, const char* value)
-		{
-			std::memcpy(out.key, key, std::min(std::strlen(key), sizeof(out.key)));
-			std::memcpy(out.value, key, std::min(std::strlen(value), sizeof(out.value)));
-		}
-		/* -------------------------------------------------------------------------- */
-		inline
-		void inode::stats::_init_attr(vfs_key_value& out)
-		{
-			std::memset(out.value, 0, sizeof(out.value));
-			std::memset(out.key, 0, sizeof(out.key));
-		}
-		/* ============================================================================= */
-		inline
-		inode::inode(vfs_inode_type type)
-			: _type(type)
-		{
+	}
 
+	/* -------------------------------------------------------------------------- */
+	inline
+	void inode::stats::_destructor (vfs_inode_stats* out) {
+		if (out->additional_attributes != nullptr) {
+			std::free (out->additional_attributes);
 		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		vfs_inode_type inode::type() const
-		{
-			return _type;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		vfs_inode_ops* inode::inode_create(vfs::module::inode* opaque)
-		{
-			if (!opaque)
-			{
-				return nullptr;
-			}
-			auto res = new vfs_inode_ops;
+	}
 
-			res->opaque = opaque;
-			res->destructor = _destructor;
-			res->lookup = _lookup;
-			res->get_directory_iterator = _get_directory_iterator;
-			res->stat = _stat;
-			res->mkdir = _mkdir;
-			res->mkfile = _mkfile;
-			res->unlink = _unlink;
-            res->open_file = _open_file;
-			return res;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		void inode::_destructor(struct vfs_inode_ops* victim)
-		{
-			if (victim)
-			{
-				auto* ino = reinterpret_cast<vfs::module::inode*>(victim->opaque);
-				delete ino;
-			}
-			delete victim;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		struct vfs_inode_ops* inode::_lookup(void* opaque, char* name)
-		{
-			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-			return inode_create(ino->lookup(name));
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		int inode::_stat(void* opaque, struct vfs_inode_stats* output)
-		{
-			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-			try
-			{
-				const auto type = ino->type();
-				uint64_t len = type == VFS_INODE_REGULAR ? ino->size() : 0;
-				vfs::module::inode::stats st(*output, type, len);
-				ino->load_stat(st);
-				return 1;
-			}
-			catch (std::exception&)
-			{
-				return 0;
-			}
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		int inode::_mkdir(void* opaque, char* name)
-		{
-			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-			return ino->mkdir(name) ? 1 : 0;
-		}
-        /* ----------------------------------------------------------------------------- */
-        inline
-		int inode::_mkfile(void* opaque, char* name)
-        {
-            auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-            return ino->mkfile(name) ? 1 : 0;
-        }
-		/* ----------------------------------------------------------------------------- */
-		inline
-		int inode::_unlink(void* opaque)
-		{
-			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-			return ino->unlink();
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		vfs_file_ops* inode::_open_file(void* opaque, enum open_mode_type mode_type)
-		{
-			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-			return file::vfs_file_ops_create(ino->open_file(mode_type));
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		struct vfs_directory_iterator* inode::_get_directory_iterator(void* opaque)
-		{
-			auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
-			if (ino->type() != VFS_INODE_DIRECTORY)
-			{
-				return nullptr;
-			}
-			return directory_iterator::vfs_directory_iterator_create(ino->get_directory_iterator());
-		}
+	/* -------------------------------------------------------------------------- */
+	inline
+	void inode::stats::_set_attr (vfs_key_value& out, const char* key, const char* value) {
+		std::memcpy (out.key, key, std::min (std::strlen (key), sizeof (out.key)));
+		std::memcpy (out.value, key, std::min (std::strlen (value), sizeof (out.value)));
+	}
 
+	/* -------------------------------------------------------------------------- */
+	inline
+	void inode::stats::_init_attr (vfs_key_value& out) {
+		std::memset (out.value, 0, sizeof (out.value));
+		std::memset (out.key, 0, sizeof (out.key));
+	}
 
-		/* ============================================================================= */
-		inline
-		filesystem::filesystem(const std::string& name)
-			: _name(name), _descr("")
-		{
+	/* ============================================================================= */
+	inline
+	inode::inode (vfs_inode_type type)
+		: _type (type) {
 
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		filesystem::filesystem(const std::string& name, const std::string& descr)
-				: _name(name), _descr(descr)
-		{
+	}
 
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		void filesystem::setup(struct vfs_module* output)
-		{
-			output->opaque = this;
+	/* ----------------------------------------------------------------------------- */
+	inline
+	vfs_inode_type inode::type () const {
+		return _type;
+	}
 
-			output->destructor = _destructor;
-			output->load_root = _load_root;
-			output->maximal_name_length = _maximal_name_length;
-			output->get_name = _get_name;
-			output->get_description = _get_description;
-			output->sync_filesystem = _sync_filesystem;
-			output->sync_inode = _sync_inode;
-			output->is_readonly = _is_readonly;
+	/* ----------------------------------------------------------------------------- */
+	inline
+	vfs_inode_ops* inode::inode_create (vfs::module::inode* opaque) {
+		if (!opaque) {
+			return nullptr;
 		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		void filesystem::_destructor(struct vfs_module* victim)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (victim->opaque);
-			delete fs;
+		auto res = new vfs_inode_ops;
 
-			delete victim;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		struct vfs_inode_ops* filesystem::_load_root(void* opaque, char* params)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
-			return inode::inode_create(fs->load_root(params));
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		size_t filesystem::_maximal_name_length(void* opaque)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
-			return fs->max_name_length();
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		size_t filesystem::_get_name(void* opaque, char* output, size_t output_size)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
-			std::memcpy(output, fs->_name.c_str(), std::min(output_size, fs->_name.size()));
-			return fs->_name.size();
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		size_t filesystem::_get_description(void* opaque, char* output, size_t output_size)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
-			std::memcpy(output, fs->_descr.c_str(), std::min(output_size, fs->_descr.size()));
-			return fs->_descr.size();
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		int filesystem::_sync_inode (void* opaque, void* inode_opaque)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
-			auto* ino = reinterpret_cast<vfs::module::inode*> (inode_opaque);
-			return fs->sync_inode(ino);
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		int filesystem::_sync_filesystem (struct vfs_module* fsys)
-		{
-			auto* fs = reinterpret_cast<vfs::module::filesystem*> (fsys->opaque);
-			return fs->sync();
-		}
-        /* ----------------------------------------------------------------------------- */
-        inline
-        int filesystem::_is_readonly(void* opaque)
-        {
-            auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
-            return fs->is_readonly() ? 1 : 0;
-        }
-		/* ============================================================================= */
-		inline
-		struct vfs_directory_iterator* directory_iterator::vfs_directory_iterator_create(directory_iterator* obj)
-		{
-			vfs_directory_iterator* ret = new vfs_directory_iterator;
-			ret->opaque = obj;
-			ret->next = _next;
-			ret->has_next = _has_next;
-			ret->destructor = _destructor;
-			return ret;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		void directory_iterator::_destructor(struct vfs_directory_iterator* victim)
-		{
-			if (victim)
-			{
-				auto* obj = reinterpret_cast<vfs::module::directory_iterator*>(victim->opaque);
-				delete obj;
-			}
-			delete victim;
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		int directory_iterator::_has_next(void* opaque)
-		{
-			auto* obj = reinterpret_cast<vfs::module::directory_iterator*>(opaque);
-			return obj->has_next();
-		}
-		/* ----------------------------------------------------------------------------- */
-		inline
-		size_t directory_iterator::_next(void* opaque, char* name, size_t max_name_length)
-		{
-			auto* obj = reinterpret_cast<vfs::module::directory_iterator*>(opaque);
-			auto nm = obj->next();
-			if (!nm.empty())
-			{
-				std::memcpy(name, nm.c_str(), std::min(max_name_length, nm.size()));
-			}
-			return nm.size();
-		}
-		// =================================================================================
-		inline
-		vfs_file_ops* file::vfs_file_ops_create(file* obj)
-		{
-			if (!obj)
-			{
-				return nullptr;
-			}
-			vfs_file_ops* ret = new vfs_file_ops;
-			ret->opaque = obj;
-			ret->destructor = _destructor;
-			ret->read = _read;
-			ret->write = _write;
-			ret->seek = _seek;
-			ret->tell = _tell;
-			ret->truncate = _truncate;
+		res->opaque = opaque;
+		res->destructor = _destructor;
+		res->lookup = _lookup;
+		res->get_directory_iterator = _get_directory_iterator;
+		res->stat = _stat;
+		res->mkdir = _mkdir;
+		res->mkfile = _mkfile;
+		res->unlink = _unlink;
+		res->open_file = _open_file;
+		return res;
+	}
 
-			return ret;
+	/* ----------------------------------------------------------------------------- */
+	inline
+	void inode::_destructor (struct vfs_inode_ops* victim) {
+		if (victim) {
+			auto* ino = reinterpret_cast<vfs::module::inode*>(victim->opaque);
+			delete ino;
 		}
-		// ---------------------------------------------------------------------------------
-		inline
-		void file::_destructor(struct vfs_file_ops* victim)
-		{
-			if (victim)
-			{
-				auto* obj = reinterpret_cast<vfs::module::file*>(victim->opaque);
-				delete obj;
-			}
-			delete victim;
+		delete victim;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	struct vfs_inode_ops* inode::_lookup (void* opaque, char* name) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		return inode_create (ino->lookup (name));
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int inode::_stat (void* opaque, struct vfs_inode_stats* output) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		try {
+			const auto type = ino->type ();
+			uint64_t len = type == VFS_INODE_REGULAR ? ino->size () : 0;
+			vfs::module::inode::stats st (*output, type, len);
+			ino->load_stat (st);
+			return 1;
 		}
-		// ---------------------------------------------------------------------------------
-		inline
-		ssize_t file::_read (void* opaque, void* buff, size_t len)
-		{
-			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
-			return obj->read(buff, len);
+		catch (std::exception&) {
+			return 0;
 		}
-		// ---------------------------------------------------------------------------------
-		inline
-		ssize_t file::_write (void* opaque, void* buff, size_t len)
-		{
-			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
-			return obj->write(buff, len);
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int inode::_mkdir (void* opaque, char* name) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		return ino->mkdir (name) ? 1 : 0;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int inode::_mkfile (void* opaque, char* name) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		return ino->mkfile (name) ? 1 : 0;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int inode::_unlink (void* opaque) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		return ino->unlink ();
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	vfs_file_ops* inode::_open_file (void* opaque, enum open_mode_type mode_type) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		return file::vfs_file_ops_create (ino->open_file (mode_type));
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	struct vfs_directory_iterator* inode::_get_directory_iterator (void* opaque) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		if (ino->type () != VFS_INODE_DIRECTORY) {
+			return nullptr;
 		}
-        // ---------------------------------------------------------------------------------
-        inline
-		int file::_truncate (void* opaque)
-        {
-            auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
-            return obj->truncate() ? 1 : 0;
-        }
-		// ---------------------------------------------------------------------------------
-		inline
-		int file::_seek (void* opaque, uint64_t pos, enum whence_type whence)
-		{
-			auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
-			return obj->seek(pos, whence) ? 1 : 0;
+		return directory_iterator::vfs_directory_iterator_create (ino->get_directory_iterator ());
+	}
+
+	/* ============================================================================= */
+	inline
+	filesystem::filesystem (std::string name)
+		: _name (std::move (name)) {
+
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	filesystem::filesystem (std::string name, std::string descr)
+		: _name (std::move (name)), _descr (std::move (descr)) {
+
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	void filesystem::setup (struct vfs_module* output) {
+		output->opaque = this;
+
+		output->destructor = _destructor;
+		output->load_root = _load_root;
+		output->maximal_name_length = _maximal_name_length;
+		output->get_name = _get_name;
+		output->get_description = _get_description;
+		output->sync_filesystem = _sync_filesystem;
+		output->sync_inode = _sync_inode;
+		output->is_readonly = _is_readonly;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	void filesystem::_destructor (struct vfs_module* victim) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (victim->opaque);
+		delete fs;
+
+		delete victim;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	struct vfs_inode_ops* filesystem::_load_root (void* opaque, const char* params) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+		return inode::inode_create (fs->load_root (params));
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	size_t filesystem::_maximal_name_length (void* opaque) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+		return fs->max_name_length ();
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	size_t filesystem::_get_name (void* opaque, char* output, size_t output_size) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+		std::memcpy (output, fs->_name.c_str (), std::min (output_size, fs->_name.size ()));
+		return fs->_name.size ();
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	size_t filesystem::_get_description (void* opaque, char* output, size_t output_size) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+		std::memcpy (output, fs->_descr.c_str (), std::min (output_size, fs->_descr.size ()));
+		return fs->_descr.size ();
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int filesystem::_sync_inode (void* opaque, void* inode_opaque) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+		auto* ino = reinterpret_cast<vfs::module::inode*> (inode_opaque);
+		return fs->sync_inode (ino);
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int filesystem::_sync_filesystem (struct vfs_module* fsys) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (fsys->opaque);
+		return fs->sync ();
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int filesystem::_is_readonly (void* opaque) {
+		auto* fs = reinterpret_cast<vfs::module::filesystem*> (opaque);
+		return fs->is_readonly () ? 1 : 0;
+	}
+
+	/* ============================================================================= */
+	inline
+	struct vfs_directory_iterator* directory_iterator::vfs_directory_iterator_create (directory_iterator* obj) {
+		vfs_directory_iterator* ret = new vfs_directory_iterator;
+		ret->opaque = obj;
+		ret->next = _next;
+		ret->has_next = _has_next;
+		ret->destructor = _destructor;
+		return ret;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	void directory_iterator::_destructor (struct vfs_directory_iterator* victim) {
+		if (victim) {
+			auto* obj = reinterpret_cast<vfs::module::directory_iterator*>(victim->opaque);
+			delete obj;
 		}
-        // ---------------------------------------------------------------------------------
-        inline
-        uint64_t file::_tell (void* opaque)
-        {
-            auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
-            return obj->tell();
-        }
-	} /* ns module */
-}
-/* forward declaration */
-VFS_EXTERN_C void VFS_MODULE_API vfs_module_register(struct vfs_module* output);
+		delete victim;
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int directory_iterator::_has_next (void* opaque) {
+		auto* obj = reinterpret_cast<vfs::module::directory_iterator*>(opaque);
+		return obj->has_next ();
+	}
+
+	/* ----------------------------------------------------------------------------- */
+	inline
+	size_t directory_iterator::_next (void* opaque, char* name, size_t max_name_length) {
+		auto* obj = reinterpret_cast<vfs::module::directory_iterator*>(opaque);
+		auto nm = obj->next ();
+		if (!nm.empty ()) {
+			std::memcpy (name, nm.c_str (), std::min (max_name_length, nm.size ()));
+		}
+		return nm.size ();
+	}
+
+	// =================================================================================
+	inline
+	vfs_file_ops* file::vfs_file_ops_create (file* obj) {
+		if (!obj) {
+			return nullptr;
+		}
+		vfs_file_ops* ret = new vfs_file_ops;
+		ret->opaque = obj;
+		ret->destructor = _destructor;
+		ret->read = _read;
+		ret->write = _write;
+		ret->seek = _seek;
+		ret->tell = _tell;
+		ret->truncate = _truncate;
+
+		return ret;
+	}
+
+	// ---------------------------------------------------------------------------------
+	inline
+	void file::_destructor (struct vfs_file_ops* victim) {
+		if (victim) {
+			auto* obj = reinterpret_cast<vfs::module::file*>(victim->opaque);
+			delete obj;
+		}
+		delete victim;
+	}
+
+	// ---------------------------------------------------------------------------------
+	inline
+	ssize_t file::_read (void* opaque, void* buff, size_t len) {
+		auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+		return obj->read (buff, len);
+	}
+
+	// ---------------------------------------------------------------------------------
+	inline
+	ssize_t file::_write (void* opaque, void* buff, size_t len) {
+		auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+		return obj->write (buff, len);
+	}
+
+	// ---------------------------------------------------------------------------------
+	inline
+	int file::_truncate (void* opaque) {
+		auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+		return obj->truncate () ? 1 : 0;
+	}
+
+	// ---------------------------------------------------------------------------------
+	inline
+	int file::_seek (void* opaque, uint64_t pos, enum whence_type whence) {
+		auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+		return obj->seek (pos, whence) ? 1 : 0;
+	}
+
+	// ---------------------------------------------------------------------------------
+	inline
+	uint64_t file::_tell (void* opaque) {
+		auto* obj = reinterpret_cast<vfs::module::file*>(opaque);
+		return obj->tell ();
+	}
+} // namespace vfs::module
+
+VFS_EXTERN_C void VFS_MODULE_API vfs_module_register (struct vfs_module* output);
 
 #define REGISTER_VFS_MODULE(FILESYS_TYPE)                                            \
 void vfs_module_register(struct vfs_module* output)                                  \
 {                                                                                    \
     (new FILESYS_TYPE())->setup(output);                                             \
 }
-
 
 #endif
 

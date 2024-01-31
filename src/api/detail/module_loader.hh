@@ -22,7 +22,7 @@ namespace vfs::core
 		vfs_module_register_t get() const;
 		std::filesystem::path path() const;
 	private:
-		shared_module(void* handle, const std::filesystem::path& pth);
+		shared_module(void* handle, std::filesystem::path  pth);
 		void* _handle;
 		std::filesystem::path _path;
 	};

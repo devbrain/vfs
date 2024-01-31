@@ -1,31 +1,31 @@
 #ifndef VFS_DETAIL_DENTRY_HH
 #define VFS_DETAIL_DENTRY_HH
 
-
 #include <map>
 #include <memory>
 #include <tuple>
 #include "api/detail/path.hh"
 #include "api/detail/wrapped_pointer.hh"
 
-namespace vfs::core
-{
-    class mount_point;
-    struct dentry;
-    class inode;
+namespace vfs::core {
+	class mount_point;
 
-    void dentry_init(wrapped_pointer <mount_point> wp);
+	struct dentry;
 
-    void dentry_done();
+	class inode;
 
-    std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve(const path& pth, int from, int to);
+	void dentry_init (wrapped_pointer<mount_point> wp);
 
-    // unlink all dentries, and returns true iff this dentry is a mount point
-    bool dentry_unlink(dentry* victim);
+	void dentry_done ();
 
-    bool dentry_has_children(dentry* victim);
+	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve (const path& pth, int from, int to);
 
-    void dentry_mount(wrapped_pointer <mount_point> wp, dentry* node);
+	// unlink all dentries, and returns true iff this dentry is a mount point
+	bool dentry_unlink (dentry* victim);
+
+	bool dentry_has_children (dentry* victim);
+
+	void dentry_mount (wrapped_pointer<mount_point> wp, dentry* node);
 
 }
 

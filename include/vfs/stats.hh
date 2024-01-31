@@ -5,22 +5,19 @@
 #include <string>
 #include <map>
 
-#include <vfs/api/vfs_api.h>
+#include "vfs/api/vfs_api.h"
 
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning( disable : 4275 4251 )
 #endif
 
-namespace vfs
-{
-	struct VFS_API stats
-	{
+namespace vfs {
+	struct VFS_API stats {
 		uint64_t size;
 		std::map<std::string, std::string> attribs;
 
-		enum type_t
-		{
+		enum type_t {
 			eLINK,
 			eFILE,
 			eDIRECTORY
