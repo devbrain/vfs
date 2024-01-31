@@ -40,8 +40,11 @@ namespace vfs::core {
 
 	static dentry* root = nullptr;
 
+	static path current_wd("/", path::PATH_UNIX);
+
 	// ======================================================================
-	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve (const path& pth, int from, int to) {
+
+	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve_internal (const path& pth, int from, int to) {
 		if (!root) {
 			THROW_EXCEPTION_EX(vfs::exception, "dentry is not initialized");
 		}
@@ -84,6 +87,11 @@ namespace vfs::core {
 			return std::make_tuple (node.get (), nullptr, i);
 		}
 		return std::make_tuple (node.get (), node->ino.lock (), i);
+	}
+
+	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve (const path& pth, int from, int to) {
+		auto target = current_wd.resolve (pth);
+		return dentry_resolve_internal (target, from, to);
 	}
 
 	// ======================================================================
@@ -152,5 +160,25 @@ namespace vfs::core {
 	void dentry_done () {
 		delete root;
 		root = nullptr;
+	}
+
+	void dentry_set_cwd(const std::string& wd) {
+		auto p = current_wd.resolve (wd);
+		auto [dent, ino, depth] = dentry_resolve_internal (p, 0, p.depth());
+		if (depth == p.depth ()) {
+			core::stats st;
+			ino->stat (st);
+			if (st.type != VFS_INODE_DIRECTORY) {
+				RAISE_EX("Can not change directory to ", p, "which points to file");
+			} else {
+				current_wd = p;
+			}
+		} else {
+			RAISE_EX("Can not change directory to ", p, "since it is missing");
+		}
+	}
+
+	std::string dentry_get_cwd() {
+		return current_wd.to_string();
 	}
 } // ns vfs::core

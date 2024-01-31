@@ -11,7 +11,10 @@ TEST_CASE("seek") {
 	sandbox sbox;
 
 	vfs::mount("physfs", sbox.root(), "/");
-	file_stream str("/test.txt", std::ios::out);
+
+	vfs::set_cwd ("/");
+
+	file_stream str("test.txt", std::ios::out);
 	str << "0123456789abcdef";
 
 	str.seekg(0);
@@ -56,24 +59,24 @@ TEST_CASE("multi open") {
 	sandbox sbox;
 
 	vfs::mount("physfs", sbox.root(), "/");
-	file_stream str("/test.txt", std::ios::out);
+	vfs::set_cwd ("/");
+
+	file_stream str("test.txt", std::ios::out);
 	str << "0123456789\n";
 	str << "abcdefghij\n";
 	str << "klmnopqrst\n";
 	str.close();
 
 	std::string s;
-	str.open("/test.txt", std::ios::in);
+	str.open("test.txt", std::ios::in);
 	std::getline(str, s);
 	REQUIRE (s == "0123456789");
 	str.close();
 
-	str.open("/test.txt", std::ios::in);
+	str.open("test.txt", std::ios::in);
 	std::getline(str, s);
 	REQUIRE (s == "0123456789");
 	str.close();
-
-	vfs::deinitialize();
 }
 
 TEST_CASE("open app") {
@@ -82,12 +85,14 @@ TEST_CASE("open app") {
 
 	vfs::mount("physfs", sbox.root(), "/");
 
-	vfs::file_output_stream ostr("/test.txt");
+	vfs::set_cwd ("/");
+
+	vfs::file_output_stream ostr("test.txt");
 	REQUIRE_FALSE(!ostr);
 	ostr << "0123456789";
 	ostr.close();
 
-	vfs::file_stream str1("/test.txt", std::ios::app);
+	vfs::file_stream str1("test.txt", std::ios::app);
 	REQUIRE_FALSE(!str1);
 
 	str1 << "abc";

@@ -83,6 +83,7 @@ target_compile_options(vfs_api PRIVATE
 
 target_link_libraries(vfs_api PUBLIC
         bsw::bsw
+        doctest::doctest
         )
 
 find_library(DL_LIBRARY dl)

@@ -28,6 +28,9 @@ namespace vfs {
 	VFS_API void mount (const std::string& fstype, const std::string& args, const std::string& mount_point);
 	VFS_API mounts get_mounts ();
 
+	VFS_API void set_cwd(const std::string& wd);
+	VFS_API std::string get_cwd();
+
 } // ns vfs
 
 #include <bsw/warn/pop.hh>

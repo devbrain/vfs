@@ -406,4 +406,12 @@ namespace vfs {
 		}
 		THROW_EXCEPTION_EX(vfs::exception, "Invalid file handle");
 	}
+	// -----------------------------------------------------------------------------------
+	void set_cwd(const std::string& wd) {
+		core::dentry_set_cwd (wd);
+	}
+
+	std::string get_cwd() {
+		return core::dentry_get_cwd ();
+	}
 } // ns vfs

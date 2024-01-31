@@ -27,6 +27,9 @@ namespace vfs::core {
 
 	void dentry_mount (wrapped_pointer<mount_point> wp, dentry* node);
 
+	void dentry_set_cwd(const std::string& wd);
+	std::string dentry_get_cwd();
+
 }
 
 #endif
