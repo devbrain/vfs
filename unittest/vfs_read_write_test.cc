@@ -3,7 +3,8 @@
 
 
 #include <doctest/doctest.h>
-#include "vfs/system.hh"
+#include <vfs/system.hh>
+#include <vfs/io.hh>
 #include <vfs/api/exception.hh>
 #include <bsw/macros.hh>
 

@@ -4,7 +4,9 @@
 
 #include "vfs/system.hh"
 #include <utility>
+
 #include <vfs/api/exception.hh>
+#include <vfs/io.hh>
 
 #include "api/detail/modules_table.hh"
 #include "api/detail/fstab.hh"
@@ -22,9 +24,13 @@ namespace vfs {
 		}
 
 		struct system {
-		 public:
+			system() = default;
+
 			explicit system (const std::filesystem::path& modules_path);
+			explicit system(std::unique_ptr<module::filesystem> fsptr);
+
 			void add_module (const std::filesystem::path& modules_path);
+			void add_module (std::unique_ptr<module::filesystem> fsptr);
 
 			[[nodiscard]] file_system* get_module (const std::string& type) const;
 
@@ -38,6 +44,12 @@ namespace vfs {
 			: _all_modules (modules_path) {
 		}
 
+		system::system(std::unique_ptr<module::filesystem> fsptr) : _all_modules (std::move(fsptr)) {
+		}
+		// ------------------------------------------------------------------------------
+		void system::add_module (std::unique_ptr<module::filesystem> fsptr) {
+			_all_modules.add (std::move (fsptr));
+		}
 		// ------------------------------------------------------------------------------
 		void system::add_module (const std::filesystem::path& modules_path) {
 			_all_modules.add (modules_path);
@@ -56,13 +68,15 @@ namespace vfs {
 	static core::fstab* fstab = nullptr;
 
 	static void system_destructor () {
-		core::dentry_done ();
-		delete fstab;
+		if (system != nullptr) {
+			core::dentry_done ();
+			delete fstab;
 
-		fstab = nullptr;
-		delete system;
+			fstab = nullptr;
+			delete system;
 
-		system = nullptr;
+			system = nullptr;
+		}
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -74,7 +88,15 @@ namespace vfs {
 			system->add_module (path_to_module);
 		}
 	}
-
+	// -------------------------------------------------------------------------------------
+	void load_module (std::unique_ptr<module::filesystem> fsptr) {
+		if (system == nullptr) {
+			system = new core::system (std::move(fsptr));
+			bsw::register_at_exit (system_destructor);
+		} else {
+			system->add_module (std::move(fsptr));
+		}
+	}
 	// -------------------------------------------------------------------------------------
 	void deinitialize () {
 		system_destructor ();
@@ -82,6 +104,10 @@ namespace vfs {
 
 	// -------------------------------------------------------------------------------------
 	void mount (const std::string& fstype, const std::string& args, const std::string& mount_point) {
+		if (system == nullptr) {
+			system = new core::system;
+			bsw::register_at_exit (system_destructor);
+		}
 		auto* fs = system->get_module (fstype);
 		if (!fs) {
 			THROW_EXCEPTION_EX(vfs::exception, "Can not find module ", fstype);
@@ -118,7 +144,8 @@ namespace vfs {
 	// -------------------------------------------------------------------------------------
 	modules get_modules () {
 		if (!system) {
-			THROW_EXCEPTION_EX(vfs::exception, "no modules loaded");
+			system = new core::system;
+			bsw::register_at_exit (system_destructor);
 		}
 		return modules (&system->_all_modules);
 	}

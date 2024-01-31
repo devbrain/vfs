@@ -19,8 +19,8 @@ namespace vfs::core
 
 		~shared_module();
 
-		vfs_module_register_t get() const;
-		std::filesystem::path path() const;
+		[[nodiscard]] vfs_module_register_t get() const;
+		[[nodiscard]] std::filesystem::path path() const;
 	private:
 		shared_module(void* handle, std::filesystem::path  pth);
 		void* _handle;

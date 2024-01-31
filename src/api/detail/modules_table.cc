@@ -45,15 +45,31 @@ namespace vfs::core {
 	file_system* modules_table::entry::module () const {
 		return _fs;
 	}
-
 	// ------------------------------------------------------------------------------------
 	modules_table::entry::~entry () {
 		delete _fs;
 	}
 	// ===================================================================================
-
 	modules_table::modules_table (const std::filesystem::path& path) {
-		auto* fs = new vfs::detail::physfs ();
+		_add_module (new vfs::detail::physfs);
+		add (path);
+	}
+	// -----------------------------------------------------------------------------------
+	modules_table::modules_table () {
+		_add_module (new vfs::detail::physfs);
+	}
+	// -----------------------------------------------------------------------------------
+	modules_table::modules_table(std::unique_ptr<vfs::module::filesystem> fsptr) {
+		_add_module (new vfs::detail::physfs);
+		add(std::move(fsptr));
+	}
+	// -----------------------------------------------------------------------------------
+	void modules_table::add (std::unique_ptr<vfs::module::filesystem> fsptr) {
+		auto* fs = std::move(fsptr).release();
+		_add_module (fs);
+	}
+	// -----------------------------------------------------------------------------------
+	void modules_table::_add_module(vfs::module::filesystem* fs) {
 		std::unique_ptr<vfs_module> impl_module = std::make_unique<vfs_module> ();
 		fs->setup (impl_module.get ());
 		if (impl_module->get_name) {
@@ -61,9 +77,7 @@ namespace vfs::core {
 			impl_module->get_name (impl_module->opaque, name, sizeof (name));
 			_entries[name] = new entry (impl_module.release (), nullptr);
 		}
-		add (path);
 	}
-
 	// -----------------------------------------------------------------------------------
 	modules_table::~modules_table () {
 		for (const auto& e : _entries) {

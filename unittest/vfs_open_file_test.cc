@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
-#include "vfs/system.hh"
+#include <vfs/system.hh>
+#include <vfs/io.hh>
 #include <vfs/api/exception.hh>
 #include "sandbox.hh"
 
@@ -8,8 +9,6 @@ TEST_CASE("openExisting") {
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
-
-    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);

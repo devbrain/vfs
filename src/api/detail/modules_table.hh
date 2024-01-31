@@ -5,7 +5,7 @@
 #ifndef MODULES_TABLE_HH
 #define MODULES_TABLE_HH
 
-#include "vfs/api/vfs_module.h"
+#include <vfs/api/vfs_module.h>
 #include <filesystem>
 #include "api/detail/module_loader.hh"
 #include "file_system.hh"
@@ -24,13 +24,17 @@ namespace vfs::core {
 		friend class vfs::modules;
 
 	 public:
+		modules_table();
 		explicit modules_table (const std::filesystem::path& path);
+		explicit modules_table(std::unique_ptr<vfs::module::filesystem> fsptr);
 		~modules_table ();
 
 		void add (const std::filesystem::path& path);
+		void add (std::unique_ptr<vfs::module::filesystem> fsptr);
 		[[nodiscard]] file_system* get (const std::string& type) const;
 
 	 private:
+		void _add_module(vfs::module::filesystem* fs);
 		void _add_file (const std::filesystem::path& path);
 	 private:
 		class entry {

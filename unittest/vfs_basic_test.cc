@@ -1,5 +1,7 @@
 #include <doctest/doctest.h>
-#include "vfs/system.hh"
+#include <vfs/system.hh>
+#include <vfs/io.hh>
+
 #include <vfs/api/exception.hh>
 #include "sandbox.hh"
 
@@ -9,9 +11,6 @@ TEST_CASE("test mount") {
     sbox.mkdir("zopa/pizda");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
-
-    vfs::load_module(std::filesystem::path("."));
-	
 
     REQUIRE_THROWS_AS(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
 
@@ -42,9 +41,6 @@ TEST_CASE("testMount2") {
     sbox.mkdir("zopa/pizda");
     sbox.mkdir("a");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
-
-
-    vfs::load_module(std::filesystem::path("."));
 
     REQUIRE_THROWS_AS(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
 
@@ -86,8 +82,6 @@ TEST_CASE("testMkdir") {
     sbox.mkdir("a");
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
-
-    vfs::load_module(std::filesystem::path("."));
 
     REQUIRE_THROWS_AS(vfs::mount("zopa", sbox.root(), "/"), vfs::exception);
 
