@@ -1,4 +1,4 @@
-#include <doctest.h>
+#include <doctest/doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
 #include "sandbox.hh"
@@ -9,7 +9,7 @@ TEST_CASE("openExisting") {
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
@@ -26,7 +26,7 @@ TEST_CASE("openNonExisting") {
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/for-read.txt", vfs::creation_disposition::eOPEN_EXISTING, true), vfs::exception);
@@ -41,7 +41,7 @@ TEST_CASE("openTruncate") {
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
@@ -69,7 +69,7 @@ TEST_CASE("CreateNew") {
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_NEW, true), vfs::exception);
@@ -97,7 +97,7 @@ TEST_CASE("CreateAlways") {
     sbox.create_file("zopa/pizda/1.txt", "aaa");
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     REQUIRE_THROWS_AS(vfs::open("/zopa/pizda/1aa.txt", vfs::creation_disposition::eCREATE_ALWAYS, true), vfs::exception);

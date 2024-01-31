@@ -2,7 +2,7 @@
 #define VFS_MOUNTS_HH
 
 #include <vfs/api/vfs_api.h>
-#include <vfs/api/stdfilesystem.hh>
+#include <filesystem>
 #include <vfs/api/detail/wrapped_iterator.hh>
 #include <memory>
 #include <iosfwd>

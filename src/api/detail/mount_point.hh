@@ -1,7 +1,7 @@
 #ifndef VFS_API_MOUNT_POINT_HH
 #define VFS_API_MOUNT_POINT_HH
 
-#include "api/detail/filesystem.hh"
+#include "api/detail/file_system.hh"
 #include "api/detail/wrapped_pointer.hh"
 #include <memory>
 #include <set>

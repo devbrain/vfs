@@ -15,15 +15,15 @@ namespace vfs::core
 
     class modules_table;
 
-    class filesystem
+    class file_system
     {
         friend class modules_table;
 
     public:
-        explicit filesystem(vfs_module* ops);
+        explicit file_system (vfs_module* ops);
 
-        filesystem(const filesystem&) = delete;
-        filesystem& operator=(const filesystem&) = delete;
+        file_system (const file_system&) = delete;
+        file_system& operator= (const file_system&) = delete;
 
         [[nodiscard]] std::unique_ptr<inode> load_root(const std::string& params);
         [[nodiscard]] size_t max_name_length() const noexcept;
@@ -34,7 +34,7 @@ namespace vfs::core
 
         [[nodiscard]] bool is_readonly() const;
     private:
-        ~filesystem();
+        ~file_system ();
         vfs_module* _module;
         bool _is_readonly;
     };
@@ -96,7 +96,7 @@ namespace vfs::core
     // -------------------------------------------------------------
     class inode
     {
-        friend class filesystem;
+        friend class file_system;
 
         friend class file_ops;
 
@@ -110,7 +110,7 @@ namespace vfs::core
         void stat(stats& st) const;
         [[nodiscard]] std::unique_ptr<directory_iterator> get_directory_iterator() const;
 
-        [[nodiscard]] const filesystem* owner() const;
+        [[nodiscard]] const file_system* owner () const;
         [[nodiscard]] bool mkdir(const std::string& name);
         [[nodiscard]] bool mkfile(const std::string& name);
         [[nodiscard]] bool dirty() const noexcept;
@@ -120,12 +120,12 @@ namespace vfs::core
         [[nodiscard]] std::unique_ptr<file_ops> get_file_ops(open_mode_type mode_type) const;
         [[nodiscard]] bool is_readonly() const;
     private:
-        explicit inode(vfs_inode_ops* ops, filesystem* owner);
+        explicit inode (vfs_inode_ops* ops, file_system* owner);
     private:
         void _make_dirty();
     private:
         vfs_inode_ops* _ops;
-        filesystem* _owner;
+        file_system* _owner;
         bool _dirty;
     };
 }

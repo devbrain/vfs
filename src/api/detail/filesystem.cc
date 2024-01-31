@@ -1,40 +1,40 @@
-#include "filesystem.hh"
+#include "file_system.hh"
 #include <vfs/api/exception.hh>
-#include <bsw/errors.hh>
+#include <bsw/exception.hh>
 #include <vector>
 
 namespace vfs::core
 {
-    filesystem::filesystem(vfs_module* ops)
+    file_system::file_system (vfs_module* ops)
             : _module(ops)
     {
         _is_readonly = _module->is_readonly(_module->opaque);
     }
     // ---------------------------------------------------------------------
-    filesystem::~filesystem()
+    file_system::~file_system ()
     {
         _module->destructor(_module);
     }
     // ---------------------------------------------------------------------
-    std::unique_ptr<inode> filesystem::load_root(const std::string& params)
+    std::unique_ptr<inode> file_system::load_root (const std::string& params)
     {
         return std::unique_ptr<inode>(new inode(_module->load_root(_module->opaque,
                                                                    const_cast<char*>(params.c_str())), this));
     }
     // ---------------------------------------------------------------------
-    size_t filesystem::max_name_length() const noexcept
+    size_t file_system::max_name_length () const noexcept
     {
         return _module->maximal_name_length(_module->opaque);
     }
     // ---------------------------------------------------------------------
-    std::string filesystem::type() const noexcept
+    std::string file_system::type () const noexcept
     {
         char name[128] = {0};
         _module->get_name(_module->opaque, name, sizeof(name));
         return name;
     }
     // ---------------------------------------------------------------------
-    std::string filesystem::description() const noexcept
+    std::string file_system::description () const noexcept
     {
         std::size_t n = 1024;
         std::vector<char> out(n, '\0');
@@ -51,11 +51,11 @@ namespace vfs::core
         return std::string(out.data());
     }
     // ---------------------------------------------------------------------
-    bool filesystem::is_readonly() const
+    bool file_system::is_readonly () const
     {
         return _is_readonly;
     }
-    int filesystem::sync()
+    int file_system::sync ()
     {
         if (!_is_readonly)
         {
@@ -64,7 +64,7 @@ namespace vfs::core
         return 1;
     }
     // ---------------------------------------------------------------------
-    int filesystem::sync(inode* ino)
+    int file_system::sync (inode* ino)
     {
         if (!_is_readonly)
         {
@@ -177,7 +177,7 @@ namespace vfs::core
         return res;
     }
     // ----------------------------------------------------------------------
-    inode::inode(vfs_inode_ops* ops, filesystem* owner)
+    inode::inode (vfs_inode_ops* ops, file_system* owner)
             : _ops(ops),
               _owner(owner),
               _dirty(false)
@@ -193,7 +193,7 @@ namespace vfs::core
         }
     }
     // ----------------------------------------------------------------------
-    const filesystem* inode::owner() const
+    const file_system* inode::owner () const
     {
         return _owner;
     }

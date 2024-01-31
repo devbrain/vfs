@@ -2,7 +2,7 @@
 #define VFS_DETAIL_FSTAB_HH
 
 
-#include "filesystem.hh"
+#include "file_system.hh"
 #include "mount_point.hh"
 #include "api/detail/wrapped_pointer.hh"
 
@@ -25,7 +25,7 @@ namespace vfs::core
 		class entry
 		{
 		public:
-			entry(filesystem* fs, const path& pth, const std::string& args);
+			entry (file_system* fs, const path& pth, const std::string& args);
 			entry(entry&& other) = default;
 			~entry();
 
@@ -40,10 +40,10 @@ namespace vfs::core
 			std::string _type;
 			std::string _args;
 			path _path;
-			filesystem* _fs;
+			file_system* _fs;
 		};
 
-		wrapped_pointer<mount_point> mount(filesystem* module, const path& mount_path, const std::string& args);
+		wrapped_pointer<mount_point> mount (file_system* module, const path& mount_path, const std::string& args);
 		void unmount (const path& mount_path);
 	private:
 		using entry_map_t = std::map<std::size_t, entry>;

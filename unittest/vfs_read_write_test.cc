@@ -2,7 +2,7 @@
 #include <cstring>
 
 
-#include <doctest.h>
+#include <doctest/doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
 #include <bsw/macros.hh>
@@ -22,7 +22,7 @@ TEST(ReadWriteTest, SimpleRead) {
     sbox.create_file("zopa/pizda/1.txt", txt);
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
@@ -48,7 +48,7 @@ TEST(ReadWriteTest, SimpleReadSeek) {
     sbox.create_file("zopa/pizda/1.txt", txt);
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
@@ -74,7 +74,7 @@ TEST(ReadWriteTest, WriteFailed) {
     sbox.create_file("zopa/pizda/1.txt", txt);
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
@@ -91,7 +91,7 @@ TEST(ReadWriteTest, WriteSimple) {
     sbox.create_file("zopa/pizda/1.txt", txt);
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/2.txt", vfs::creation_disposition::eCREATE_NEW, false);
@@ -118,7 +118,7 @@ TEST(ReadWriteTest, WriteOffset) {
     sbox.create_file("zopa/pizda/1.txt", txt);
 
 
-    vfs::load_module(stdfs::path("."));
+    vfs::load_module(std::filesystem::path("."));
     vfs::mount("physfs", sbox.root(), "/");
 
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, false);

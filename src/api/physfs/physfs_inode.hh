@@ -2,14 +2,14 @@
 #define PHYSFS_INODE_HH
 
 #include "vfs/api/vfs_module.h"
-#include "vfs/api/stdfilesystem.hh"
+#include <filesystem>
 
 namespace vfs::detail
 {
     class physfs_inode : public vfs::module::inode
     {
     public:
-        explicit physfs_inode(const stdfs::path& pth);
+        explicit physfs_inode(const std::filesystem::path& pth);
 
         inode* lookup(const char* name) override;
         uint64_t size() override;
@@ -20,7 +20,7 @@ namespace vfs::detail
 
         vfs::module::file* open_file(open_mode_type mode_type) override;
     private:
-        const stdfs::path _path;
+        const std::filesystem::path _path;
     };
 }
 

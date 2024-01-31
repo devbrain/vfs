@@ -10,7 +10,7 @@
 #include "api/detail/dentry.hh"
 #include "api/detail/stats_converter.hh"
 
-#include <bsw/object_manager.hh>
+#include <bsw/register_at_exit.hh>
 #include <bsw/errors.hh>
 
 namespace vfs
@@ -26,27 +26,27 @@ namespace vfs
 		struct system
 		{
 		public:
-			explicit system(const stdfs::path& modules_path);
-			void add_module(const stdfs::path& modules_path);
+			explicit system(const std::filesystem::path& modules_path);
+			void add_module(const std::filesystem::path& modules_path);
 
-			[[nodiscard]] filesystem* get_module(const std::string& type) const;
+			[[nodiscard]] file_system* get_module (const std::string& type) const;
 
 			~system();
 
 			modules_table _all_modules;
 		};
 		// =============================================================================
-		system::system(const stdfs::path& modules_path)
+		system::system(const std::filesystem::path& modules_path)
 			: _all_modules(modules_path)
 		{
 		}
 		// ------------------------------------------------------------------------------
-		void system::add_module(const stdfs::path& modules_path)
+		void system::add_module(const std::filesystem::path& modules_path)
 		{
 			_all_modules.add(modules_path);
 		}
 		// ------------------------------------------------------------------------------
-		filesystem* system::get_module(const std::string& type) const
+		file_system* system::get_module (const std::string& type) const
 		{
 			return _all_modules.get(type);
 		}
@@ -68,12 +68,12 @@ namespace vfs
 		system = nullptr;
 	}
 	// ----------------------------------------------------------------------------------
-	void load_module(const stdfs::path& path_to_module)
+	void load_module(const std::filesystem::path& path_to_module)
 	{
 		if (system == nullptr)
 		{
 			system = new core::system(path_to_module);
-            ::core::object_manager::instance().call_on_exit(system_destructor);
+			bsw::register_at_exit(system_destructor);
 		}
 		else
 		{
@@ -345,7 +345,7 @@ namespace vfs
                 THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
             }
         }
-        THROW_EXCEPTION("Should not be here ", pth);
+        THROW_EXCEPTION_EX(exception, "Should not be here ", pth);
     }
     // ---------------------------------------------------------------------------------------------------------------
     void close(file* f)

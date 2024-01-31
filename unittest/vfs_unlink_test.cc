@@ -1,4 +1,4 @@
-#include <doctest.h>
+#include <doctest/doctest.h>
 #include <vfs/api/system.hh>
 #include <vfs/api/exception.hh>
 #include <bsw/macros.hh>
@@ -19,7 +19,7 @@ TEST(UnlinkTest, testUnlinkFile) {
 	sbox.create_file("zopa/pizda/2.txt", "aaa");
 
 
-	vfs::load_module(stdfs::path("."));
+	vfs::load_module(std::filesystem::path("."));
 
 	vfs::mount("physfs", sbox.root(), "/");
 	vfs::mount("physfs", sbox.root() + "/zopa", "/a");
@@ -39,7 +39,7 @@ TEST(UnlinkTest, testUnlinkDirectory) {
 	sbox.mkdir("zopa/pizda");
 	sbox.mkdir("a");
 
-	vfs::load_module(stdfs::path("."));
+	vfs::load_module(std::filesystem::path("."));
 
 	vfs::mount("physfs", sbox.root(), "/");
 
@@ -65,7 +65,7 @@ TEST(UnlinkTest, testUnlinkFileStat) {
 	sbox.create_file("zopa/pizda/2.txt", "aaa");
 
 
-	vfs::load_module(stdfs::path("."));
+	vfs::load_module(std::filesystem::path("."));
 
 	vfs::mount("physfs", sbox.root(), "/");
 	vfs::mount("physfs", sbox.root() + "/zopa", "/a");
@@ -92,7 +92,7 @@ TEST(UnlinkTest, testUnlinkFileInMem) {
 	sbox.create_file("zopa/pizda/2.txt", "aaa");
 
 
-	vfs::load_module(stdfs::path("."));
+	vfs::load_module(std::filesystem::path("."));
 
 	vfs::mount("physfs", sbox.root(), "/");
 	vfs::mount("physfs", sbox.root() + "/zopa", "/a");
@@ -119,7 +119,7 @@ TEST(UnlinkTest, testUnlinkNonEmpty)
 	sbox.create_file("zopa/pizda/1.txt", "aaa");
 
 
-	vfs::load_module(stdfs::path("."));
+	vfs::load_module(std::filesystem::path("."));
 
 	vfs::mount("physfs", sbox.root(), "/");
 
@@ -142,7 +142,7 @@ TEST(UnlinkTest, testUnlinkFileInMount) {
 	sbox.create_file("zopa/pizda/2.txt", "aaa");
 
 
-	vfs::load_module(stdfs::path("."));
+	vfs::load_module(std::filesystem::path("."));
 
 
 	vfs::mount("physfs", sbox.root() + "/zopa", "/");

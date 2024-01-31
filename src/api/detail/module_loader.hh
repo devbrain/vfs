@@ -6,7 +6,7 @@
 #define VFS_MODULE_LOADER_HH
 
 #include "vfs/api/vfs_module.h"
-#include "vfs/api/stdfilesystem.hh"
+#include <filesystem>
 
 #include <memory>
 
@@ -15,16 +15,16 @@ namespace vfs::core
 	class shared_module
 	{
 	public:
-		static std::unique_ptr<shared_module> load(const stdfs::path& pth);
+		static std::unique_ptr<shared_module> load(const std::filesystem::path& pth);
 
 		~shared_module();
 
 		vfs_module_register_t get() const;
-		stdfs::path path() const;
+		std::filesystem::path path() const;
 	private:
-		shared_module(void* handle, const stdfs::path& pth);
+		shared_module(void* handle, const std::filesystem::path& pth);
 		void* _handle;
-		stdfs::path _path;
+		std::filesystem::path _path;
 	};
 }
 

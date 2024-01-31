@@ -45,7 +45,7 @@ namespace vfs::core
     }
     */
     // --------------------------------------------------------------------------
-    fstab::entry::entry(filesystem* fs, const path& pth, const std::string& args)
+    fstab::entry::entry (file_system* fs, const path& pth, const std::string& args)
             : _type(fs->type()),
               _args(args),
               _path(pth),
@@ -87,7 +87,7 @@ namespace vfs::core
         return wrapped_pointer<mount_point>(_mount_point.get());
     }
     // =====================================================================================
-    wrapped_pointer<mount_point> fstab::mount(filesystem* module, const path& mount_path, const std::string& args)
+    wrapped_pointer<mount_point> fstab::mount (file_system* module, const path& mount_path, const std::string& args)
     {
         auto key = mount_path.hash();
         auto[itr, result] = _fstab.try_emplace(key,

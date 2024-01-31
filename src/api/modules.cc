@@ -67,7 +67,7 @@ namespace vfs {
         return _refcount;
     }
     // -----------------------------------------------------------------------------------
-    stdfs::path modules::data::path() const noexcept {
+    std::filesystem::path modules::data::path() const noexcept {
         return _path;
     }
     // ===================================================================================

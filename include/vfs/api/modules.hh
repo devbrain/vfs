@@ -2,7 +2,7 @@
 #define VFS_MODULES_HH
 
 #include <vfs/api/vfs_api.h>
-#include <vfs/api/stdfilesystem.hh>
+#include <filesystem>
 #include <vfs/api/detail/wrapped_iterator.hh>
 #include <memory>
 #include <iosfwd>
@@ -44,11 +44,11 @@ namespace vfs
 		private:
 			std::string _type;
 			int _refcount;
-			stdfs::path _path;
+			std::filesystem::path _path;
 		public:
 			[[nodiscard]] std::string type() const noexcept;
 			[[nodiscard]] int refcount() const noexcept;
-			[[nodiscard]] stdfs::path path() const noexcept;
+			[[nodiscard]] std::filesystem::path path() const noexcept;
 		private:
 			explicit data(const wrapper& itr);
 		};

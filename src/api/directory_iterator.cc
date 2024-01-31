@@ -1,6 +1,6 @@
 #include <vfs/api/directory_iterator.hh>
 #include <vfs/api/exception.hh>
-#include "api/detail/filesystem.hh"
+#include "api/detail/file_system.hh"
 #include "api/detail/stats_converter.hh"
 #include <bsw/errors.hh>
 

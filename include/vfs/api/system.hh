@@ -8,7 +8,7 @@
 #include <map>
 #include <optional>
 
-#include <vfs/api/stdfilesystem.hh>
+#include <filesystem>
 #include <vfs/api/vfs_api.h>
 #include <vfs/api/modules.hh>
 #include <vfs/api/mounts.hh>
@@ -24,7 +24,7 @@ namespace vfs
 {
     VFS_API void deinitialize();
 
-    VFS_API void load_module(const stdfs::path& path_to_module);
+    VFS_API void load_module(const std::filesystem::path& path_to_module);
     VFS_API modules get_modules();
 
     VFS_API void mount(const std::string& fstype, const std::string& args, const std::string& mount_point);

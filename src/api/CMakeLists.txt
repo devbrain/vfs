@@ -1,3 +1,12 @@
+if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
+        NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+endif ()
+
+if (DEFINED vfs_SHARED_LIBS)
+    set(BUILD_SHARED_LIBS "${assets_SHARED_LIBS}")
+endif ()
 
 set(src
         detail/modules_table.cc
@@ -26,16 +35,14 @@ set(hdr
         detail/wrapped_pointer.hh
         detail/stats_converter.hh
         detail/path.hh
-        detail/filesystem.hh
+        detail/file_system.hh
         detail/mount_point.hh
 
         physfs/physfs_inode.hh
         physfs/physfs.hh
 
         ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
-        ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h
         ${PROJECT_ROOT}/include/vfs/api/vfs_module.h
-        ${PROJECT_ROOT}/include/vfs/api/stdfilesystem.hh
         ${PROJECT_ROOT}/include/vfs/api/system.hh
         ${PROJECT_ROOT}/include/vfs/api/modules.hh
         ${PROJECT_ROOT}/include/vfs/api/mounts.hh
@@ -49,6 +56,7 @@ set(hdr
 add_library(vfs_api ${src} ${hdr})
 add_library(vfs_api::vfs_api ALIAS vfs_api)
 
+include(GenerateExportHeader)
 generate_export_header(vfs_api
         EXPORT_MACRO_NAME VFS_API
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
@@ -80,11 +88,8 @@ if (DL_LIBRARY)
 endif ()
 
 
-configure_file(vfs_config.h.in ${CMAKE_BINARY_DIR}/include/vfs/vfs_config.h)
-
 target_compile_definitions(vfs_api
         PRIVATE
-        ONYX_MODULE_NAME=vfs_api
         $<$<CXX_COMPILER_ID:MSVC>:
         _CRT_SECURE_NO_WARNINGS
         _SCL_SECURE_NO_WARNINGS
@@ -94,23 +99,3 @@ target_compile_definitions(vfs_api
         )
 target_compile_features(vfs_api PUBLIC cxx_std_17)
 
-# ==================================================================
-# Installation
-# ==================================================================
-
-onyx_install_package(
-  PACKAGE_NAME vfs
-  NAMESPACE vfs
-  CONFIG_FILE ${CMAKE_SOURCE_DIR}/cmake/vfs-config.cmake.in
-  TARGETS vfs_api
-  )
-
-
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/vfs
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        )
-
-install(DIRECTORY ${CMAKE_BINARY_DIR}/include/vfs
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        )
-      

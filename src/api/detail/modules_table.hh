@@ -6,9 +6,9 @@
 #define MODULES_TABLE_HH
 
 #include "vfs/api/vfs_module.h"
-#include "vfs/api/stdfilesystem.hh"
+#include <filesystem>
 #include "api/detail/module_loader.hh"
-#include "filesystem.hh"
+#include "file_system.hh"
 
 #include <map>
 #include <string>
@@ -26,14 +26,14 @@ namespace vfs::core
 	{
         friend class vfs::modules;
 	public:
-		explicit modules_table(const stdfs::path& path);
+		explicit modules_table(const std::filesystem::path& path);
 		~modules_table();
 
-		void add(const stdfs::path& path);
-		[[nodiscard]] filesystem* get(const std::string& type) const;
+		void add(const std::filesystem::path& path);
+		[[nodiscard]] file_system* get (const std::string& type) const;
 
 	private:
-		void _add_file(const stdfs::path& path);
+		void _add_file(const std::filesystem::path& path);
 	private:
 		class entry
 		{
@@ -44,13 +44,13 @@ namespace vfs::core
 			void inc_ref();
 			bool dec_ref();
 			[[nodiscard]] int ref_count() const;
-			[[nodiscard]] stdfs::path path() const;
-			[[nodiscard]] filesystem* module() const;
+			[[nodiscard]] std::filesystem::path path() const;
+			[[nodiscard]] file_system* module () const;
 		private:
 			~entry();
 		private:
 			int _ref_count;
-			filesystem* _fs;
+			file_system* _fs;
 			std::unique_ptr<shared_module> _dll;
 		};
 		friend class iterator;

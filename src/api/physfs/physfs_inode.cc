@@ -40,7 +40,7 @@ namespace vfs::detail
     class directory_iterator : public vfs::module::directory_iterator
     {
     public:
-        directory_iterator(stdfs::directory_iterator di)
+        directory_iterator(std::filesystem::directory_iterator di)
                 : _di(di),
                   _itr(begin(_di)),
                   _end(end(_di))
@@ -60,14 +60,14 @@ namespace vfs::detail
             return ret;
         }
     private:
-        stdfs::directory_iterator _di;
-        stdfs::directory_iterator _itr;
-        stdfs::directory_iterator _end;
+        std::filesystem::directory_iterator _di;
+        std::filesystem::directory_iterator _itr;
+        std::filesystem::directory_iterator _end;
     };
 
 // ===================================================================================
-    physfs_inode::physfs_inode(const stdfs::path& pth)
-            : vfs::module::inode(stdfs::is_directory(pth) ? VFS_INODE_DIRECTORY : VFS_INODE_REGULAR),
+    physfs_inode::physfs_inode(const std::filesystem::path& pth)
+            : vfs::module::inode(std::filesystem::is_directory(pth) ? VFS_INODE_DIRECTORY : VFS_INODE_REGULAR),
               _path(pth)
     {
 
@@ -75,9 +75,9 @@ namespace vfs::detail
 // -----------------------------------------------------------------------------------
     vfs::module::inode* physfs_inode::lookup(const char* name)
     {
-        const stdfs::path child = _path / name;
+        const std::filesystem::path child = _path / name;
 
-        if (!stdfs::exists(child))
+        if (!std::filesystem::exists(child))
         {
             return nullptr;
         }
@@ -86,7 +86,7 @@ namespace vfs::detail
 // -----------------------------------------------------------------------------------
     vfs::module::directory_iterator* physfs_inode::get_directory_iterator()
     {
-        return new directory_iterator(stdfs::directory_iterator(_path));
+        return new directory_iterator(std::filesystem::directory_iterator(_path));
     }
 // -----------------------------------------------------------------------------------
     uint64_t physfs_inode::size()
@@ -95,23 +95,23 @@ namespace vfs::detail
         {
             return 0;
         }
-        return stdfs::file_size(_path);
+        return std::filesystem::file_size(_path);
     }
 // -----------------------------------------------------------------------------------
     bool physfs_inode::mkdir(const char* name)
     {
-        const stdfs::path child = _path / name;
-        if (stdfs::exists(child))
+        const std::filesystem::path child = _path / name;
+        if (std::filesystem::exists(child))
         {
             return false;
         }
-        return stdfs::create_directory(child);
+        return std::filesystem::create_directory(child);
     }
 // -----------------------------------------------------------------------------------
     bool physfs_inode::mkfile(const char* name)
     {
-        const stdfs::path child = _path / name;
-        if (stdfs::exists(child))
+        const std::filesystem::path child = _path / name;
+        if (std::filesystem::exists(child))
         {
             return false;
         }
@@ -126,11 +126,11 @@ namespace vfs::detail
 // -----------------------------------------------------------------------------------
     int physfs_inode::unlink()
     {
-        if (!stdfs::exists(_path))
+        if (!std::filesystem::exists(_path))
         {
             return 0;
         }
-        return stdfs::remove(_path) ? 1 : 0;
+        return std::filesystem::remove(_path) ? 1 : 0;
     }
 // -----------------------------------------------------------------------------------
     vfs::module::file* physfs_inode::open_file(open_mode_type mode_type)

@@ -16,7 +16,7 @@ namespace vfs::detail
 
     vfs::module::inode* physfs::load_root(const std::string& params)
     {
-        return new physfs_inode(stdfs::path(params));
+        return new physfs_inode(std::filesystem::path(params));
     }
 
     size_t physfs::max_name_length()

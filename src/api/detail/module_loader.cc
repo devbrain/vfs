@@ -7,7 +7,7 @@
 
 namespace
 {
-	void* probe_module(const stdfs::path& pth)
+	void* probe_module(const std::filesystem::path& pth)
 	{
 	    std::string str = pth.string();
 		void* dll = dlopen(str.c_str(), RTLD_LAZY);
@@ -31,7 +31,7 @@ namespace
 namespace vfs::core
 {
 
-	std::unique_ptr<shared_module> shared_module::load(const stdfs::path& pth)
+	std::unique_ptr<shared_module> shared_module::load(const std::filesystem::path& pth)
 	{
 
 		void* dll = probe_module(pth);
@@ -52,12 +52,12 @@ namespace vfs::core
 		return reinterpret_cast<vfs_module_register_t>(dlsym(_handle, VFS_MODULE_REGISTER_NAME));
 	}
 	// --------------------------------------------------------------------------------
-	stdfs::path shared_module::path() const
+	std::filesystem::path shared_module::path() const
 	{
 		return _path;
 	}
 	// --------------------------------------------------------------------------------
-	shared_module::shared_module(void* handle, const stdfs::path& pth)
+	shared_module::shared_module(void* handle, const std::filesystem::path& pth)
 		: _handle(handle),
 		  _path(pth)
 	{
