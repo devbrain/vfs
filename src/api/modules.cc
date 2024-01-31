@@ -3,7 +3,6 @@
 #include "api/detail/modules_table.hh"
 
 namespace vfs {
-
 	struct modules::wrapper {
 		explicit wrapper (core::modules_table::map_t::const_iterator it)
 			: itr (it) {

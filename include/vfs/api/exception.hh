@@ -7,10 +7,8 @@
 #include <string>
 
 namespace vfs {
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning( disable : 4275 )
-#endif
+#include <bsw/warn/push.hh>
+#include <bsw/warn/dll_interface>
 
 	class VFS_API exception : public bsw::exception {
 	 public:
@@ -24,9 +22,7 @@ namespace vfs {
 
 	};
 
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#include <bsw/warn/pop.hh>
 #define THROW_EXCEPTION_EX(Exception, ...) RAISE_EX_CUSTOM(Exception, ##__VA_ARGS__)
 } // ns vfs
 

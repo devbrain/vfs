@@ -5,12 +5,11 @@
 #include <string>
 #include <map>
 
-#include "vfs/api/vfs_api.h"
+#include <vfs/api/vfs_api.h>
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning( disable : 4275 4251 )
-#endif
+#include <bsw/warn/push.hh>
+#include <bsw/warn/dll_interface>
+#include <bsw/warn/dll_interface_base>
 
 namespace vfs {
 	struct VFS_API stats {
@@ -28,8 +27,6 @@ namespace vfs {
 
 }
 
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#include <bsw/warn/pop.hh>
 
 #endif

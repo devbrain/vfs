@@ -1,16 +1,17 @@
 #ifndef VFS_MODULES_HH
 #define VFS_MODULES_HH
 
-#include "vfs/api/vfs_api.h"
 #include <filesystem>
-#include "vfs/api/detail/wrapped_iterator.hh"
 #include <memory>
 #include <iosfwd>
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning( disable : 4275 4251 )
-#endif
+#include <vfs/api/vfs_api.h>
+#include <vfs/api/detail/wrapped_iterator.hh>
+
+#include <bsw/warn/push.hh>
+#include <bsw/warn/dll_interface>
+#include <bsw/warn/dll_interface_base>
+
 namespace vfs {
 	namespace core {
 		class modules_table;
@@ -73,8 +74,6 @@ namespace vfs {
 	VFS_API std::ostream& operator<< (std::ostream&, const modules::data&);
 } // ns vfs
 
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#include <bsw/warn/pop.hh>
 
 #endif

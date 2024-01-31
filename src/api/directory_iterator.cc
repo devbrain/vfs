@@ -67,10 +67,7 @@ namespace vfs {
 	}
 
 	//-----------------------------------------------------------------------------------
-	directory_iterator::directory_iterator (const directory_iterator& other)
-		: _directory (other._directory),
-		  _ino_stats (other._ino_stats) {
-	}
+	directory_iterator::directory_iterator (const directory_iterator& other)  = default;
 
 	//-----------------------------------------------------------------------------------
 	directory_iterator::reference directory_iterator::operator* () const {

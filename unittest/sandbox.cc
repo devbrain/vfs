@@ -15,13 +15,13 @@ sandbox::sandbox()
 }
 
 
-void sandbox::mkdir(const std::string pth)
+void sandbox::mkdir(const std::string& pth)
 {
     auto path = _root / std::filesystem::path(pth);
     std::filesystem::create_directories(path);
 }
 
-void sandbox::create_file (const std::string pth, const std::string& text)
+void sandbox::create_file (const std::string& pth, const std::string& text)
 {
     auto path = _root / std::filesystem::path(pth);
     std::ofstream file(path); //open in constructor

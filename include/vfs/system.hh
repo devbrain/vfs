@@ -7,18 +7,17 @@
 
 #include <map>
 #include <optional>
-
 #include <filesystem>
-#include "vfs/api/vfs_api.h"
-#include "modules.hh"
-#include "mounts.hh"
-#include "stats.hh"
-#include "directory_iterator.hh"
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning( disable : 4251 )
-#endif
+#include <vfs/api/vfs_api.h>
+#include <vfs/modules.hh>
+#include <vfs/mounts.hh>
+#include <vfs/stats.hh>
+#include <vfs/directory_iterator.hh>
+
+
+#include <bsw/warn/push.hh>
+#include <bsw/warn/dll_interface>
 
 namespace vfs {
 	VFS_API void deinitialize ();
@@ -78,8 +77,6 @@ namespace vfs {
 
 } // ns vfs
 
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#include <bsw/warn/pop.hh>
 
 #endif //VFS_SYSTEM_HH

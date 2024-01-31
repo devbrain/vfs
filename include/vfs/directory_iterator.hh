@@ -5,8 +5,8 @@
 #include <string>
 #include <memory>
 
-#include "stats.hh"
-#include "vfs/api/vfs_api.h"
+#include <vfs/stats.hh>
+#include <vfs/api/vfs_api.h>
 
 namespace vfs {
 	// forward declarations
@@ -29,14 +29,10 @@ namespace vfs {
 		explicit directory (const std::shared_ptr<core::inode>& ino);
 
 		struct impl;
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning( disable : 4251 )
-#endif
+#include <bsw/warn/push.hh>
+#include <bsw/warn/dll_interface>
 		std::unique_ptr<impl> _pimpl;
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#include <bsw/warn/pop.hh>
 	};
 
 	class VFS_API directory_iterator {
@@ -63,14 +59,10 @@ namespace vfs {
 		void assert_directory () const;
 
 		directory* _directory;
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning( disable : 4251 )
-#endif
+#include <bsw/warn/push.hh>
+#include <bsw/warn/dll_interface>
 		value_type _ino_stats;
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+#include <bsw/warn/pop.hh>
 	};
 
 	VFS_API directory_iterator begin (directory& w);
