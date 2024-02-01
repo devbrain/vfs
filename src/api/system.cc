@@ -116,14 +116,17 @@ namespace vfs {
 			fstab = new core::fstab;
 		}
 
+
+		path p (mount_point);
+		p.make_directory ();
+		if (!p.is_absolute()) {
+			THROW_EXCEPTION_EX(vfs::exception, "Mount point ", mount_point, " should be absolute");
+		}
 		if (core::is_root (mount_point)) {
 			auto mountedfs = fstab->mount (fs, path (mount_point), args);
 			core::dentry_init (mountedfs);
 		} else {
-			path p (mount_point);
-			p.make_directory ();
-
-			auto [dent, ino, depth] = core::dentry_resolve (p, 0, p.depth ());
+			auto [dent, ino, depth, _] = core::dentry_resolve (p);
 
 			if (depth != p.depth ()) {
 				THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", mount_point);
@@ -160,10 +163,10 @@ namespace vfs {
 
 	// -------------------------------------------------------------------------------------
 	std::optional<stats> get_stats (const std::string& pth) {
-		path p (pth);
-		p.make_directory ();
+		path some_path (pth);
+		some_path.make_directory ();
 
-		auto [dent, ino, depth] = core::dentry_resolve (p, 0, p.depth ());
+		auto [dent, ino, depth, p] = core::dentry_resolve (some_path);
 
 		if (depth != p.depth ()) {
 			return std::nullopt;
@@ -183,10 +186,10 @@ namespace vfs {
 
 	// ---------------------------------------------------------------------------------
 	directory open_directory (const std::string& pth) {
-		path p (pth);
-		p.make_directory ();
+		path some_path (pth);
+		some_path.make_directory ();
 
-		auto [dent, ino, depth] = core::dentry_resolve (p, 0, p.depth ());
+		auto [dent, ino, depth, p] = core::dentry_resolve (some_path);
 		if (depth != p.depth ()) {
 			THROW_EXCEPTION_EX(vfs::exception, "path not found ", pth);
 		}
@@ -200,10 +203,10 @@ namespace vfs {
 
 	// ---------------------------------------------------------------------------------
 	void create_directory (const std::string& pth) {
-		path p (pth);
-		p.make_directory ();
+		path some_path (pth);
+		some_path.make_directory ();
 
-		auto [dent, ino, depth] = core::dentry_resolve (p, 0, p.depth ());
+		auto [dent, ino, depth, p] = core::dentry_resolve (some_path);
 		if (depth == p.depth ()) {
 			THROW_EXCEPTION_EX(vfs::exception, "path ", pth, " already exists");
 		}
@@ -221,10 +224,10 @@ namespace vfs {
 
 	// --------------------------------------------------------------------------------
 	void unlink (const std::string& pth) {
-		path p (pth);
-		p.make_directory ();
+		path some_path (pth);
+		some_path.make_directory ();
 
-		auto [dent, ino, depth] = core::dentry_resolve (p, 0, p.depth ());
+		auto [dent, ino, depth, p] = core::dentry_resolve (some_path);
 		if (depth != p.depth ()) {
 			THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
 		}
@@ -246,22 +249,86 @@ namespace vfs {
 
 	// ------------------------------------------------------------------------------------------
 	struct file {
-		file (std::unique_ptr<core::file_ops>&& fops, std::string  pth, bool ro)
+		file (std::unique_ptr<core::file_ops>&& fops, std::string  pth, bool ro, bool app)
 			: file_ops (std::move (fops)),
 			  file_path (std::move(pth)),
-			  read_only (ro) {
+			  read_only (ro),
+			  append (app) {
 
 		}
 
 		std::unique_ptr<core::file_ops> file_ops;
 		std::string file_path;
 		bool read_only;
+		bool append;
 	};
 
 	// ------------------------------------------------------------------------------------------
+	file* open (const std::string& pth, unsigned openmode) {
+		path some_path (pth);
+		some_path.make_directory ();
+		auto [dent, ino, depth, p] = core::dentry_resolve (some_path);
+		std::unique_ptr<core::file_ops> fops;
+		bool read_only = (openmode & READ_ONLY) && ((openmode & WRITE_ONLY) == 0);
+		bool has_append = (openmode & APPEND);
+
+		if (depth == p.depth ()) {
+			// path found
+			core::stats st;
+			ino->stat (st);
+			if (st.type == VFS_INODE_DIRECTORY) {
+				THROW_EXCEPTION_EX(vfs::exception, "path ", pth, " is directory");
+			}
+			fops = ino->get_file_ops (read_only ? eVFS_OPEN_MODE_READ : eVFS_OPEN_MODE_WRITE);
+			if (!fops) {
+				THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth);
+			}
+
+			if (openmode & TRUNCATE) {
+				if ((openmode & WRITE_ONLY) || (openmode & READ_ONLY)) {
+					if (!fops->truncate ()) {
+						THROW_EXCEPTION_EX(vfs::exception, "failed to truncate file ", pth);
+					}
+					return new file (std::move (fops), pth, read_only, has_append);
+				} else {
+					if (openmode & CREATE) {
+						return new file (std::move (fops), pth, read_only, has_append);
+					} else {
+						THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, "for TRUNCATE");
+					}
+				}
+			} else {
+				return new file (std::move (fops), pth, read_only, has_append);
+			}
+		} else {
+			if (depth == p.depth () - 1) {
+				if (read_only) {
+					THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for reading, since it does not exists");
+				}
+				p.make_file ();
+				if (!ino->mkfile (p.get_file_name ())) {
+					THROW_EXCEPTION_EX(vfs::exception, "can not create new file ", pth);
+				}
+				p.make_directory ();
+				auto [dent_new, ino_new, depth_new, new_path] = core::dentry_resolve (p);
+				if (depth_new < new_path.depth ()) {
+					THROW_EXCEPTION_EX(vfs::exception, "can not resolve new file ", pth);
+				}
+				fops = ino_new->get_file_ops ((openmode & WRITE_ONLY) ? eVFS_OPEN_MODE_WRITE : eVFS_OPEN_MODE_READ);
+				if (!fops) {
+					THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for writing");
+				}
+				return new file (std::move (fops), pth, read_only, has_append);
+			} else {
+				THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
+			}
+		}
+		THROW_EXCEPTION_EX(exception, "Should not be here ", pth);
+	}
+	// ------------------------------------------------------------------------------------------
 	file* open (const std::string& pth, creation_disposition cd, bool readonly) {
-		path p (pth);
-		p.make_directory ();
+		path some_path (pth);
+		some_path.make_directory ();
 		if (readonly) {
 			if (cd == creation_disposition::eCREATE_ALWAYS) {
 				THROW_EXCEPTION_EX(vfs::exception, "Mismatched arguments CREATE_ALWAYS and readonly");
@@ -272,7 +339,7 @@ namespace vfs {
 
 		}
 		// TODO check read only fs
-		auto [dent, ino, depth] = core::dentry_resolve (p, 0, p.depth ());
+		auto [dent, ino, depth, p] = core::dentry_resolve (some_path);
 		std::unique_ptr<core::file_ops> fops;
 
 		if (depth == p.depth ()) {
@@ -289,14 +356,14 @@ namespace vfs {
 					if (!fops->truncate ()) {
 						THROW_EXCEPTION_EX(vfs::exception, "failed to truncate file ", pth);
 					}
-					return new file (std::move (fops), pth, readonly);
+					return new file (std::move (fops), pth, readonly, false);
 				case creation_disposition::eCREATE_NEW:
 				case creation_disposition::eOPEN_EXISTING:
 					fops = ino->get_file_ops (readonly ? eVFS_OPEN_MODE_READ : eVFS_OPEN_MODE_WRITE);
 					if (!fops) {
 						THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth);
 					}
-					return new file (std::move (fops), pth, readonly);
+					return new file (std::move (fops), pth, readonly, false);
 			}
 		} else {
 			if (depth == p.depth () - 1) {
@@ -312,15 +379,15 @@ namespace vfs {
 					THROW_EXCEPTION_EX(vfs::exception, "can not create new file ", pth);
 				}
 				p.make_directory ();
-				auto [dent_new, ino_new, depth_new] = core::dentry_resolve (p, 0, p.depth ());
-				if (depth_new < p.depth ()) {
+				auto [dent_new, ino_new, depth_new, new_path] = core::dentry_resolve (p);
+				if (depth_new < new_path.depth ()) {
 					THROW_EXCEPTION_EX(vfs::exception, "can not resolve new file ", pth);
 				}
 				fops = ino_new->get_file_ops (eVFS_OPEN_MODE_WRITE);
 				if (!fops) {
 					THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for writing");
 				}
-				return new file (std::move (fops), pth, readonly);
+				return new file (std::move (fops), pth, readonly, false);
 			} else {
 				THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
 			}
@@ -356,10 +423,16 @@ namespace vfs {
 			if (f->file_ops->is_readonly ()) {
 				THROW_EXCEPTION_EX(vfs::exception, "the file ", f->file_path, " is opened in read only file system");
 			}
+			if (f->append) {
+				if (!f->file_ops->seek (0, eVFS_SEEK_END)) {
+					THROW_EXCEPTION_EX(vfs::exception, "append failed ", f->file_path);
+				}
+			}
 			auto rc = f->file_ops->write (buff, len);
 			if (rc < 0) {
 				THROW_EXCEPTION_EX(vfs::exception, "write failed to ", f->file_path);
 			}
+
 			return static_cast<size_t>(rc);
 		}
 		THROW_EXCEPTION_EX(vfs::exception, "Invalid file handle");

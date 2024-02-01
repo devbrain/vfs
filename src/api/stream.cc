@@ -27,28 +27,25 @@ namespace vfs {
 		mode (m);
 		reset_buffers ();
 
-		creation_disposition flags;
-		bool read_only = false;
-
-		if (m & std::ios::in) {
-			read_only = true;
-			flags = creation_disposition::eOPEN_EXISTING;
-			if (m & std::ios::out) {
-				read_only = false;
-				flags = creation_disposition::eCREATE_ALWAYS;
-			}
-		}
-
+		unsigned flags (0);
 		if (m & std::ios::trunc) {
-			read_only = false;
-			flags = creation_disposition::eTRUNCATE_EXISTING;
+			flags |= openmode_t::TRUNCATE;
 		}
 		if (m & std::ios::app) {
-			read_only = false;
-			flags = creation_disposition::eOPEN_EXISTING;
+			flags |= openmode_t::APPEND;
+		}
+		if (m & std::ios::out) {
+			flags |= openmode_t::CREATE;
+		}
+		if ((m & std::ios::in) && (m & std::ios::out)) {
+			flags |= openmode_t::READ_WRITE;
+		} else if (m & std::ios::in) {
+			flags |= openmode_t::READ_ONLY;
+		} else {
+			flags |= openmode_t::WRITE_ONLY;
 		}
 
-		_fd = vfs::open (path, flags, read_only);
+		_fd = vfs::open (path, flags);
 
 		if ((m & std::ios::app) || (m & std::ios::ate)) {
 			seekoff (0, std::ios::end, m);

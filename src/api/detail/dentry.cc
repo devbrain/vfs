@@ -44,7 +44,7 @@ namespace vfs::core {
 
 	// ======================================================================
 
-	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve_internal (const path& pth, int from, int to) {
+	std::tuple<dentry*, std::shared_ptr<inode>, int, path> dentry_resolve_internal (const path& pth, int from, int to) {
 		if (!root) {
 			THROW_EXCEPTION_EX(vfs::exception, "dentry is not initialized");
 		}
@@ -84,14 +84,15 @@ namespace vfs::core {
 			}
 		}
 		if (node->ino.expired ()) {
-			return std::make_tuple (node.get (), nullptr, i);
+			return std::make_tuple (node.get (), nullptr, i, pth);
 		}
-		return std::make_tuple (node.get (), node->ino.lock (), i);
+		return std::make_tuple (node.get (), node->ino.lock (), i, pth);
 	}
 
-	std::tuple<dentry*, std::shared_ptr<inode>, int> dentry_resolve (const path& pth, int from, int to) {
-		auto target = current_wd.resolve (pth);
-		return dentry_resolve_internal (target, from, to);
+	std::tuple<dentry*, std::shared_ptr<inode>, int, path> dentry_resolve (const path& pth) {
+		path target = current_wd;
+		target.resolve (pth);
+		return dentry_resolve_internal (target, 0, target.depth());
 	}
 
 	// ======================================================================
@@ -163,8 +164,10 @@ namespace vfs::core {
 	}
 
 	void dentry_set_cwd(const std::string& wd) {
-		auto p = current_wd.resolve (wd);
-		auto [dent, ino, depth] = dentry_resolve_internal (p, 0, p.depth());
+		auto some_path = current_wd;
+		some_path.resolve (wd);
+		some_path.make_directory();
+		auto [dent, ino, depth, p] = dentry_resolve_internal (some_path, 0, some_path.depth());
 		if (depth == p.depth ()) {
 			core::stats st;
 			ino->stat (st);

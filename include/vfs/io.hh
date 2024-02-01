@@ -49,6 +49,18 @@ namespace vfs {
 	struct file;
 
 	VFS_API file* open (const std::string& path, creation_disposition cd, bool readonly);
+
+	enum openmode_t : unsigned {
+		TRUNCATE   = 0x1,
+		APPEND     = 0x2,
+		CREATE     = 0x4,
+		READ_ONLY  = 0x8,
+		WRITE_ONLY = 0x10,
+		READ_WRITE = READ_ONLY | WRITE_ONLY
+	};
+
+	VFS_API file* open (const std::string& path, unsigned openmode);
+
 	VFS_API void close (file* f);
 
 	VFS_API size_t read (file* f, void* buff, size_t len);

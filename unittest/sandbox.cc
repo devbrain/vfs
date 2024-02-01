@@ -34,3 +34,13 @@ void sandbox::create_file (const std::string& pth, const std::string& text) {
 std::string sandbox::root () const noexcept {
 	return _root.generic_string ();
 }
+
+bool sandbox::exists (const std::string& pth) const {
+	auto path = _root / std::filesystem::path (pth);
+	return std::filesystem::exists (path);
+}
+
+std::size_t sandbox::size (const std::string& pth) const {
+	auto path = _root / std::filesystem::path (pth);
+	return std::filesystem::file_size (path);
+}
