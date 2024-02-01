@@ -51,6 +51,7 @@ set(hdr
         ${PROJECT_ROOT}/include/vfs/directory_iterator.hh
         ${PROJECT_ROOT}/include/vfs/api/detail/wrapped_iterator.hh
         ${PROJECT_ROOT}/include/vfs/io.hh
+        io.cc
         ${PROJECT_ROOT}/include/vfs/stream.hh
         stream.cc
         )
