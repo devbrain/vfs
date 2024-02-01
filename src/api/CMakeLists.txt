@@ -25,9 +25,6 @@ set(src
         modules.cc
         mounts.cc
         directory_iterator.cc
-        )
-
-set(hdr
         detail/module_loader.hh
         detail/modules_table.hh
         detail/fstab.hh
@@ -56,8 +53,17 @@ set(hdr
         stream.cc
         )
 
+if (vfs_ENABLE_TESTING)
+    set(testing_src
+            testing/dll_test_init.cc
+            testing/test_path.cc
+    )
+else()
+    set(testing_src
+    )
+endif()
 
-add_library(vfs_api ${src} ${hdr})
+add_library(vfs_api ${src} ${testing_src})
 add_library(vfs_api::vfs_api ALIAS vfs_api)
 
 include(GenerateExportHeader)
@@ -82,15 +88,14 @@ target_compile_options(vfs_api PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>: "/W4" >)
 
 
-target_link_libraries(vfs_api PUBLIC
-        bsw::bsw
-        doctest::doctest
-        )
+target_link_libraries(vfs_api PUBLIC bsw::bsw ${CMAKE_DL_LIBS})
 
-find_library(DL_LIBRARY dl)
-if (DL_LIBRARY)
-    target_link_libraries(vfs_api PUBLIC ${DL_LIBRARY})
-endif ()
+
+if (vfs_ENABLE_TESTING)
+    target_link_libraries(vfs_api PUBLIC doctest::doctest)
+    target_compile_definitions(vfs_api PRIVATE VFS_ENABLE_TESTING)
+endif()
+
 
 
 target_compile_definitions(vfs_api

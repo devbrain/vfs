@@ -4,7 +4,8 @@ project(vfs VERSION 1.0.0 LANGUAGES CXX)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 option(vfs_INCLUDE_PACKAGING "Include packaging rules for vfs" "${is_top_level}")
-option(vfs_ENABLE_TESTING "Enable testing for vfs" TRUE)
+option(vfs_ENABLE_TESTING "Enable testing for vfs" ${is_top_level})
+option(BUILD_SHARED_LIBS "Build shared library" ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/cmake")
 
@@ -25,6 +26,7 @@ add_subdirectory(ext)
 add_subdirectory(src/api)
 
 if (vfs_ENABLE_TESTING)
+    message("Testing is enabled")
     add_subdirectory(unittest)
 endif()
 
@@ -32,8 +34,7 @@ if (vfs_INCLUDE_PACKAGING)
     #   add_subdirectory(packaging)
 endif ()
 
-option(BUILD_SHARED_LIBS "Build shared library" ON)
-option(BUILD_TEST "Build unittests" ON)
+
 
 
 
