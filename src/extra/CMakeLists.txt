@@ -1,0 +1,5 @@
+find_package(Qt6 COMPONENTS Core)
+if (Qt6_FOUND)
+    message("QT6 found")
+    add_subdirectory(ui)
+endif()

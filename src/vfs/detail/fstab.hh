@@ -3,7 +3,7 @@
 
 #include "file_system.hh"
 #include "mount_point.hh"
-#include "api/detail/wrapped_pointer.hh"
+#include "detail/wrapped_pointer.hh"
 
 #include "path.hh"
 

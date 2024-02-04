@@ -1,13 +1,12 @@
 #include <ostream>
 #include "vfs/mounts.hh"
-#include "api/detail/fstab.hh"
+#include "detail/fstab.hh"
 
 namespace vfs {
 
 	struct mounts::wrapper {
 		explicit wrapper (core::fstab::entry_map_t::const_iterator it)
 			: itr (it) {
-
 		}
 
 		core::fstab::entry_map_t::const_iterator itr;

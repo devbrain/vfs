@@ -3,7 +3,7 @@
 //
 
 #include <doctest/doctest.h>
-#include "api/detail/path.hh"
+#include "detail/path.hh"
 
 #include <stdexcept>
 

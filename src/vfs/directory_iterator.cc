@@ -1,7 +1,7 @@
 #include "vfs/directory_iterator.hh"
-#include <vfs/api/exception.hh>
-#include "api/detail/file_system.hh"
-#include "api/detail/stats_converter.hh"
+#include "vfs/exception.hh"
+#include "detail/file_system.hh"
+#include "detail/stats_converter.hh"
 #include <bsw/errors.hh>
 
 namespace vfs {

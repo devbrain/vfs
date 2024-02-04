@@ -12,7 +12,7 @@
 #include <vfs/modules.hh>
 #include <vfs/mounts.hh>
 
-#include <vfs/api/vfs_module.h>
+#include "vfs/api/vfs_module.h"
 
 
 #include <bsw/warn/push.hh>

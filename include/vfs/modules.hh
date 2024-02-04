@@ -6,7 +6,7 @@
 #include <iosfwd>
 
 #include <vfs/api/vfs_api.h>
-#include <vfs/api/detail/wrapped_iterator.hh>
+#include <vfs/detail/wrapped_iterator.hh>
 
 #include <bsw/warn/push.hh>
 #include <bsw/warn/dll_interface>

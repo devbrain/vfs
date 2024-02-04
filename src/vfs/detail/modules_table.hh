@@ -5,9 +5,9 @@
 #ifndef MODULES_TABLE_HH
 #define MODULES_TABLE_HH
 
-#include <vfs/api/vfs_module.h>
+#include "vfs/api/vfs_module.h"
 #include <filesystem>
-#include "api/detail/module_loader.hh"
+#include "detail/module_loader.hh"
 #include "file_system.hh"
 
 #include <map>
@@ -26,12 +26,13 @@ namespace vfs::core {
 	 public:
 		modules_table();
 		explicit modules_table (const std::filesystem::path& path);
-		explicit modules_table(std::unique_ptr<vfs::module::filesystem> fsptr);
+		modules_table(std::unique_ptr<vfs::module::filesystem> fsptr, bool register_phys_fs);
 		~modules_table ();
 
 		void add (const std::filesystem::path& path);
 		void add (std::unique_ptr<vfs::module::filesystem> fsptr);
 		[[nodiscard]] file_system* get (const std::string& type) const;
+		[[nodiscard]] file_system* get_single () const;
 
 	 private:
 		void _add_module(vfs::module::filesystem* fs);

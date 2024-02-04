@@ -1,4 +1,4 @@
-#include "api/detail/stats_converter.hh"
+#include "stats_converter.hh"
 
 namespace vfs {
 	stats convert (const core::stats& st) {

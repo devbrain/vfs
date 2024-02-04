@@ -1,6 +1,6 @@
 #include <ostream>
 #include "vfs/modules.hh"
-#include "api/detail/modules_table.hh"
+#include "detail/modules_table.hh"
 
 namespace vfs {
 	struct modules::wrapper {

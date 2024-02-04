@@ -10,8 +10,11 @@
 
 namespace vfs {
 	// forward declarations
+	class VFS_API directory;
 	namespace core {
 		class inode;
+		class dentry_tree;
+		vfs::directory open_directory (const std::string& pth, core::dentry_tree* tree);
 	}
 	class VFS_API directory;
 
@@ -19,7 +22,7 @@ namespace vfs {
 	// ---------------------------------------------------------------------
 
 	class VFS_API directory {
-		friend VFS_API directory open_directory (const std::string& pth);
+		friend directory core::open_directory (const std::string& pth, core::dentry_tree* tree);
 	 public:
 		std::tuple<std::string, stats> next ();
 		[[nodiscard]] bool has_next () const;

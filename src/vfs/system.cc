@@ -5,12 +5,12 @@
 #include "vfs/system.hh"
 #include <utility>
 
-#include <vfs/api/exception.hh>
+#include "vfs/exception.hh"
 
 #include "detail/modules_table.hh"
 #include "detail/fstab.hh"
 #include "detail/dentry.hh"
-
+#include "system_iface.hh"
 
 #include <bsw/register_at_exit.hh>
 #include <bsw/errors.hh>
@@ -36,6 +36,8 @@ namespace vfs {
 			~system ();
 
 			modules_table _all_modules;
+			std::unique_ptr<core::fstab> fstab;
+			std::unique_ptr<core::dentry_tree> dentry;
 		};
 
 		// =============================================================================
@@ -43,7 +45,7 @@ namespace vfs {
 			: _all_modules (modules_path) {
 		}
 
-		system::system(std::unique_ptr<module::filesystem> fsptr) : _all_modules (std::move(fsptr)) {
+		system::system(std::unique_ptr<module::filesystem> fsptr) : _all_modules (std::move(fsptr), true) {
 		}
 		// ------------------------------------------------------------------------------
 		void system::add_module (std::unique_ptr<module::filesystem> fsptr) {
@@ -64,20 +66,26 @@ namespace vfs {
 	} // ns detail
 	// ==================================================================================
 	static core::system* system = nullptr;
-	static core::fstab* fstab = nullptr;
 
-	void fstab_unmount(const path& p) {
-		fstab->unmount (p);
+	core::fstab* get_system_fstab() {
+		ENFORCE(system);
+		ENFORCE(system->fstab);
+		return system->fstab.get();
 	}
+
+	core::dentry_tree* get_system_dentry_tree() {
+		ENFORCE(system);
+		ENFORCE(system->dentry);
+		return system->dentry.get();
+	}
+
+//	void fstab_unmount(const path& p) {
+//		system->fstab->unmount (p);
+//	}
 
 	static void system_destructor () {
 		if (system != nullptr) {
-			core::dentry_done ();
-			delete fstab;
-
-			fstab = nullptr;
 			delete system;
-
 			system = nullptr;
 		}
 	}
@@ -115,8 +123,8 @@ namespace vfs {
 		if (!fs) {
 			THROW_EXCEPTION_EX(vfs::exception, "Can not find module ", fstype);
 		}
-		if (fstab == nullptr) {
-			fstab = new core::fstab;
+		if (!system->fstab) {
+			system->fstab = std::make_unique<core::fstab>();
 		}
 
 
@@ -126,25 +134,25 @@ namespace vfs {
 			THROW_EXCEPTION_EX(vfs::exception, "Mount point ", mount_point, " should be absolute");
 		}
 		if (core::is_root (mount_point)) {
-			auto mountedfs = fstab->mount (fs, path (mount_point), args);
-			core::dentry_init (mountedfs);
+			auto mountedfs = system->fstab->mount (fs, path (mount_point), args);
+			system->dentry = std::make_unique<core::dentry_tree> (mountedfs);
 		} else {
-			auto [dent, ino, depth, _] = core::dentry_resolve (p);
+			auto [dent, ino, depth, _] = system->dentry->resolve (p);
 
 			if (depth != p.depth ()) {
 				THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", mount_point);
 			}
-			auto mountedfs = fstab->mount (fs, p, args);
-			core::dentry_mount (mountedfs, dent);
+			auto mountedfs = system->fstab->mount (fs, p, args);
+			core::dentry_tree::mount (mountedfs, dent);
 		}
 	}
 
 	// -------------------------------------------------------------------------------------
 	void unmount (const std::string& mount_point) {
-		if (!fstab) {
+		if (!system->fstab) {
 			THROW_EXCEPTION_EX(vfs::exception, "no mounted filesystems found");
 		}
-		fstab->unmount (path (mount_point));
+		system->fstab->unmount (path (mount_point));
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -158,18 +166,20 @@ namespace vfs {
 
 	// -------------------------------------------------------------------------------------
 	mounts get_mounts () {
-		if (!fstab) {
+		if (!system->fstab) {
 			THROW_EXCEPTION_EX(vfs::exception, "no mounted filesystems found");
 		}
-		return mounts (fstab);
+		return mounts (system->fstab.get());
 	}
 
 	// -------------------------------------------------------------------------------------
 	void set_cwd(const std::string& wd) {
-		core::dentry_set_cwd (wd);
+		ENFORCE(system->dentry);
+		system->dentry->cwd (wd);
 	}
 	// -------------------------------------------------------------------------------------
 	std::string get_cwd() {
-		return core::dentry_get_cwd ();
+		ENFORCE(system->dentry);
+		return system->dentry->cwd();
 	}
 } // ns vfs

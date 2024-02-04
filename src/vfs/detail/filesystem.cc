@@ -1,5 +1,5 @@
 #include "file_system.hh"
-#include <vfs/api/exception.hh>
+#include "vfs/exception.hh"
 #include <bsw/exception.hh>
 #include <vector>
 

@@ -4,6 +4,7 @@
 
 #include "modules_table.hh"
 #include "physfs/physfs.hh"
+#include "vfs/exception.hh"
 
 namespace vfs::core {
 	modules_table::entry::entry (vfs_module* obj, std::unique_ptr<shared_module>&& dll)
@@ -59,9 +60,13 @@ namespace vfs::core {
 		_add_module (new vfs::detail::physfs);
 	}
 	// -----------------------------------------------------------------------------------
-	modules_table::modules_table(std::unique_ptr<vfs::module::filesystem> fsptr) {
-		_add_module (new vfs::detail::physfs);
-		add(std::move(fsptr));
+	modules_table::modules_table(std::unique_ptr<vfs::module::filesystem> fsptr, bool register_phys_fs) {
+		if (register_phys_fs) {
+			_add_module (new vfs::detail::physfs);
+		}
+		if (fsptr) {
+			add (std::move (fsptr));
+		}
 	}
 	// -----------------------------------------------------------------------------------
 	void modules_table::add (std::unique_ptr<vfs::module::filesystem> fsptr) {
@@ -139,5 +144,10 @@ namespace vfs::core {
 			return nullptr;
 		}
 		return itr->second->module ();
+	}
+	// -----------------------------------------------------------------------------------
+	file_system* modules_table::get_single () const {
+		ENFORCE(_entries.size() == 1)
+		return _entries.begin()->second->module();
 	}
 } // ns vfs::detail

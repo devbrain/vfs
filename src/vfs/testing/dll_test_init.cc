@@ -2,6 +2,7 @@
 // Created by igor on 2/1/24.
 //
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest/doctest.h>
 #include <vfs/api/vfs_api.h>
 

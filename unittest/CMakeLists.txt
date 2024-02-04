@@ -9,7 +9,7 @@ add_executable(unittest
         vfs_stream_test.cc
         )
 
-target_link_libraries(unittest PRIVATE doctest::doctest vfs_api::vfs_api)
+target_link_libraries(unittest PRIVATE doctest::doctest neutrino::vfs)
 target_include_directories(unittest PRIVATE ${PROJECT_ROOT}/src)
 
 

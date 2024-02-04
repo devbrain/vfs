@@ -1,4 +1,4 @@
-#include "api/detail/path.hh"
+#include "detail/path.hh"
 #include <functional>
 #include <bsw/exception.hh>
 

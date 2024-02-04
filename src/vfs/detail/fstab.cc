@@ -1,5 +1,5 @@
 #include "fstab.hh"
-#include <vfs/api/exception.hh>
+#include "vfs/exception.hh"
 #include <bsw/errors.hh>
 #include <bsw/logger/logger.hh>
 
