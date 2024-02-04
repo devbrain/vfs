@@ -32,9 +32,22 @@ typedef long ssize_t;
 #define vfs_api_EXPORTS
 #define vfs_api_EXPORTS_undef
 #endif
-#include "vfs/api/vfs_api.h"
 
-#define VFS_MODULE_API VFS_API
+#ifndef VFS_ALWAYS_EXPORTS
+# if defined(__WIN32__) || defined(__WINRT__) || defined(__CYGWIN__)
+#   define VFS_ALWAYS_EXPORTS __declspec(dllexport)
+# elif defined(__OS2__)
+#    define VFS_ALWAYS_EXPORTS    __declspec(dllexport)
+# else
+#  if defined(__GNUC__) && __GNUC__ >= 4
+#   define VFS_ALWAYS_EXPORTS __attribute__ ((visibility("default")))
+#  else
+#    error "Unknown COMPILER"
+#  endif
+# endif
+#endif
+
+#define VFS_MODULE_API VFS_ALWAYS_EXPORTS
 
 #if defined(__cplusplus)
 #define VFS_EXTERN_C extern "C"

@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.24)
 
-project(vfs VERSION 1.0.0 LANGUAGES CXX)
+project(vfs VERSION 1.0.0 LANGUAGES CXX C)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 option(vfs_INCLUDE_PACKAGING "Include packaging rules for vfs" "${is_top_level}")

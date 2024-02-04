@@ -3,3 +3,5 @@ if (Qt6_FOUND)
     message("QT6 found")
     add_subdirectory(ui)
 endif()
+
+add_subdirectory(zipfs)

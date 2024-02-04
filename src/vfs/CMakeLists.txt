@@ -5,12 +5,12 @@ if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
 endif ()
 
 if (DEFINED vfs_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS "${assets_SHARED_LIBS}")
+    set(BUILD_SHARED_LIBS "${vfs_SHARED_LIBS}")
 endif ()
 
 add_library(vfs_api INTERFACE ${PROJECT_ROOT}/include/vfs/api/vfs_module.h)
 add_library(neutrino::vfs_api ALIAS vfs_api)
-target_include_directories(vfs_api INTERFACE ${PROJECT_ROOT}/include/vfs/api/)
+target_include_directories(vfs_api INTERFACE ${PROJECT_ROOT}/include/)
 
 set(src
         detail/modules_table.cc
