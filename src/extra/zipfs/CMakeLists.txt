@@ -18,7 +18,7 @@ set (src
 )
 
 add_library(zipfs ${src})
-target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw)
+target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw popl)
 target_include_directories(zipfs PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${PROJECT_ROOT}/include>
@@ -35,4 +35,12 @@ include(GenerateExportHeader)
 generate_export_header(zipfs
         EXPORT_MACRO_NAME ZIPFS_API
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/zipfs_api.h
+)
+
+add_executable(testme
+        testme.cc
+        miniz.c
+        miniz.h)
+target_compile_definitions(testme PRIVATE
+        _LARGEFILE64_SOURCE
 )

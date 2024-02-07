@@ -4,4 +4,7 @@ if (Qt6_FOUND)
     add_subdirectory(ui)
 endif()
 
+add_subdirectory(popl)
 add_subdirectory(zipfs)
+
+

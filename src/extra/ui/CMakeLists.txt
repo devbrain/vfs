@@ -3,8 +3,12 @@ qt_standard_project_setup()
 
 qt_add_executable(vfs_commander
         main.cc
-        mainwindow.cc
-        mainwindow.hh
+        navigation_model.cc
+        navigation_model.hh
+        navigation_view.cc
+        navigation_view.hh
+        #mainwindow.cc
+        #mainwindow.hh
 )
 
 target_link_libraries(vfs_commander PRIVATE Qt6::Widgets Qt6::Core neutrino::vfs)
