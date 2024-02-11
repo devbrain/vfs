@@ -9,6 +9,8 @@ namespace vfs {
 				break;
 			case VFS_INODE_REGULAR: res.type = stats::eFILE;
 				break;
+			case VFS_NAME_TRUNCATED: res.type = stats::eNAME_TRUNCATED;
+				break;
 			default: res.type = stats::eLINK;
 		}
 		if (st.attr1.key[0] != 0) {

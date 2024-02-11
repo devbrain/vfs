@@ -9,15 +9,16 @@
 
 #include "navigation_model.hh"
 
-NavigationModel::NavigationModel (const QString& initalPath, QObject *parent)
-:   QAbstractListModel (parent),
-    m_currentPath(initalPath.toStdString()),
-	m_currentIndex (0) {
-	populate (m_currentPath);
+NavigationModel::NavigationModel (const QString& initalPath, QObject* parent)
+	: QAbstractListModel (parent),
+	  m_initial_path(initalPath.toStdString ()),
+	  m_current_path (m_initial_path),
+	  m_cursor (0) {
+	populate (m_current_path);
 }
 
 int NavigationModel::rowCount (const QModelIndex& parent) const {
-	return static_cast<int>(m_entries.size());
+	return static_cast<int>(m_entries.size ());
 }
 
 int NavigationModel::columnCount (const QModelIndex& parent) const {
@@ -25,52 +26,79 @@ int NavigationModel::columnCount (const QModelIndex& parent) const {
 }
 
 QVariant NavigationModel::data (const QModelIndex& index, int role) const {
-	if (!index.isValid()) {
+	if (!index.isValid ()) {
 		return {};
 	}
-   if ( role == Qt::DisplayRole)
-   {
-	   const auto& e = m_entries[index.row ()];
-       if (index.column() == 0) {
-		   return e.name;
-	   }
-       if (index.column() == 1) {
+	if (role == Qt::DisplayRole) {
+		const auto& e = m_entries[index.row ()];
+		if (index.column () == 0) {
+			return e.name;
+		}
+		if (index.column () == 1) {
 			if (e.isDir) {
 				return "<DIR>";
 			} else {
 				return static_cast<qulonglong>(e.size);
 			}
-	   }
-   }
-   if (role == Qt::BackgroundRole) {
-	   if (index.row() == m_currentIndex) {
-		   return QColor("yellow");
-	   }
-   }
-   return {};
+		}
+	}
+	if (role == CURSOR_ROLE) {
+		return index.row() == m_cursor;
+	}
+	return {};
+}
+
+void NavigationModel::onDrillDown () {
+	drillDownByRow (m_cursor);
+}
+
+void NavigationModel::onDrillDownByIndex(const QModelIndex index) {
+	if (index.isValid()) {
+		drillDownByRow (index.row ());
+	}
+}
+
+void NavigationModel::drillDownByRow(int row) {
+	if (row >= 0 && row < m_entries.size()  && m_entries[row].isDir) {
+		auto name = m_entries[row].name.toStdString();
+		if (name == "..") {
+			populate (m_current_path.parent_path());
+		} else {
+			populate (m_current_path / name);
+		}
+	}
 }
 
 void NavigationModel::populate (const std::filesystem::path& path) {
-	auto u8_path = path.u8string();
+	auto u8_path = path.u8string ();
 	auto stats = vfs::get_stats (u8_path);
 	if (stats) {
 		if (stats->type == vfs::stats::type_t::eDIRECTORY) {
-			beginResetModel();
-			m_entries.clear();
-			m_currentIndex = 0;
+			m_current_path = path;
+			beginResetModel ();
+			m_entries.clear ();
+			m_cursor = 0;
+
+			if (m_current_path != m_initial_path) {
+				m_entries.emplace_back ("..", true, 0);
+			}
+
 			auto dir = vfs::open_directory (u8_path);
 			vfs::directory_iterator end;
-			for (vfs::directory_iterator dir_itr(dir); dir_itr != end; dir_itr++) {
+			for (vfs::directory_iterator dir_itr (dir); dir_itr != end; dir_itr++) {
 				const auto& [name, st] = *dir_itr;
-				m_entries.emplace_back (name, st.type == vfs::stats::type_t::eDIRECTORY, st.size);
-				std::sort(m_entries.begin(), m_entries.end(), [](const auto& a, const auto& b) {
-					if ((a.isDir && b.isDir) || (!a.isDir && !b.isDir)) {
-						return a.name < b.name;
-					}
-					return a.isDir;
-				});
+				if (st.type != vfs::stats::type_t::eNAME_TRUNCATED) {
+					m_entries.emplace_back (name, st.type == vfs::stats::type_t::eDIRECTORY, st.size);
+				}
 			}
-			endResetModel();
+			std::sort (m_entries.begin (), m_entries.end (), [] (const auto& a, const auto& b) {
+			  if ((a.isDir && b.isDir) || (!a.isDir && !b.isDir)) {
+				  return a.name < b.name;
+			  }
+			  return a.isDir;
+			});
+			endResetModel ();
+			emit modelPopulated ();
 		} else {
 			RAISE_EX(u8_path, "should be directory");
 		}
@@ -91,23 +119,39 @@ QVariant NavigationModel::headerData (int section, Qt::Orientation orientation, 
 	return {};
 }
 
-void NavigationModel::moveDown () {
-	if (m_currentIndex < m_entries.size() - 1) {
-		m_currentIndex++;
-		emit dataChanged(index(m_currentIndex-1,0), index(m_currentIndex-1, 2));
-		emit dataChanged(index(m_currentIndex,0), index(m_currentIndex, 2));
+void NavigationModel::onNavigateDown(JumpMode jumpMode) {
+	const auto last_row = rowCount (QModelIndex()) - 1;
+	int new_pos = 0;
+	if (jumpMode == Edge) {
+		new_pos = last_row;
+	} else {
+		new_pos = jumpMode == Jump ? std::min (m_cursor + 10, last_row) :
+				  std::min (m_cursor + 1, last_row);
 	}
+	moveCursor (new_pos);
 }
 
-void NavigationModel::moveUp () {
-	if (m_currentIndex > 0) {
-		m_currentIndex--;
-		emit dataChanged(index(m_currentIndex+1,0), index(m_currentIndex+1, 2));
-		emit dataChanged(index(m_currentIndex,0), index(m_currentIndex, 2));
+void NavigationModel::onNavigateUp(JumpMode jumpMode) {
+	int new_pos = 0;
+	if (jumpMode == Edge) {
+		new_pos = 0;
+	} else {
+		new_pos = jumpMode == Jump ? std::max (m_cursor - 10, 0) : std::max (m_cursor - 1, 0);
 	}
+	moveCursor (new_pos);
 }
 
+void NavigationModel::moveCursor(int newPos) {
+	if (m_cursor != newPos) {
+		auto startIndex = index (m_cursor, 0);
+		emit cursorMoved (startIndex);
+		m_cursor = newPos;
+		emit cursorMoved (index (m_cursor, 0));
+		auto endIndex = index (newPos, columnCount (QModelIndex{}) - 1);
+		emit dataChanged (startIndex, endIndex);
+	}
+}
 
 
 NavigationModel::Entry::Entry (const std::string& name, bool is_dir, uint64_t size)
-	: name (name.c_str()), isDir (is_dir), size (size) {}
+	: name (name.c_str ()), isDir (is_dir), size (size) {}

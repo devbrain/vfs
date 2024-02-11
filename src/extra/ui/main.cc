@@ -16,9 +16,15 @@ int main (int argc, char* argv[]) {
 	auto* ds = new NavigationModel("/");
 
 	NavigationView w;
-	QObject::connect (&w, &NavigationView::onKeyUp, ds, &NavigationModel::moveUp);
-	QObject::connect (&w, &NavigationView::onKeyDown, ds, &NavigationModel::moveDown);
+	QObject::connect (ds, &NavigationModel::modelPopulated, &w, &NavigationView::onModelPopulated);
+	QObject::connect (ds, &NavigationModel::cursorMoved, &w, &NavigationView::onCursorMoved);
+	QObject::connect (&w, &NavigationView::navigateDown, ds, &NavigationModel::onNavigateDown);
+	QObject::connect (&w, &NavigationView::navigateUp, ds, &NavigationModel::onNavigateUp);
+	QObject::connect (&w, &NavigationView::drillDown, ds, &NavigationModel::onDrillDown);
+	QObject::connect (&w, &NavigationView::drillDownByIndex, ds, &NavigationModel::onDrillDownByIndex);
+
 	w.setModel (ds);
+	w.onModelPopulated();
 	w.show ();
 
 	return QApplication::exec ();

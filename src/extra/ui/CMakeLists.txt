@@ -7,6 +7,7 @@ qt_add_executable(vfs_commander
         navigation_model.hh
         navigation_view.cc
         navigation_view.hh
+        navigation_cursor.hh
         #mainwindow.cc
         #mainwindow.hh
 )

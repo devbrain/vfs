@@ -58,7 +58,8 @@ typedef long ssize_t;
 enum vfs_inode_type {
 	VFS_INODE_REGULAR,
 	VFS_INODE_DIRECTORY,
-	VFS_INODE_LINK
+	VFS_INODE_LINK,
+	VFS_NAME_TRUNCATED
 };
 
 struct vfs_key_value {

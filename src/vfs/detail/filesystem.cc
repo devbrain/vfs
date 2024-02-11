@@ -101,9 +101,14 @@ namespace vfs::core {
 	// ----------------------------------------------------------------------
 	std::string directory_iterator::next () {
 		std::string s;
-		s.resize (_owner->owner ()->max_name_length ());
-		size_t n = _ops->next (_ops->opaque, const_cast<char*>(s.c_str ()), s.size ());
-		s.resize (n);
+		const auto max_len = _owner->owner ()->max_name_length ();
+		s.resize (max_len);
+		size_t n = _ops->next (_ops->opaque, const_cast<char*>(s.c_str ()), max_len);
+		if (n < max_len) {
+			s.resize (n);
+		} else {
+			s[max_len-1] = 0;
+		}
 		return s;
 	}
 

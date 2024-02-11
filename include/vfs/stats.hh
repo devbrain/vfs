@@ -19,7 +19,8 @@ namespace vfs {
 		enum type_t {
 			eLINK,
 			eFILE,
-			eDIRECTORY
+			eDIRECTORY,
+			eNAME_TRUNCATED // if real name was truncated due to maximal path length constraint
 		};
 
 		type_t type;

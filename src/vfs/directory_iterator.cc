@@ -21,10 +21,15 @@ namespace vfs {
 	// -----------------------------------------------------------------------------------------
 	std::tuple<std::string, stats> directory::next () {
 		std::string name = _pimpl->di->next ();
+
 		core::stats st;
 		auto child = _pimpl->node->lookup (name);
 		if (child) {
 			child->stat (st);
+			return std::make_tuple (name, convert (st));
+		} else {
+			st.size = 0;
+			st.type = VFS_NAME_TRUNCATED;
 			return std::make_tuple (name, convert (st));
 		}
 		throw std::runtime_error (name + " was removed during iteration");
