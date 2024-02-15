@@ -46,6 +46,11 @@ QVariant NavigationModel::data (const QModelIndex& index, int role) const {
 	if (m_is_active && role == CURSOR_ROLE) {
 		return index.row() == m_cursor;
 	}
+	if (m_is_active && role == Qt::BackgroundRole) {
+		if (index.row() == m_cursor) {
+			return QColor::fromRgb (100, 0, 0);
+		}
+	}
 	return {};
 }
 

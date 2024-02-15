@@ -15,6 +15,8 @@ NavigationPanel::NavigationPanel (QWidget* parent)
 	m_view->setModel (m_model);
 	m_layout->addWidget (m_view);
 
+	setFrameStyle (QFrame::Box | QFrame::Raised);
+
 	connect (m_model, &NavigationModel::modelPopulated, m_view, &NavigationView::onModelPopulated);
 	connect (m_model, &NavigationModel::cursorMoved, m_view, &NavigationView::onCursorMoved);
 	connect (m_view, &NavigationView::navigateDown, m_model, &NavigationModel::onNavigateDown);
@@ -24,17 +26,9 @@ NavigationPanel::NavigationPanel (QWidget* parent)
 	connect (m_model, &NavigationModel::currentPathChanged, this, [this](const QString& newPath) {
 		emit currentPathChanged(newPath);
 	});
-	connect (m_view, &NavigationView::tabPressed, this, [this]() {
-		emit tabPressed();
-	});
 }
 
 void NavigationPanel::setActive(bool flag) {
-	if (flag) {
-		setFrameStyle (QFrame::Box | QFrame::Raised);
-	} else {
-		setFrameStyle (QFrame::NoFrame | QFrame::Sunken);
-	}
 	m_is_active = flag;
 	m_model->setActive (m_is_active);
 	if (flag) {

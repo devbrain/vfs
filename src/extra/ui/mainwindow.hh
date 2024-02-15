@@ -12,6 +12,7 @@ namespace Ui {
 }
 
 class NavigationPanel;
+class MountsDialog;
 
 class MainWindow : public QMainWindow {
  Q_OBJECT
@@ -22,7 +23,9 @@ class MainWindow : public QMainWindow {
 	void onTabPressed();
  private:
 	void setupSignalsForPanel(NavigationPanel* panel);
+ private:
 	Ui::MainWindow* ui;
+	MountsDialog* mounts_dialog;
 };
 
 #endif //VFS_SRC_EXTRA_UI_MAINWINDOW_HH_

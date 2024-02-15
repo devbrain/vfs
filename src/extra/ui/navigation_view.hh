@@ -22,7 +22,6 @@ class NavigationView : public QTreeView {
 	void navigateUp(JumpMode jumpMode);
 	void drillDown();
 	void drillDownByIndex(const QModelIndex index);
-	void tabPressed();
  private:
 	void keyPressEvent(QKeyEvent *e) override;
 	void mouseDoubleClickEvent(QMouseEvent *e) override;

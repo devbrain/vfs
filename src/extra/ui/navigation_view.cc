@@ -13,7 +13,7 @@ class CursorPainter : public QStyledItemDelegate {
  public:
 	explicit CursorPainter (QWidget* parent);
 	void paint (QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-};
+ };
 
 CursorPainter::CursorPainter (QWidget* parent)
 	: QStyledItemDelegate (parent) {
@@ -56,10 +56,6 @@ NavigationView::NavigationView (QWidget* parent)
 		{Qt::Key_Asterisk, [this] () { invertSelection (); }},
 		{Qt::Key_Enter, [this] () { emit drillDown (); }},
 		{Qt::Key_Return, [this] () { emit drillDown (); }},
-		{Qt::Key_A, [this] () {
-			int x = 0;
-			emit tabPressed();
-		}},
 	};
 }
 

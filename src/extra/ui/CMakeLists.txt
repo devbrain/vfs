@@ -12,6 +12,8 @@ qt_add_executable(vfs_commander
         navigation_panel.cc
         mainwindow.cc
         mainwindow.hh
+        mounts_dialog.cc
+        mounts_dialog.hh
 )
 
 target_link_libraries(vfs_commander PRIVATE Qt6::Widgets Qt6::Core neutrino::vfs)
