@@ -185,7 +185,7 @@
   <customwidget>
    <class>NavigationPanel</class>
    <extends>QWidget</extends>
-   <header>navigation_panel.hh</header>
+   <header>navigation/navigation_panel.hh</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

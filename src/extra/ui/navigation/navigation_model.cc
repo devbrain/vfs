@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <QColor>
 
-#include <bsw/exception.hh>
-#include <vfs/io.hh>
+#include "bsw/exception.hh"
+#include "vfs/io.hh"
 
 #include "navigation_model.hh"
 

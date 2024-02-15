@@ -4,8 +4,8 @@
 
 #include "mainwindow.hh"
 #include "ui_mainwindow.h"
-#include "navigation_view.hh"
-#include "mounts_dialog.hh"
+#include "navigation/navigation_view.hh"
+#include "mounts/mounts_dialog.hh"
 
 MainWindow::MainWindow (QWidget* parent)
 	: QMainWindow (parent),

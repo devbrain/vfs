@@ -3,17 +3,17 @@ qt_standard_project_setup()
 
 qt_add_executable(vfs_commander
         main.cc
-        navigation_model.cc
-        navigation_model.hh
-        navigation_view.cc
-        navigation_view.hh
-        navigation_cursor.hh
-        navigation_panel.hh
-        navigation_panel.cc
+        navigation/navigation_model.cc
+        navigation/navigation_model.hh
+        navigation/navigation_view.cc
+        navigation/navigation_view.hh
+        navigation/navigation_cursor.hh
+        navigation/navigation_panel.hh
+        navigation/navigation_panel.cc
         mainwindow.cc
         mainwindow.hh
-        mounts_dialog.cc
-        mounts_dialog.hh
+        mounts/mounts_dialog.cc
+        mounts/mounts_dialog.hh
 )
 
 target_link_libraries(vfs_commander PRIVATE Qt6::Widgets Qt6::Core neutrino::vfs)
