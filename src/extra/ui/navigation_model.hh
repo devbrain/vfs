@@ -18,14 +18,17 @@ class NavigationModel : public QAbstractListModel {
  public:
 	explicit NavigationModel (const QString& initalPath, QObject *parent = nullptr);
 
+	QString getCurrentPath() const;
  public slots:
 	void onNavigateDown(JumpMode jumpMode);
 	void onNavigateUp(JumpMode jumpMode);
 	void onDrillDown ();
 	void onDrillDownByIndex(const QModelIndex index);
+	void setActive(bool f);
  signals:
 	void modelPopulated();
 	void cursorMoved(const QModelIndex& newPos);
+	void currentPathChanged(const QString& newPath);
  private:
 	[[nodiscard]] int rowCount(const QModelIndex& parent) const override;
 	[[nodiscard]] int columnCount(const QModelIndex& parent) const override;
@@ -46,6 +49,7 @@ class NavigationModel : public QAbstractListModel {
 	std::filesystem::path m_current_path;
 	std::vector<Entry> m_entries;
 	int m_cursor;
+	bool m_is_active;
 };
 
 #endif //VFS_SRC_EXTRA_UI_NAVIGATION_MODEL_HH_

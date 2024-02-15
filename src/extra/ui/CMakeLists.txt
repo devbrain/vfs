@@ -8,12 +8,14 @@ qt_add_executable(vfs_commander
         navigation_view.cc
         navigation_view.hh
         navigation_cursor.hh
-        #mainwindow.cc
-        #mainwindow.hh
+        navigation_panel.hh
+        navigation_panel.cc
+        mainwindow.cc
+        mainwindow.hh
 )
 
 target_link_libraries(vfs_commander PRIVATE Qt6::Widgets Qt6::Core neutrino::vfs)
-
+target_include_directories(vfs_commander PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 if (WIN32)
     set_target_properties(vfs_commander PROPERTIES WIN32_EXECUTABLE ON)
 else()

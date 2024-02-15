@@ -56,6 +56,10 @@ NavigationView::NavigationView (QWidget* parent)
 		{Qt::Key_Asterisk, [this] () { invertSelection (); }},
 		{Qt::Key_Enter, [this] () { emit drillDown (); }},
 		{Qt::Key_Return, [this] () { emit drillDown (); }},
+		{Qt::Key_A, [this] () {
+			int x = 0;
+			emit tabPressed();
+		}},
 	};
 }
 

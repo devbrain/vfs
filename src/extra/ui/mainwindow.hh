@@ -11,14 +11,17 @@ namespace Ui {
 	class MainWindow;
 }
 
+class NavigationPanel;
+
 class MainWindow : public QMainWindow {
  Q_OBJECT
-
  public:
 	explicit MainWindow (QWidget* parent = nullptr);
 	~MainWindow () override;
-
+ public slots:
+	void onTabPressed();
  private:
+	void setupSignalsForPanel(NavigationPanel* panel);
 	Ui::MainWindow* ui;
 };
 

@@ -13,7 +13,8 @@ NavigationModel::NavigationModel (const QString& initalPath, QObject* parent)
 	: QAbstractListModel (parent),
 	  m_initial_path(initalPath.toStdString ()),
 	  m_current_path (m_initial_path),
-	  m_cursor (0) {
+	  m_cursor (0),
+      m_is_active (true) {
 	populate (m_current_path);
 }
 
@@ -42,7 +43,7 @@ QVariant NavigationModel::data (const QModelIndex& index, int role) const {
 			}
 		}
 	}
-	if (role == CURSOR_ROLE) {
+	if (m_is_active && role == CURSOR_ROLE) {
 		return index.row() == m_cursor;
 	}
 	return {};
@@ -75,6 +76,7 @@ void NavigationModel::populate (const std::filesystem::path& path) {
 	if (stats) {
 		if (stats->type == vfs::stats::type_t::eDIRECTORY) {
 			m_current_path = path;
+			emit currentPathChanged ({m_current_path.c_str()});
 			beginResetModel ();
 			m_entries.clear ();
 			m_cursor = 0;
@@ -152,6 +154,16 @@ void NavigationModel::moveCursor(int newPos) {
 	}
 }
 
+void NavigationModel::setActive(bool f) {
+	m_is_active = f;
+	auto startIndex = index (m_cursor, 0);
+	auto endIndex = index (m_cursor, columnCount (QModelIndex{}) - 1);
+	emit dataChanged (startIndex, endIndex);
+}
+
+QString NavigationModel::getCurrentPath () const {
+	return {m_current_path.c_str()};
+}
 
 NavigationModel::Entry::Entry (const std::string& name, bool is_dir, uint64_t size)
 	: name (name.c_str ()), isDir (is_dir), size (size) {}
