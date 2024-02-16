@@ -11,11 +11,14 @@ namespace Ui {
 	class MountsDialog;
 }
 
+class MountsModel;
+
 class MountsDialog : public QDialog {
  public:
 	explicit MountsDialog (QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
  private:
 	Ui::MountsDialog* ui;
+	MountsModel* m_model;
 };
 
 #endif //VFS_SRC_EXTRA_UI_MOUNTS_DIALOG_HH_

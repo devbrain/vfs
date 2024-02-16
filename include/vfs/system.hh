@@ -23,7 +23,7 @@ namespace vfs {
 
 	VFS_API void load_module (const std::filesystem::path& path_to_module);
 	VFS_API void load_module (std::unique_ptr<module::filesystem> fsptr);
-
+	VFS_API modules get_modules ();
 
 	VFS_API void mount (const std::string& fstype, const std::string& args, const std::string& mount_point);
 	VFS_API mounts get_mounts ();

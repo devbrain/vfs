@@ -18,7 +18,7 @@ namespace vfs::detail
 		~iterator() = default;
 
 		[[nodiscard]] Data operator*() const;
-
+		[[nodiscard]] Data operator -> () const;
 		bool operator==(const iterator& other) const noexcept ;
 		bool operator!=(const iterator& other) const noexcept ;
 
@@ -36,6 +36,11 @@ namespace vfs::detail
 	// =====================================================================
 	template <typename Data, typename Wrapper>
 	Data iterator<Data, Wrapper>::operator*() const
+	{
+		return Data(_value);
+	}
+	template <typename Data, typename Wrapper>
+	Data iterator<Data, Wrapper>::operator -> () const
 	{
 		return Data(_value);
 	}

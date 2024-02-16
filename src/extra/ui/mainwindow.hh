@@ -13,6 +13,7 @@ namespace Ui {
 
 class NavigationPanel;
 class MountsDialog;
+class ModulesDialog;
 
 class MainWindow : public QMainWindow {
  Q_OBJECT
@@ -26,6 +27,7 @@ class MainWindow : public QMainWindow {
  private:
 	Ui::MainWindow* ui;
 	MountsDialog* mounts_dialog;
+	ModulesDialog* modules_dialog;
 };
 
 #endif //VFS_SRC_EXTRA_UI_MAINWINDOW_HH_

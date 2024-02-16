@@ -119,6 +119,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionModules"/>
     <addaction name="actionMounts"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -178,6 +179,11 @@
   <action name="actionMounts">
    <property name="text">
     <string>Mounts</string>
+   </property>
+  </action>
+  <action name="actionModules">
+   <property name="text">
+    <string>Modules</string>
    </property>
   </action>
  </widget>
