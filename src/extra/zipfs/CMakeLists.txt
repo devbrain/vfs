@@ -13,12 +13,15 @@ set (src
         ${PROJECT_ROOT}/include/vfs/extra/zipfs.hh
         zipfs_impl.cc
         zipfs_impl.hh
+        zipfs_inode.cc
+        zipfs_inode.hh
         miniz.c
         miniz.h
 )
 
 add_library(zipfs ${src})
-target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw popl archive)
+target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw
+                            PRIVATE popl)
 target_include_directories(zipfs PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${PROJECT_ROOT}/include>

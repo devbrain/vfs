@@ -21,6 +21,7 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(PROJECT_INCLUDE_PRIVATE ${PROJECT_ROOT}/src)
 set(PROJECT_INCLUDE ${PROJECT_ROOT}/include)
 set(PROJECT_CONFIG_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/include)
+set(VFS_TEST_DATA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
 
 if (is_top_level)
     set(BINARY_OUT_DIR ${CMAKE_BINARY_DIR}/bin)
@@ -44,6 +45,7 @@ add_subdirectory(src/extra)
 
 if (vfs_ENABLE_TESTING)
     message("Testing is enabled")
+    add_subdirectory(src/test_utils)
     add_subdirectory(unittest)
 endif()
 

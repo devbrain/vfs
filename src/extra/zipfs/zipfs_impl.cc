@@ -4,7 +4,7 @@
 
 #include "zipfs_impl.hh"
 #include <vfs/extra/zipfs.hh>
-#include <bsw/strings/string_tokenizer.hh>
+#include <fstream>
 #include "popl.hpp"
 
 namespace vfs::extra {
@@ -32,10 +32,15 @@ namespace vfs::extra {
 	}
 
 	zipfs::zipfs ()
-		: vfs::module::filesystem ("zipfs") {
+		: vfs::module::filesystem ("zipfs"),
+		  m_stream (nullptr) {
 	}
 
 	vfs::module::inode* zipfs::load_root (const std::string& params) {
+		auto cmds = parse_commands (params);
+		if (!cmds.is_vfs) {
+			m_stream = new std::ifstream (cmds.path, std::ios::binary | std::ios::in);
+		}
 		return nullptr;
 	}
 
@@ -52,11 +57,15 @@ namespace vfs::extra {
 	}
 
 	[[nodiscard]] bool zipfs::is_readonly () const {
-		return false;
+		return true;
 	}
 
-	vfs::module::filesystem* create_zipfs() {
-		return new zipfs;
+	zipfs::~zipfs () {
+		delete m_stream;
+	}
+
+	std::unique_ptr<vfs::module::filesystem> create_zipfs() {
+		return std::make_unique<zipfs>();
 	}
 }
 

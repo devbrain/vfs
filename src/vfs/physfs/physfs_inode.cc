@@ -64,7 +64,6 @@ namespace vfs::detail {
 	physfs_inode::physfs_inode (const std::filesystem::path& pth)
 		: vfs::module::inode (std::filesystem::is_directory (pth) ? VFS_INODE_DIRECTORY : VFS_INODE_REGULAR),
 		  _path (pth) {
-
 	}
 
 // -----------------------------------------------------------------------------------

@@ -9,5 +9,4 @@ if (vfs_ENABLE_TESTING)
 endif()
 
 add_subdirectory(bsw)
-add_subdirectory(libarchive)
 
