@@ -10,7 +10,7 @@
 
 
 
-#include "sandbox.hh"
+#include "utils/sandbox.hh"
 
 #define EXPECT_EQ(A,B) REQUIRE(A == B)
 #define TEST(A,B) TEST_CASE(STRINGIZE(B))
@@ -38,8 +38,6 @@ TEST(ReadWriteTest, SimpleRead) {
 
     EXPECT_EQ(strncmp(temp.data(), txt, sz), 0);
     vfs::close(f);
-
-    vfs::deinitialize();
 }
 
 TEST(ReadWriteTest, SimpleReadSeek) {
@@ -64,8 +62,6 @@ TEST(ReadWriteTest, SimpleReadSeek) {
 
     EXPECT_EQ(strncmp(temp.data(), txt+1, rc), 0);
     vfs::close(f);
-
-    vfs::deinitialize();
 }
 
 TEST(ReadWriteTest, WriteFailed) {
@@ -81,8 +77,6 @@ TEST(ReadWriteTest, WriteFailed) {
     vfs::file* f = vfs::open("/zopa/pizda/1.txt", vfs::creation_disposition::eOPEN_EXISTING, true);
     EXPECT_THROW(vfs::write(f, txt, 1), vfs::exception);
     vfs::close(f);
-
-    vfs::deinitialize();
 }
 
 TEST(ReadWriteTest, WriteSimple) {
@@ -108,8 +102,6 @@ TEST(ReadWriteTest, WriteSimple) {
     EXPECT_EQ(rc, sz);
     EXPECT_EQ(strncmp(temp.data(), txt, rc), 0);
     vfs::close(f);
-
-    vfs::deinitialize();
 }
 
 TEST(ReadWriteTest, WriteOffset) {
@@ -139,6 +131,4 @@ TEST(ReadWriteTest, WriteOffset) {
     EXPECT_EQ(rc, sz);
     EXPECT_EQ(strncmp(temp.data()+2, txt, strlen(txt)), 0);
     vfs::close(f);
-
-    vfs::deinitialize();
 }

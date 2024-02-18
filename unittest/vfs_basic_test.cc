@@ -3,7 +3,7 @@
 #include <vfs/io.hh>
 
 #include "vfs/exception.hh"
-#include "sandbox.hh"
+#include "utils/sandbox.hh"
 
 
 TEST_CASE("test mount") {
@@ -30,8 +30,6 @@ TEST_CASE("test mount") {
 
     st = vfs::get_stats("/zopa/pizda/2.txt");
     REQUIRE(!st);
-
-    vfs::deinitialize();
 }
 
 
@@ -70,8 +68,6 @@ TEST_CASE("testMount2") {
 	    REQUIRE(std::get<0>(d) == "pizda");
 	    REQUIRE(std::get<1>(d).type == vfs::stats::eDIRECTORY);
 	}
-
-    vfs::deinitialize();
 }
 
 
@@ -98,7 +94,5 @@ TEST_CASE("testMkdir") {
     st = vfs::get_stats("/zopa/newDir");
     REQUIRE(st);
     REQUIRE(st->type == vfs::stats::eDIRECTORY);
-
-    vfs::deinitialize();
 }
 

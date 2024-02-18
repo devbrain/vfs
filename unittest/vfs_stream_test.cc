@@ -4,7 +4,7 @@
 #include <doctest/doctest.h>
 #include <vfs/system.hh>
 #include <vfs/stream.hh>
-#include "sandbox.hh"
+#include "utils/sandbox.hh"
 
 TEST_CASE("stream read") {
 	using namespace vfs;

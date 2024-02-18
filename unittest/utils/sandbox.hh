@@ -2,9 +2,8 @@
 #define UNITTEST_SANDBOX_HH
 
 #include <filesystem>
-#include "test_api.h"
 
-class TEST_API sandbox {
+class sandbox {
  public:
 	sandbox ();
 	~sandbox ();

@@ -6,8 +6,7 @@
 #define VFS_SRC_TEST_UTILS_TEST_DATA_HH_
 
 #include <string>
-#include "test_api.h"
 
-TEST_API std::string get_test_file(const std::string& name);
+std::string get_test_file(const std::string& name);
 
 #endif //VFS_SRC_TEST_UTILS_TEST_DATA_HH_

@@ -3,7 +3,7 @@
 #include <vfs/io.hh>
 #include "vfs/exception.hh"
 #include <bsw/macros.hh>
-#include "sandbox.hh"
+#include "utils/sandbox.hh"
 
 #define EXPECT_EQ(A,B) REQUIRE(A == B)
 #define EXPECT_FALSE(A) REQUIRE(!(A))
@@ -31,8 +31,6 @@ TEST(UnlinkTest, testUnlinkFile) {
 
 	st = vfs::get_stats("/a/pizda/1.txt");
 	EXPECT_FALSE(st);
-
-	vfs::deinitialize();
 }
 
 TEST(UnlinkTest, testUnlinkDirectory) {
@@ -53,9 +51,6 @@ TEST(UnlinkTest, testUnlinkDirectory) {
 	EXPECT_EQ(st->type, vfs::stats::eDIRECTORY);
 	vfs::unlink("/zopa/pizda");
 	EXPECT_FALSE(vfs::get_stats("/zopa/pizda"));
-
-
-	vfs::deinitialize();
 }
 
 TEST(UnlinkTest, testUnlinkFileStat) {
@@ -81,8 +76,6 @@ TEST(UnlinkTest, testUnlinkFileStat) {
 
 	st = vfs::get_stats("/a/pizda/1.txt");
 	EXPECT_FALSE(st);
-
-	vfs::deinitialize();
 }
 
 TEST(UnlinkTest, testUnlinkFileInMem) {
@@ -108,31 +101,26 @@ TEST(UnlinkTest, testUnlinkFileInMem) {
 
 	st = vfs::get_stats("/a/pizda/1.txt");
 	EXPECT_FALSE(st);
-
-	vfs::deinitialize();
 }
 
 TEST(UnlinkTest, testUnlinkNonEmpty)
 {
 	sandbox sbox;
-	sbox.mkdir("zopa/pizda");
-	sbox.mkdir("a");
-	sbox.create_file("zopa/pizda/1.txt", "aaa");
+	sbox.mkdir ("zopa/pizda");
+	sbox.mkdir ("a");
+	sbox.create_file ("zopa/pizda/1.txt", "aaa");
 
+	vfs::load_module (std::filesystem::path ("."));
 
-	vfs::load_module(std::filesystem::path("."));
+	vfs::mount ("physfs", sbox.root (), "/");
 
-	vfs::mount("physfs", sbox.root(), "/");
+	EXPECT_ANY_THROW(vfs::unlink ("/zopa"));
+	EXPECT_TRUE(vfs::get_stats ("/zopa"));
 
-	EXPECT_ANY_THROW(vfs::unlink("/zopa"));
-	EXPECT_TRUE(vfs::get_stats("/zopa"));
-
-	EXPECT_ANY_THROW(vfs::unlink("/zopa/pizda"));
-	vfs::unlink("/zopa/pizda/1.txt");
-	vfs::unlink("/zopa/pizda/");
-	EXPECT_FALSE(vfs::get_stats("/zopa/pizda"));
-	vfs::deinitialize();
-
+	EXPECT_ANY_THROW(vfs::unlink ("/zopa/pizda"));
+	vfs::unlink ("/zopa/pizda/1.txt");
+	vfs::unlink ("/zopa/pizda/");
+	EXPECT_FALSE(vfs::get_stats ("/zopa/pizda"));
 }
 
 TEST(UnlinkTest, testUnlinkFileInMount) {
@@ -172,6 +160,4 @@ TEST(UnlinkTest, testUnlinkFileInMount) {
 		}
 	}
 	EXPECT_FALSE(a_found);
-
-	vfs::deinitialize();
 }

@@ -4,7 +4,7 @@
 #include <doctest/doctest.h>
 #include <vfs/extra/zipfs.hh>
 #include <vfs/archive.hh>
-#include "test_data.hh"
+#include "utils/test_data.hh"
 
 TEST_SUITE("zipfs test") {
 	TEST_CASE ("Test 1") {

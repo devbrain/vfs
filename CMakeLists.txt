@@ -45,7 +45,6 @@ add_subdirectory(src/extra)
 
 if (vfs_ENABLE_TESTING)
     message("Testing is enabled")
-    add_subdirectory(src/test_utils)
     add_subdirectory(unittest)
 endif()
 
