@@ -53,7 +53,7 @@ namespace vfs::core {
 	// ===================================================================================
 	modules_table::modules_table (const std::filesystem::path& path) {
 		_add_module (new vfs::detail::physfs);
-		add (path);
+		add (path, nullptr);
 	}
 	// -----------------------------------------------------------------------------------
 	modules_table::modules_table () {
@@ -91,10 +91,10 @@ namespace vfs::core {
 	}
 
 	// -----------------------------------------------------------------------------------
-	void modules_table::add (const std::filesystem::path& path) {
+	void modules_table::add (const std::filesystem::path& path, modules_loading_report* report) {
 		if (std::filesystem::is_directory (path)) {
 			for (auto& p : std::filesystem::directory_iterator (path)) {
-				add (p);
+				add (p, report);
 			}
 		} else {
 			if (std::filesystem::is_regular_file (path)) {
@@ -108,15 +108,16 @@ namespace vfs::core {
 				ext_type ext = path.extension ().c_str ();
 				ext_type xxx = path.c_str ();
 				if (ext == DLL_EXT) {
-					_add_file (path);
+					_add_file (path, report);
 				}
 			}
 		}
 	}
 
 	// -----------------------------------------------------------------------------------
-	void modules_table::_add_file (const std::filesystem::path& path) {
+	void modules_table::_add_file (const std::filesystem::path& path, modules_loading_report* report) {
 		std::unique_ptr<shared_module> shm = shared_module::load (path);
+		bool loaded = false;
 		if (shm) {
 			auto creator = shm->get ();
 
@@ -132,8 +133,12 @@ namespace vfs::core {
 				auto itr = _entries.find (key);
 				if (itr == _entries.end ()) {
 					_entries[name] = new entry (impl_module.release (), std::move (shm));
+					loaded = true;
 				}
 			}
+		}
+		if (report) {
+			report->emplace_back (path, loaded);
 		}
 	}
 

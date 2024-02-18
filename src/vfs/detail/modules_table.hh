@@ -9,6 +9,7 @@
 #include <filesystem>
 #include "detail/module_loader.hh"
 #include "file_system.hh"
+#include <vfs/modules.hh>
 
 #include <map>
 #include <string>
@@ -22,21 +23,20 @@ namespace vfs::core {
 
 	class modules_table {
 		friend class vfs::modules;
-
 	 public:
 		modules_table();
 		explicit modules_table (const std::filesystem::path& path);
 		modules_table(std::unique_ptr<vfs::module::filesystem> fsptr, bool register_phys_fs);
 		~modules_table ();
 
-		void add (const std::filesystem::path& path);
+		void add (const std::filesystem::path& path, modules_loading_report* report);
 		void add (std::unique_ptr<vfs::module::filesystem> fsptr);
 		[[nodiscard]] file_system* get (const std::string& type) const;
 		[[nodiscard]] file_system* get_single () const;
 
 	 private:
 		void _add_module(vfs::module::filesystem* fs);
-		void _add_file (const std::filesystem::path& path);
+		void _add_file (const std::filesystem::path& path, modules_loading_report* report);
 	 private:
 		class entry {
 			friend class modules_table;

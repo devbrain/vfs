@@ -18,7 +18,7 @@ set (src
 )
 
 add_library(zipfs ${src})
-target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw popl)
+target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw popl archive)
 target_include_directories(zipfs PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${PROJECT_ROOT}/include>

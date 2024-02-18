@@ -21,7 +21,7 @@
 namespace vfs {
 	VFS_API void deinitialize ();
 
-	VFS_API void load_module (const std::filesystem::path& path_to_module);
+	VFS_API void load_module (const std::filesystem::path& path_to_module, modules_loading_report* report = nullptr);
 	VFS_API void load_module (std::unique_ptr<module::filesystem> fsptr);
 	VFS_API modules get_modules ();
 

@@ -2,6 +2,8 @@
 // Created by igor on 2/16/24.
 //
 
+#include <algorithm>
+#include <filesystem>
 #include "modules_model.hh"
 #include <vfs/system.hh>
 
@@ -64,11 +66,25 @@ void ModulesModel::populate () {
 		md.refcount = d.refcount();
 		m_data.push_back (md);
 	}
+	std::sort(m_data.begin(), m_data.end(), [](const auto& a, const auto& b) {
+		return a.type < b.type;
+	});
 	endResetModel();
 }
 
+std::list<ModulesLoadingReport> ModulesModel::load(const QString& path, bool with_report) {
+	std::filesystem::path p(path.toStdString());
+	vfs::modules_loading_report report;
+	vfs::load_module (p, &report);
+	populate();
+	std::list<ModulesLoadingReport> out;
+	if (with_report) {
+		for (const auto& entry : report) {
+			out.emplace_back (entry.path.c_str(), entry.is_loaded);
+		}
+	}
+	return out;
+}
 
-
-
-
-
+ModulesLoadingReport::ModulesLoadingReport (const QString& path, bool loaded)
+	: path (path), loaded (loaded) {}

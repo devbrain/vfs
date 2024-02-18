@@ -1,4 +1,5 @@
 #include <ostream>
+#include <utility>
 #include "vfs/modules.hh"
 #include "detail/modules_table.hh"
 
@@ -86,4 +87,7 @@ namespace vfs {
 		os << d.type () << "\t" << d.path ();
 		return os;
 	}
+
+	modules_loading_report_item::modules_loading_report_item (std::filesystem::path path, const bool is_loaded)
+		: path (std::move(path)), is_loaded (is_loaded) {}
 }

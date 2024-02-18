@@ -28,7 +28,7 @@ namespace vfs {
 			explicit system (const std::filesystem::path& modules_path);
 			explicit system(std::unique_ptr<module::filesystem> fsptr);
 
-			void add_module (const std::filesystem::path& modules_path);
+			void add_module (const std::filesystem::path& modules_path, modules_loading_report* report);
 			void add_module (std::unique_ptr<module::filesystem> fsptr);
 
 			[[nodiscard]] file_system* get_module (const std::string& type) const;
@@ -52,8 +52,8 @@ namespace vfs {
 			_all_modules.add (std::move (fsptr));
 		}
 		// ------------------------------------------------------------------------------
-		void system::add_module (const std::filesystem::path& modules_path) {
-			_all_modules.add (modules_path);
+		void system::add_module (const std::filesystem::path& modules_path, modules_loading_report* report) {
+			_all_modules.add (modules_path, report);
 		}
 
 		// ------------------------------------------------------------------------------
@@ -91,12 +91,12 @@ namespace vfs {
 	}
 
 	// ----------------------------------------------------------------------------------
-	void load_module (const std::filesystem::path& path_to_module) {
+	void load_module (const std::filesystem::path& path_to_module, modules_loading_report* report) {
 		if (system == nullptr) {
 			system = new core::system (path_to_module);
 			bsw::register_at_exit (system_destructor);
 		} else {
-			system->add_module (path_to_module);
+			system->add_module (path_to_module, report);
 		}
 	}
 	// -------------------------------------------------------------------------------------

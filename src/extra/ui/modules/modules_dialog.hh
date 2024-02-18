@@ -17,6 +17,9 @@ class ModulesDialog : public QDialog {
  public:
 	explicit ModulesDialog (QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
  private:
+	void loadModuleFromFile();
+	void loadModuleFromDirectory();
+ private:
 	Ui::ModulesDialog* ui;
 	ModulesModel* m_model;
 };

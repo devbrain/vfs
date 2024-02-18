@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <memory>
 #include <iosfwd>
+#include <list>
 
 #include <vfs/api/vfs_api.h>
 #include <vfs/detail/wrapped_iterator.hh>
@@ -16,6 +17,14 @@ namespace vfs {
 	namespace core {
 		class modules_table;
 	}
+
+	struct VFS_API modules_loading_report_item {
+		modules_loading_report_item (std::filesystem::path  path, const bool is_loaded);
+		const std::filesystem::path path;
+		const bool is_loaded;
+	};
+
+	using modules_loading_report = std::list<modules_loading_report_item>;
 
 	class VFS_API modules;
 
