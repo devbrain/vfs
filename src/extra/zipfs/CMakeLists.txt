@@ -15,6 +15,12 @@ set (src
         zipfs_impl.hh
         zipfs_inode.cc
         zipfs_inode.hh
+        zip_archive.cc
+        zip_archive.hh
+        zipfs_uncompressed_file.cc
+        zipfs_uncompressed_file.hh
+        zipfs_inmem_file.cc
+        zipfs_inmem_file.hh
         miniz.c
         miniz.h
 )
@@ -22,6 +28,15 @@ set (src
 add_library(zipfs ${src})
 target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw
                             PRIVATE popl)
+if ("${CMAKE_C_BYTE_ORDER}" STREQUAL "LITTLE_ENDIAN")
+    set (defMINIZ_LITTLE_ENDIAN 1)
+else()
+    set (defMINIZ_LITTLE_ENDIAN 0)
+endif()
+
+target_compile_definitions(zipfs PRIVATE MINIZ_NO_STDIO MINIZ_LITTLE_ENDIAN=${defMINIZ_LITTLE_ENDIAN})
+
+
 target_include_directories(zipfs PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${PROJECT_ROOT}/include>

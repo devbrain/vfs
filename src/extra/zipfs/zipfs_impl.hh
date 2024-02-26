@@ -5,8 +5,9 @@
 #ifndef VFS_SRC_EXTRA_ZIPFS_ZIPFS_IMPL_HH_
 #define VFS_SRC_EXTRA_ZIPFS_ZIPFS_IMPL_HH_
 
+#include <memory>
 #include "vfs/api/vfs_module.h"
-#include <istream>
+#include "zip_archive.hh"
 
 namespace vfs::extra {
 	class zipfs : public vfs::module::filesystem {
@@ -20,7 +21,7 @@ namespace vfs::extra {
 		int sync_inode (vfs::module::inode* inod) override;
 		[[nodiscard]] bool is_readonly () const override;
 	 private:
-		std::istream* m_stream;
+		std::unique_ptr<zip_archive> m_archive;
 	};
 }
 

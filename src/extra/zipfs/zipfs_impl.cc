@@ -2,10 +2,13 @@
 // Created by igor on 2/4/24.
 //
 
-#include "zipfs_impl.hh"
-#include <vfs/extra/zipfs.hh>
 #include <fstream>
+
+#include <vfs/extra/zipfs.hh>
 #include "popl.hpp"
+
+#include "zipfs_inode.hh"
+#include "zipfs_impl.hh"
 
 namespace vfs::extra {
 
@@ -33,19 +36,23 @@ namespace vfs::extra {
 
 	zipfs::zipfs ()
 		: vfs::module::filesystem ("zipfs"),
-		  m_stream (nullptr) {
+		  m_archive (nullptr) {
 	}
 
 	vfs::module::inode* zipfs::load_root (const std::string& params) {
 		auto cmds = parse_commands (params);
 		if (!cmds.is_vfs) {
-			m_stream = new std::ifstream (cmds.path, std::ios::binary | std::ios::in);
+			auto stream = std::make_unique<std::ifstream> (cmds.path, std::ios::binary | std::ios::in);
+			stream->seekg (0, std::ios::end);
+			auto size = stream->tellg();
+			stream->seekg (0, std::ios::beg);
+			m_archive = std::make_unique<zip_archive>(std::move(stream), size);
 		}
-		return nullptr;
+		return new zipfs_inode(m_archive.get(), m_archive->get_root());
 	}
 
 	size_t zipfs::max_name_length () {
-		return 64;
+		return 512;
 	}
 
 	int zipfs::sync () {
@@ -60,9 +67,7 @@ namespace vfs::extra {
 		return true;
 	}
 
-	zipfs::~zipfs () {
-		delete m_stream;
-	}
+	zipfs::~zipfs () = default;
 
 	std::unique_ptr<vfs::module::filesystem> create_zipfs() {
 		return std::make_unique<zipfs>();

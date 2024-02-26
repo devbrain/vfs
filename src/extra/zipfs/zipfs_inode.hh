@@ -7,12 +7,12 @@
 
 #include <vfs/api/vfs_module.h>
 #include <iosfwd>
-#include "miniz.h"
+#include "zip_archive.hh"
 
-namespace vfs::detail {
+namespace vfs::extra {
 	class zipfs_inode : public vfs::module::inode {
 	 public:
-		explicit zipfs_inode (std::istream* stream);
+		zipfs_inode (zip_archive* archive, zip_tree* node);
 
 		inode* lookup (const char* name) override;
 		uint64_t size () override;
@@ -23,8 +23,8 @@ namespace vfs::detail {
 
 		vfs::module::file* open_file (open_mode_type mode_type) override;
 	 private:
-		std::istream* m_stream;
-		mz_zip_archive m_archive;
+		zip_archive* m_archive;
+		zip_tree* m_node;
 	};
 }
 
