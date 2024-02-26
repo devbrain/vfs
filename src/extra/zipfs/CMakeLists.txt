@@ -28,13 +28,18 @@ set (src
 add_library(zipfs ${src})
 target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw
                             PRIVATE popl)
+
 if ("${CMAKE_C_BYTE_ORDER}" STREQUAL "LITTLE_ENDIAN")
     set (defMINIZ_LITTLE_ENDIAN 1)
 else()
     set (defMINIZ_LITTLE_ENDIAN 0)
 endif()
 
-target_compile_definitions(zipfs PRIVATE MINIZ_NO_STDIO MINIZ_LITTLE_ENDIAN=${defMINIZ_LITTLE_ENDIAN})
+target_compile_definitions(zipfs PRIVATE
+        MINIZ_NO_STDIO
+        MINIZ_LITTLE_ENDIAN=${defMINIZ_LITTLE_ENDIAN}
+        _LARGEFILE64_SOURCE
+)
 
 
 target_include_directories(zipfs PUBLIC
@@ -45,9 +50,6 @@ target_include_directories(zipfs PUBLIC
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_definitions(zipfs PRIVATE
-        _LARGEFILE64_SOURCE
-        )
 
 include(GenerateExportHeader)
 generate_export_header(zipfs
@@ -55,10 +57,10 @@ generate_export_header(zipfs
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/zipfs_api.h
 )
 
-add_executable(testme
-        testme.cc
-        miniz.c
-        miniz.h)
-target_compile_definitions(testme PRIVATE
-        _LARGEFILE64_SOURCE
-)
+#add_executable(testme
+#        testme.cc
+#        miniz.c
+#        miniz.h)
+#target_compile_definitions(testme PRIVATE
+#        _LARGEFILE64_SOURCE
+#)
