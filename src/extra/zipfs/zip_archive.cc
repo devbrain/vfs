@@ -202,7 +202,7 @@ namespace vfs::extra {
 									  (mz_uint8 *)out.data(),
 									  (mz_uint8 *)next_out,
 									  &out_bytes,
-									  (infile_remaining ? TINFL_FLAG_HAS_MORE_INPUT : 0) | TINFL_FLAG_PARSE_ZLIB_HEADER);
+									  (infile_remaining ? TINFL_FLAG_HAS_MORE_INPUT : 0));
 
 			avail_in -= in_bytes;
 			next_in = next_in + in_bytes;
@@ -225,16 +225,12 @@ namespace vfs::extra {
 					switch (status) {
 						case TINFL_STATUS_FAILED_CANNOT_MAKE_PROGRESS:
 							RAISE_EX("zipfs decompression failure: CANNOT_MAKE_PROGRESS");
-							break;
 						case TINFL_STATUS_BAD_PARAM:
 							RAISE_EX("zipfs decompression failure: BAD_PARAM");
-							break;
 						case TINFL_STATUS_ADLER32_MISMATCH:
 							RAISE_EX("zipfs decompression failure: ADLER32_MISMATCH");
-							break;
 						case TINFL_STATUS_FAILED:
 							RAISE_EX("zipfs decompression failure: STATUS_FAILED");
-							break;
 						default:
 							RAISE_EX("zipfs decompression failure: Should not be here");
 					}

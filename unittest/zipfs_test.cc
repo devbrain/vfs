@@ -1,10 +1,15 @@
 //
 // Created by igor on 2/18/24.
 //
+#include <vector>
 #include <doctest/doctest.h>
 #include <vfs/extra/zipfs.hh>
 #include <vfs/archive.hh>
+#include <bsw/io/memory_stream_buf.hh>
 #include "utils/test_data.hh"
+#include "utils/sha1.hh"
+
+
 
 TEST_SUITE("zipfs test") {
 	TEST_CASE ("Test stat") {
@@ -49,5 +54,42 @@ TEST_SUITE("zipfs test") {
 		REQUIRE(s8.has_value());
 		REQUIRE(s8->size == 262144);
 		REQUIRE(s8->type == vfs::stats::eFILE);
+	}
+
+	TEST_CASE("Test read simple") {
+		vfs::archive zip(vfs::extra::create_zipfs(), get_test_file ("zipfs/test.zip"));
+		auto* f = zip.open ("/test/256.dat", vfs::READ_ONLY);
+		REQUIRE(f != nullptr);
+		vfs::seek (f, 0, vfs::seek_type::eEND);
+		auto sz = vfs::tell (f);
+		REQUIRE(sz == 262144);
+
+		std::vector<unsigned char> x(sz, 0xFF);
+		vfs::seek (f, 0, vfs::seek_type::eSET);
+		vfs::read (f, x.data(), sz);
+		for (const auto b : x) {
+			if (b != 0) {
+				REQUIRE(b == 0);
+			}
+		}
+	}
+
+	TEST_CASE("Test read random data") {
+		vfs::archive zip(vfs::extra::create_zipfs(), get_test_file ("zipfs/test.zip"));
+		auto* f = zip.open ("/test/sample.txt", vfs::READ_ONLY);
+		REQUIRE(f != nullptr);
+		vfs::seek (f, 0, vfs::seek_type::eEND);
+		auto sz = vfs::tell (f);
+		REQUIRE(sz == 262144);
+
+		std::vector<char> x(sz);
+		vfs::seek (f, 0, vfs::seek_type::eSET);
+		vfs::read (f, x.data(), sz);
+
+		bsw::io::memory_input_stream stream(x.data(), x.size());
+		SHA1 sha_1;
+		sha_1.update (stream);
+		auto digest = sha_1.final();
+		REQUIRE(digest == "d0af266666e5bcbae63b6b3f63dc3f19bfbb8ac7");
 	}
 }

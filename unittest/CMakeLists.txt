@@ -3,6 +3,7 @@ add_executable(unittest
         utils/sandbox.cc
         utils/test_data.hh
         utils/test_data.cc
+        utils/sha1.hh
         main.cpp
         vfs_basic_test.cc
         vfs_unlink_test.cc

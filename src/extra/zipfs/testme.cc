@@ -26,14 +26,10 @@ int main(int argc, char* argv[]) {
 
 		printf("Filename: \"%s\", Comment: \"%s\", Uncompressed size: %u, Compressed size: %u, Is Dir: %u\n", file_stat.m_filename, file_stat.m_comment, (uint)file_stat.m_uncomp_size, (uint)file_stat.m_comp_size, mz_zip_reader_is_file_a_directory(&zip_archive, i));
 
-		if (!strcmp(file_stat.m_filename, "directory/"))
+		if (!strcmp(file_stat.m_filename, "test/256.dat"))
 		{
-			if (!mz_zip_reader_is_file_a_directory(&zip_archive, i))
-			{
-				printf("mz_zip_reader_is_file_a_directory() didn't return the expected results!\n");
-				mz_zip_reader_end(&zip_archive);
-				return EXIT_FAILURE;
-			}
+			size_t pSize;
+			mz_zip_reader_extract_file_to_heap (&zip_archive, "test/256.dat", &pSize, 0);
 		}
 	}
 
