@@ -2,6 +2,7 @@
 // Created by igor on 2/18/24.
 //
 #include <vector>
+#include <cstring>
 #include <doctest/doctest.h>
 #include <vfs/extra/zipfs.hh>
 #include <vfs/archive.hh>
@@ -58,18 +59,38 @@ TEST_SUITE("zipfs test") {
 
 	TEST_CASE("Test read simple") {
 		vfs::archive zip(vfs::extra::create_zipfs(), get_test_file ("zipfs/test.zip"));
+		auto st = zip.get_stats ("/test/256.dat");
 		auto* f = zip.open ("/test/256.dat", vfs::READ_ONLY);
 		REQUIRE(f != nullptr);
-		vfs::seek (f, 0, vfs::seek_type::eEND);
-		auto sz = vfs::tell (f);
-		REQUIRE(sz == 262144);
+		if (!st->is_sequential) {
 
-		std::vector<unsigned char> x(sz, 0xFF);
-		vfs::seek (f, 0, vfs::seek_type::eSET);
-		vfs::read (f, x.data(), sz);
-		for (const auto b : x) {
-			if (b != 0) {
-				REQUIRE(b == 0);
+			vfs::seek (f, 0, vfs::seek_type::eEND);
+			auto sz = vfs::tell (f);
+			REQUIRE(sz == 262144);
+
+			std::vector<unsigned char> x (sz, 0xFF);
+			vfs::seek (f, 0, vfs::seek_type::eSET);
+			vfs::read (f, x.data (), sz);
+			for (const auto b : x) {
+				if (b != 0) {
+					REQUIRE(b == 0);
+				}
+			}
+		} else {
+			REQUIRE(st->size == 262144);
+			char buff[256];
+			size_t has_bytes = 0;
+			while (has_bytes < st->size) {
+				std::memset (buff, 0xFF, sizeof(buff));
+				auto rc = vfs::read (f, buff, sizeof (buff));
+				REQUIRE (rc >= 0);
+				has_bytes += rc;
+				for (size_t i=0; i<(size_t)rc; i++) {
+					auto b = buff[i];
+					if (b != 0) {
+						REQUIRE(b == 0);
+					}
+				}
 			}
 		}
 	}

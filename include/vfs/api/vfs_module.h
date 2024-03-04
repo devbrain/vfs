@@ -76,6 +76,9 @@ struct vfs_inode_stats {
 	 */
 	uint64_t size;
 
+	// for dirs is always 1, for files - is implementation specific
+	int is_sequential;
+
 	struct vfs_key_value attr1;
 	struct vfs_key_value attr2;
 
@@ -168,6 +171,8 @@ struct vfs_inode_ops {
 
 	int (* unlink) (void* opaque);
 
+	int (* is_sequential)(void* opaque);
+
 	struct vfs_file_ops* (* open_file) (void* opaque, enum open_mode_type mode_type);
 };
 
@@ -256,7 +261,7 @@ namespace vfs::module {
 	 public:
 		class stats {
 		 public:
-			stats (vfs_inode_stats& output, vfs_inode_type type, uint64_t length);
+			stats (vfs_inode_stats& output, vfs_inode_type type, uint64_t length, bool is_sequential);
 			void attr (const char* key, const char* value);
 		 private:
 			static void _destructor (vfs_inode_stats* out);
@@ -281,7 +286,9 @@ namespace vfs::module {
 		virtual bool mkdir (const char* name) = 0;
 		virtual bool mkfile (const char* name) = 0;
 		virtual int unlink () = 0;
-
+		[[nodiscard]] virtual bool is_sequential() const {
+			return false;
+		}
 		virtual file* open_file (open_mode_type mode_type) = 0;
 	 public:
 		static vfs_inode_ops* inode_create (vfs::module::inode* opaque);
@@ -296,6 +303,7 @@ namespace vfs::module {
 		static int _mkfile (void* opaque, char* name);
 		static int _unlink (void* opaque);
 		static vfs_file_ops* _open_file (void* opaque, enum open_mode_type mode_type);
+		static int _is_sequential (void* opaque);
 	};
 
 	class filesystem {
@@ -331,11 +339,12 @@ namespace vfs::module {
 	Implementation
    ============================================================================ */
 	inline
-	inode::stats::stats (vfs_inode_stats& output, vfs_inode_type type, uint64_t length)
+	inode::stats::stats (vfs_inode_stats& output, vfs_inode_type type, uint64_t length, bool is_sequential)
 		: _output (output),
 		  _num_atts (0) {
 		output.type = type;
 		output.size = length;
+		output.is_sequential = is_sequential ? 1 : 0;
 		output.num_of_additional_attributes = 0;
 		_init_attr (output.attr1);
 		_init_attr (output.attr2);
@@ -424,6 +433,7 @@ namespace vfs::module {
 		res->mkfile = _mkfile;
 		res->unlink = _unlink;
 		res->open_file = _open_file;
+		res->is_sequential = _is_sequential;
 		return res;
 	}
 
@@ -451,7 +461,7 @@ namespace vfs::module {
 		try {
 			const auto type = ino->type ();
 			uint64_t len = type == VFS_INODE_REGULAR ? ino->size () : 0;
-			vfs::module::inode::stats st (*output, type, len);
+			vfs::module::inode::stats st (*output, type, len, type == VFS_INODE_DIRECTORY ? false : ino->is_sequential());
 			ino->load_stat (st);
 			return 1;
 		}
@@ -487,7 +497,12 @@ namespace vfs::module {
 		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
 		return file::vfs_file_ops_create (ino->open_file (mode_type));
 	}
-
+	/* ----------------------------------------------------------------------------- */
+	inline
+	int inode::_is_sequential (void* opaque) {
+		auto* ino = reinterpret_cast<vfs::module::inode*>(opaque);
+		return ino->is_sequential();
+	}
 	/* ----------------------------------------------------------------------------- */
 	inline
 	struct vfs_directory_iterator* inode::_get_directory_iterator (void* opaque) {

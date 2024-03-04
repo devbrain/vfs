@@ -6,5 +6,6 @@ endif()
 
 add_subdirectory(popl)
 add_subdirectory(zipfs)
+add_subdirectory(rarfs)
 
 

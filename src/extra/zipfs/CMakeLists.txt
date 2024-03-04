@@ -21,7 +21,9 @@ set (src
         zipfs_uncompressed_file.hh
         zipfs_inmem_file.cc
         zipfs_inmem_file.hh
-        miniz.c
+        zipfs_stream_file.cc
+        zipfs_stream_file.hh
+        miniz-ext.c
         miniz.h
 )
 
@@ -57,10 +59,10 @@ generate_export_header(zipfs
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/zipfs_api.h
 )
 
-#add_executable(testme
-#        testme.cc
-#        miniz.c
-#        miniz.h)
-#target_compile_definitions(testme PRIVATE
-#        _LARGEFILE64_SOURCE
-#)
+add_executable(testme
+        testme.cc
+        miniz-ext.c
+        miniz.h)
+target_compile_definitions(testme PRIVATE
+        _LARGEFILE64_SOURCE
+)

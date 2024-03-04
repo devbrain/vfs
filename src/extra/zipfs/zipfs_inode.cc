@@ -6,6 +6,7 @@
 #include "zipfs_uncompressed_file.hh"
 #include "zipfs_inmem_file.hh"
 #include "zipfs_inode.hh"
+#include "zipfs_stream_file.hh"
 
 
 namespace vfs::extra {
@@ -30,8 +31,6 @@ namespace vfs::extra {
 		children_itr_t _itr;
 		children_itr_t _end;
 	};
-
-
 
 	// ============================================================================
 
@@ -74,7 +73,23 @@ namespace vfs::extra {
 		if (!m_node->is_compressed) {
 			return new zipfs_uncompressed_file(m_archive, m_node);
 		}
-		return new zipfs_inmem_file(m_archive, m_node);
+		if (m_node->original_size < 65536) {
+			return new zipfs_inmem_file (m_archive, m_node);
+		}
+		//return new zipfs_inmem_file (m_archive, m_node);
+		return new zipfs_stream_file(m_archive, m_node);
+	}
+
+	bool zipfs_inode::is_sequential () const {
+		if (m_node->is_dir) {
+			return false;
+		}
+		if (!m_node->is_compressed) {
+			if (m_node->original_size < 65536) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

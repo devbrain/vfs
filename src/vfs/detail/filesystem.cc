@@ -223,6 +223,10 @@ namespace vfs::core {
 		return _owner->is_readonly ();
 	}
 
+	// ----------------------------------------------------------------------
+	bool inode::is_sequential () const {
+		return _ops->is_sequential(_ops->opaque);
+	}
 	// ========================================================================
 	bool file_ops::seek (uint64_t pos, enum whence_type whence) {
 		return _ops->seek (_ops->opaque, pos, whence) == 1;

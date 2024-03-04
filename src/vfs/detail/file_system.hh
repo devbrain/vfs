@@ -112,6 +112,7 @@ namespace vfs::core {
 
 		[[nodiscard]] std::unique_ptr<file_ops> get_file_ops (open_mode_type mode_type) const;
 		[[nodiscard]] bool is_readonly () const;
+		[[nodiscard]] bool is_sequential () const;
 	 private:
 		explicit inode (vfs_inode_ops* ops, file_system* owner);
 	 private:

@@ -10,7 +10,7 @@ fetchcontent_declare(
         GIT_PROGRESS TRUE
         GIT_TAG master
         TIMEOUT 10
-        UPDATE_COMMAND ""
+        # UPDATE_COMMAND ""
 )
 
 fetchcontent_makeavailable(BSW_EXT)

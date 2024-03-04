@@ -22,7 +22,7 @@ namespace vfs {
 			eDIRECTORY,
 			eNAME_TRUNCATED // if real name was truncated due to maximal path length constraint
 		};
-
+		bool is_sequential;
 		type_t type;
 	};
 

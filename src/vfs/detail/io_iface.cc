@@ -12,11 +12,12 @@
 
 namespace vfs {
 	struct file {
-		file (std::unique_ptr<core::file_ops>&& fops, std::string  pth, bool ro, bool app)
+		file (std::unique_ptr<core::file_ops>&& fops, std::string  pth, bool ro, bool app, bool seq)
 			: file_ops (std::move (fops)),
 			  file_path (std::move(pth)),
 			  read_only (ro),
-			  append (app) {
+			  append (app),
+			  is_sequential (seq) {
 
 		}
 
@@ -24,6 +25,7 @@ namespace vfs {
 		std::string file_path;
 		bool read_only;
 		bool append;
+		bool is_sequential;
 	};
 
 	namespace core {
@@ -137,16 +139,16 @@ namespace vfs {
 						if (!fops->truncate ()) {
 							THROW_EXCEPTION_EX(vfs::exception, "failed to truncate file ", pth);
 						}
-						return new file (std::move (fops), pth, read_only, has_append);
+						return new file (std::move (fops), pth, read_only, has_append, st.is_sequential);
 					} else {
 						if (openmode & CREATE) {
-							return new file (std::move (fops), pth, read_only, has_append);
+							return new file (std::move (fops), pth, read_only, has_append, st.is_sequential);
 						} else {
 							THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, "for TRUNCATE");
 						}
 					}
 				} else {
-					return new file (std::move (fops), pth, read_only, has_append);
+					return new file (std::move (fops), pth, read_only, has_append, st.is_sequential);
 				}
 			} else {
 				if (depth == p.depth () - 1) {
@@ -166,7 +168,7 @@ namespace vfs {
 					if (!fops) {
 						THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for writing");
 					}
-					return new file (std::move (fops), pth, read_only, has_append);
+					return new file (std::move (fops), pth, read_only, has_append, ino_new->is_sequential());
 				} else {
 					THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
 				}
@@ -204,14 +206,14 @@ namespace vfs {
 						if (!fops->truncate ()) {
 							THROW_EXCEPTION_EX(vfs::exception, "failed to truncate file ", pth);
 						}
-						return new file (std::move (fops), pth, readonly, false);
+						return new file (std::move (fops), pth, readonly, false, ino->is_sequential());
 					case creation_disposition::eCREATE_NEW:
 					case creation_disposition::eOPEN_EXISTING:
 						fops = ino->get_file_ops (readonly ? eVFS_OPEN_MODE_READ : eVFS_OPEN_MODE_WRITE);
 						if (!fops) {
 							THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth);
 						}
-						return new file (std::move (fops), pth, readonly, false);
+						return new file (std::move (fops), pth, readonly, false, ino->is_sequential());
 				}
 			} else {
 				if (depth == p.depth () - 1) {
@@ -235,7 +237,7 @@ namespace vfs {
 					if (!fops) {
 						THROW_EXCEPTION_EX(vfs::exception, "unable to open file ", pth, " for writing");
 					}
-					return new file (std::move (fops), pth, readonly, false);
+					return new file (std::move (fops), pth, readonly, false, ino_new->is_sequential());
 				} else {
 					THROW_EXCEPTION_EX(vfs::exception, "path does not exists ", pth);
 				}
@@ -296,6 +298,9 @@ namespace vfs {
 
 		// ---------------------------------------------------------------------------------------------------------------
 		void seek (file* f, uint64_t pos, seek_type whence) {
+			if (f->is_sequential) {
+				THROW_EXCEPTION_EX(vfs::exception, "sequential access only for ", f->file_path);
+			}
 			if (f && f->file_ops) {
 				whence_type wt = eVFS_SEEK_CUR;
 				switch (whence) {

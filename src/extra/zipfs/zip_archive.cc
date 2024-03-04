@@ -11,6 +11,8 @@
 
 #include "zip_archive.hh"
 
+extern "C" int mz_inflate_no_copy(mz_streamp pStream, int flush);
+
 static size_t file_read_func (void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) {
 	auto* is = reinterpret_cast<std::istream*>(pOpaque);
 	is->seekg (static_cast<std::streamoff>(file_ofs), std::ios::beg);
@@ -254,3 +256,4 @@ namespace vfs::extra {
 		}
 	}
 }
+

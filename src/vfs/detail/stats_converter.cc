@@ -4,6 +4,7 @@ namespace vfs {
 	stats convert (const core::stats& st) {
 		stats res;
 		res.size = st.size;
+		res.is_sequential = st.is_sequential;
 		switch (st.type) {
 			case VFS_INODE_DIRECTORY: res.type = stats::eDIRECTORY;
 				break;
