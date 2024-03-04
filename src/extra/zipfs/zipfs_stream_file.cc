@@ -91,6 +91,7 @@ namespace vfs::extra {
 		std::memcpy (buff, m_outbuf + m_outbuf_ptr, can_read);
 		m_outbuf_ptr += can_read;
 		m_pointer += can_read;
+		return can_read;
 	}
 
 	bool zipfs_stream_file::seek (uint64_t pos, whence_type whence) {
