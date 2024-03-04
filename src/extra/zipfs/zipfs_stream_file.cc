@@ -100,6 +100,6 @@ namespace vfs::extra {
 	}
 
 	zipfs_stream_file::~zipfs_stream_file () {
-		tinfl_decompressor_free(&m_inflator);
+
 	}
 }

@@ -89,7 +89,7 @@ TEST_SUITE("zipfs test") {
 				}
 			}
 		}
-		delete f;
+		vfs::close(f);
 	}
 
 	TEST_CASE("Test read random data") {
@@ -114,6 +114,6 @@ TEST_SUITE("zipfs test") {
 		auto digest = sha_1.final ();
 		REQUIRE(digest == "d0af266666e5bcbae63b6b3f63dc3f19bfbb8ac7");
 
-		delete f;
+		vfs::close (f);
 	}
 }
