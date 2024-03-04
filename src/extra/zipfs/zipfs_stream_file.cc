@@ -85,6 +85,7 @@ namespace vfs::extra {
 				return rc;
 			}
 			bytes_in_obuf = (std::size_t)rc;
+			m_outbuf_len = bytes_in_obuf;
 			m_outbuf_ptr = 0;
 		}
 		auto can_read = std::min(bytes_in_obuf, len);
