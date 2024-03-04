@@ -73,10 +73,9 @@ namespace vfs::extra {
 		if (!m_node->is_compressed) {
 			return new zipfs_uncompressed_file(m_archive, m_node);
 		}
-		if (m_node->original_size < 65536) {
+		if (m_node->original_size < zipfs_stream_file::OUTPUT_BUFFER_SIZE) {
 			return new zipfs_inmem_file (m_archive, m_node);
 		}
-		//return new zipfs_inmem_file (m_archive, m_node);
 		return new zipfs_stream_file(m_archive, m_node);
 	}
 
@@ -85,7 +84,7 @@ namespace vfs::extra {
 			return false;
 		}
 		if (!m_node->is_compressed) {
-			if (m_node->original_size < 65536) {
+			if (m_node->original_size < zipfs_stream_file::OUTPUT_BUFFER_SIZE) {
 				return false;
 			}
 		}

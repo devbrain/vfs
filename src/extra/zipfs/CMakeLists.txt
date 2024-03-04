@@ -23,7 +23,7 @@ set (src
         zipfs_inmem_file.hh
         zipfs_stream_file.cc
         zipfs_stream_file.hh
-        miniz-ext.c
+        miniz.c
         miniz.h
 )
 
@@ -39,6 +39,8 @@ endif()
 
 target_compile_definitions(zipfs PRIVATE
         MINIZ_NO_STDIO
+        MINIZ_NO_ZLIB_APIS
+        MINIZ_NO_TIME
         MINIZ_LITTLE_ENDIAN=${defMINIZ_LITTLE_ENDIAN}
         _LARGEFILE64_SOURCE
 )

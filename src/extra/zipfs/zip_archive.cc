@@ -11,7 +11,7 @@
 
 #include "zip_archive.hh"
 
-extern "C" int mz_inflate_no_copy(mz_streamp pStream, int flush);
+
 
 static size_t file_read_func (void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) {
 	auto* is = reinterpret_cast<std::istream*>(pOpaque);
@@ -62,7 +62,7 @@ static void raise_last_error (const mz_zip_archive& a) {
 namespace vfs::extra {
 	zip_archive::zip_archive (std::unique_ptr<std::istream> istream, uint64_t file_size)
 		: m_istream (std::move (istream)),
-		  m_archive{0},
+		  m_archive{},
 		  m_root(new zip_tree) {
 		m_root->offset = file_size;
 		mz_zip_zero_struct(&m_archive);
@@ -73,7 +73,7 @@ namespace vfs::extra {
 			raise_last_error (m_archive);
 		}
 		auto num_files = mz_zip_reader_get_num_files(&m_archive);
-		for (int i = 0; i < num_files; i++) {
+		for (unsigned int i = 0; i < num_files; i++) {
 			mz_zip_archive_file_stat file_stat;
 			if (!mz_zip_reader_file_stat (&m_archive, i, &file_stat)) {
 				raise_last_error (m_archive);
@@ -244,10 +244,10 @@ namespace vfs::extra {
 	}
 	// ===========================================================================================
 	zip_tree::zip_tree()
-	: compressed_size(0),
-	  original_size(0),
-	  is_dir(true),
+	: is_dir(true),
 	  is_compressed(false),
+	  original_size(0),
+	  compressed_size(0),
 	  offset(0) {}
 
 	zip_tree::~zip_tree() {

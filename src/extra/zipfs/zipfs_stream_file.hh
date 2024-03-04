@@ -31,9 +31,9 @@ namespace vfs::extra {
 		mz_uint8*  m_next_in;
 		size_t     m_avail_in;
 		size_t     m_total_in;
-		tinfl_decompressor m_inflator;
-		unsigned char m_inbuf[INPUT_BUFFER_SIZE];
-		unsigned char m_outbuf[OUTPUT_BUFFER_SIZE];
+		tinfl_decompressor m_inflator{};
+		unsigned char m_inbuf[INPUT_BUFFER_SIZE]{};
+		unsigned char m_outbuf[OUTPUT_BUFFER_SIZE]{};
 
 		std::size_t m_outbuf_len;
 		std::size_t m_outbuf_ptr;
