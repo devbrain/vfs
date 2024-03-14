@@ -63,7 +63,7 @@ TEST_CASE("testMount2") {
     st = vfs::get_stats("/a/pizda/2.txt");
     REQUIRE(!st);
 
-    for (const auto d : vfs::open_directory("/a"))
+    for (const auto& d : vfs::open_directory("/a"))
 	{
 	    REQUIRE(std::get<0>(d) == "pizda");
 	    REQUIRE(std::get<1>(d).type == vfs::stats::eDIRECTORY);

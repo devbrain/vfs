@@ -10,7 +10,7 @@
 
 namespace vfs::extra {
 	class zip_archive;
-	class zip_tree;
+	struct zip_tree;
 
 	class zipfs_uncompressed_file : public vfs::module::file {
 	 public:

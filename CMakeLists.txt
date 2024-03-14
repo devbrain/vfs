@@ -39,6 +39,15 @@ if (is_top_level)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${LIB_OUT_DIR})
 endif()
 
+# Compile flags
+
+if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
+        NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+endif ()
+
+
 if (MSVC)
     # warning level 4
     add_compile_options(/W4)
@@ -47,7 +56,7 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -g)
 endif()
 
-
+# --------------------------------------------------------------
 
 add_subdirectory(ext)
 add_subdirectory(src/vfs)

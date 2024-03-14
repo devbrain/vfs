@@ -14,6 +14,7 @@ TEST_SUITE("zipfs test") {
 	TEST_CASE ("Test stat") {
 		vfs::archive zip (vfs::extra::create_zipfs (), get_test_file ("zipfs/test.zip"));
 
+
 		auto s1 = zip.get_stats ("/test");
 		REQUIRE(s1.has_value ());
 		REQUIRE(s1->size == 0);

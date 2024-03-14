@@ -10,14 +10,26 @@ add_executable(unittest
         vfs_open_file_test.cc
         vfs_read_write_test.cc
         vfs_stream_test.cc
-        zipfs_test.cc
 
-        )
+        extra/zipfs_test.cc
+        extra/floppyfs_test.cc
+
+)
 target_compile_definitions(unittest
         PRIVATE VFS_TEST_DATA="${VFS_TEST_DATA_FILES}"
 )
-target_link_libraries(unittest PRIVATE doctest::doctest neutrino::vfs zipfs)
-target_include_directories(unittest PRIVATE ${PROJECT_ROOT}/src)
+target_link_libraries(unittest
+        PRIVATE
+                doctest::doctest
+                neutrino::vfs
+                zipfs
+                floppyfs
+        )
+target_include_directories(unittest
+        PRIVATE
+                ${PROJECT_ROOT}/src
+                ${CMAKE_CURRENT_SOURCE_DIR}
+        )
 
 
 

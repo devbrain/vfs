@@ -6,7 +6,6 @@
 #define VFS_SRC_EXTRA_ZIPFS_ZIPFS_INODE_HH_
 
 #include <vfs/api/vfs_module.h>
-#include <iosfwd>
 #include "zip_archive.hh"
 
 namespace vfs::extra {

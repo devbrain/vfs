@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <vfs/extra/zipfs.hh>
+
 #include "popl.hpp"
 
 #include "zipfs_inode.hh"
