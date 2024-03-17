@@ -20,12 +20,15 @@ namespace vfs::extra {
 		bool truncate () override;
 		[[nodiscard]] uint64_t tell () const override;
 	 private:
+		ssize_t read_cluster (void* buff, size_t len);
+	 private:
 		driver*  m_fat;
 		uint32_t m_start_cluster;
 		uint32_t m_current_cluster;
 		std::size_t m_file_size;
 		std::size_t m_bytes_per_cluster;
 		uint64_t m_pointer;
+		std::vector<driver::file_map> m_file_map;
 	};
 }
 

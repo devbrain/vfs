@@ -88,6 +88,6 @@ namespace vfs::extra {
 	}
 
 	vfs::module::file* floppyfs_inode::open_file ([[maybe_unused]] open_mode_type mode_type) {
-		return new floppyfs_file (m_fat, m_cluster);
+		return new floppyfs_file (m_fat, m_cluster, m_size);
 	}
 }
