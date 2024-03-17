@@ -152,7 +152,8 @@ namespace vfs::extra {
 				fats,
 				{root_dir_size, root_dir_offset},
 				bpb_dos33.BPB_BytsPerSec,
-				bpb_dos33.BPB_SecPerClus
+				bpb_dos33.BPB_SecPerClus,
+				bpb_dos33.BPB_RootEntCnt
 		};
 	}
 
@@ -167,14 +168,16 @@ namespace vfs::extra {
 			  std::vector<disk_entry> fat,
 			  disk_entry root_directory,
 			  uint32_t bytes_per_sector,
-			  uint32_t sectors_per_cluster)
+			  uint32_t sectors_per_cluster,
+			  uint32_t root_dir_entries)
 		:
 		type (type),
 		count_of_clusters (count_of_clusters),
 		fat (std::move(fat)),
 		root_directory (root_directory),
 		bytes_per_sector (bytes_per_sector),
-		sectors_per_cluster(sectors_per_cluster) {
+		sectors_per_cluster(sectors_per_cluster),
+		root_dir_entries (root_dir_entries) {
 
 	}
 }

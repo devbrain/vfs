@@ -29,7 +29,7 @@ namespace vfs::extra {
 	};
 
 
-	floppyfs_inode::floppyfs_inode (fat12* fat, uint16_t cluster, bool is_dir, uint32_t size)
+	floppyfs_inode::floppyfs_inode (driver* fat, uint16_t cluster, bool is_dir, uint32_t size)
 		: vfs::module::inode (is_dir ? VFS_INODE_DIRECTORY : VFS_INODE_REGULAR),
 		  m_fat (fat),
 		  m_cluster (cluster),
@@ -37,23 +37,17 @@ namespace vfs::extra {
 	}
 
 	module::inode* floppyfs_inode::lookup (const char* name) {
-		uint16_t ino_cluster = 0;
-		bool ino_is_dir = false;
-		uint32_t ino_size = 0;
-		m_fat->read_dir (m_cluster, [&ino_cluster, &ino_is_dir, &ino_size, name] (uint16_t cluster,
-											  bool is_dir,
-											  uint32_t size,
-											  const std::string& ename) {
-		  if (ename == name) {
-			  ino_cluster = cluster;
-			  ino_is_dir = is_dir;
-			  ino_size = size;
-			  return false;
-		  }
-		  return true;
-		});
-		if (m_cluster != 0) {
-			return new floppyfs_inode (m_fat, ino_cluster, ino_is_dir, ino_size);
+		auto fat_dir = m_fat->get_directory (m_cluster);
+		auto itr = fat_dir.get_iterator();
+		while (true) {
+			auto opt_entry = itr.read();
+			if (opt_entry) {
+				if (opt_entry->name == name) {
+					return new floppyfs_inode (m_fat, opt_entry->cluster, opt_entry->is_dir, opt_entry->size);
+				}
+			} else {
+				break;
+			}
 		}
 		return nullptr;
 	}
@@ -64,12 +58,16 @@ namespace vfs::extra {
 
 	vfs::module::directory_iterator* floppyfs_inode::get_directory_iterator () {
 		std::vector<std::string> names;
-		m_fat->read_dir (m_cluster, [&names] ([[maybe_unused]]uint16_t cluster,
-											  [[maybe_unused]]bool is_dir,
-											  [[maybe_unused]]uint32_t size, const std::string& name) {
-		  names.emplace_back (name);
-		  return true;
-		});
+		auto fat_dir = m_fat->get_directory (m_cluster);
+		auto itr = fat_dir.get_iterator();
+		while (true) {
+			auto opt_entry = itr.read();
+			if (opt_entry) {
+				names.emplace_back (opt_entry->name);
+			} else {
+				break;
+			}
+		}
 		return new directory_iterator(std::move (names));
 	}
 

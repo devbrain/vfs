@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 #include <optional>
+#include <ostream>
 
 namespace vfs::extra {
 	class driver;
@@ -17,6 +18,7 @@ namespace vfs::extra {
 	 public:
 		struct entry {
 			entry (std::string  name, uint32_t size, bool is_dir, uint32_t cluster);
+			friend std::ostream& operator<< (std::ostream& os, const entry& entry);
 			std::string name;
 			uint32_t    size;
 			bool        is_dir;
@@ -36,13 +38,15 @@ namespace vfs::extra {
 		 private:
 			explicit iterator(directory& owner);
 		 private:
+			bool reposition();
+		 private:
 			directory& m_owner;
 			uint32_t   m_current_cluster;
 			uint32_t   m_pos;
 		};
 		friend class iterator;
 	 public:
-		directory(uint32_t cluster, driver& dos_fs);
+		directory(uint32_t cluster, std::size_t cluster_size, driver& dos_fs);
 		directory(driver& dos_fs, std::size_t root_dir_entries);
 
 		iterator get_iterator();

@@ -34,7 +34,8 @@ namespace vfs::extra {
 			 std::vector<disk_entry> fat,
 			 disk_entry root_directory,
 			 uint32_t bytes_per_sector,
-			 uint32_t sectors_per_cluster);
+			 uint32_t sectors_per_cluster,
+			 uint32_t root_dir_entries);
 
 		const type_t   type;
 		const uint32_t count_of_clusters;
@@ -42,6 +43,7 @@ namespace vfs::extra {
 		const disk_entry root_directory;
 		const uint32_t bytes_per_sector;
 		const uint32_t sectors_per_cluster;
+		const uint32_t root_dir_entries;
 	};
 
 	bpb read_bpb(std::istream& is);

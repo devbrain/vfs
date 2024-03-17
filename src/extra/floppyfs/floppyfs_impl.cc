@@ -21,12 +21,12 @@ namespace vfs::extra {
 			return nullptr;
 		}
 		std::istream* is = m_istream.get ();
-		m_fat = std::make_unique<fat12>(*is);
+		m_fat = std::make_unique<driver>(*is);
 		return new floppyfs_inode(m_fat.get(), 0, true, 0);
 	}
 
 	size_t floppyfs::max_name_length () {
-		return 11;
+		return 256;
 	}
 
 	int floppyfs::sync () {

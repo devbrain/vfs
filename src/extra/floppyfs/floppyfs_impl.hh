@@ -8,8 +8,7 @@
 #include <memory>
 #include <iostream>
 #include <vfs/api/vfs_module.h>
-#include "fat_12.hh"
-
+#include "fat/driver.hh"
 namespace vfs::extra {
 	class floppyfs : public vfs::module::filesystem {
 	 public:
@@ -23,7 +22,7 @@ namespace vfs::extra {
 		[[nodiscard]] bool is_readonly () const override;
 	 private:
 		std::unique_ptr<std::iostream> m_istream;
-		std::unique_ptr<fat12> m_fat;
+		std::unique_ptr<driver> m_fat;
 	};
 
 }

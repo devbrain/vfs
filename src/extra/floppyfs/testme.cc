@@ -6,18 +6,24 @@
 #include <iostream>
 #include <fstream>
 
-#include "fat/bpb.hh"
-#include "fat/fat.hh"
+
+#include "fat/driver.hh"
+#include "fat/directory.hh"
 
 int main(int argc, char* argv[]) {
 	//std::ifstream ifs("/home/igor/tmp/fat12/images/floppy.img", std::ios::binary);
 	std::ifstream ifs("/home/igor/proj/ares/vfs/test_data/floppyfs/Disk.img", std::ios::binary);
-	auto bpb = vfs::extra::read_bpb (ifs);
+	//std::ifstream ifs("/home/igor/proj/ares/vfs/test_data/floppyfs/disk01.img", std::ios::binary);
+	vfs::extra::driver driver(ifs);
+	auto d = driver.get_directory (0);
+	auto itr = d.get_iterator();
+	std::optional<vfs::extra::directory::entry> e;
+	do {
+		e = itr.read();
+		if (e.has_value()) {
+			std::cout << *e << std::endl;
+		}
+	} while(e.has_value());
 
-	vfs::extra::fat fat(bpb.type, bpb.fat[0], ifs);
-	for (uint32_t i = 0; i<fat.size(); i++) {
-		auto c = fat.get (i);
-		std::cout << std::hex << c << std::endl;
-	}
 	return 0;
 }

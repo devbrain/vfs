@@ -51,7 +51,9 @@ TEST_SUITE("floppyfs test") {
 						break;
 					}
 				}
-				REQUIRE(found);
+				if (!found) {
+					REQUIRE(found);
+				}
 			}
 		}
 	}

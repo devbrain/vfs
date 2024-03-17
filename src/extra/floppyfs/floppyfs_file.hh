@@ -5,13 +5,13 @@
 #ifndef VFS_SRC_EXTRA_FLOPPYFS_FLOPPYFS_FILE_HH_
 #define VFS_SRC_EXTRA_FLOPPYFS_FLOPPYFS_FILE_HH_
 
-#include "fat_12.hh"
+#include "fat/driver.hh"
 #include <vfs/api/vfs_module.h>
 
 namespace vfs::extra {
 	class floppyfs_file : public vfs::module::file {
 	 public:
-		floppyfs_file(fat12* fat, uint16_t start_cluster);
+		floppyfs_file(driver* fat, uint32_t start_cluster, std::size_t file_size);
 		~floppyfs_file() override;
 	 private:
 		ssize_t read (void* buff, size_t len) override;
@@ -20,9 +20,11 @@ namespace vfs::extra {
 		bool truncate () override;
 		[[nodiscard]] uint64_t tell () const override;
 	 private:
-		fat12*   m_fat;
-		uint16_t m_start_cluster;
-
+		driver*  m_fat;
+		uint32_t m_start_cluster;
+		uint32_t m_current_cluster;
+		std::size_t m_file_size;
+		std::size_t m_bytes_per_cluster;
 		uint64_t m_pointer;
 	};
 }

@@ -2,6 +2,7 @@
 // Created by igor on 3/14/24.
 //
 
+#include <algorithm>
 #include <utility>
 #include <cstring>
 #include <variant>
@@ -9,6 +10,7 @@
 #include "directory.hh"
 #include <bsw/byte_order.hh>
 #include <bsw/override.hh>
+#include <bsw/strings/wchar.hh>
 
 #if defined(BSW_IS_LITTLE_ENDIAN)
 #define    getushort(x)    *((u_int16_t *)(x))
@@ -43,7 +45,7 @@ namespace vfs::extra {
 #define    ATTR_DIRECTORY    0x10        /* entry is a directory name */
 
 #define    ATTR_ARCHIVE    0x20        /* file is new or modified */
-#define    ATTR_LFN     (ATTR_READONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME | ATTR_DIRECTORY | ATTR_ARCHIVE)
+#define    ATTR_LFN     0xf // (ATTR_READONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME | ATTR_DIRECTORY | ATTR_ARCHIVE)
 		uint8_t deLowerCase;    /* NT VFAT lower case flags */
 #define    LCASE_BASE    0x08        /* filename base in lower case */
 #define    LCASE_EXT    0x10        /* filename extension in lower case */
@@ -116,16 +118,16 @@ namespace vfs::extra {
 		}
 	}
 	// ===================================================================================
-	directory::directory (uint32_t cluster, driver& dos_fs)
+	directory::directory (uint32_t cluster, std::size_t bytes_per_cluster, driver& dos_fs)
 		: m_driver (dos_fs),
 		  m_cluster (cluster),
-		  m_dir_entries (0) {
+		  m_dir_entries (bytes_per_cluster / DIR_ENTRY_SIZE) {
 	}
 
 	directory::directory (driver& dos_fs, std::size_t root_dir_entries)
 		: m_driver (dos_fs),
 		  m_cluster (0),
-		  m_dir_entries (0) {
+		  m_dir_entries (root_dir_entries) {
 	}
 
 	directory::iterator directory::get_iterator () {
@@ -134,6 +136,12 @@ namespace vfs::extra {
 
 	directory::entry::entry (std::string name, uint32_t size, bool is_dir, uint32_t cluster)
 		: name (std::move(name)), size (size), is_dir (is_dir), cluster (cluster) {}
+
+	std::ostream& operator<< (std::ostream& os, const directory::entry& entry) {
+		os << "name: " << entry.name << " size: " << entry.size << " is_dir: " << entry.is_dir << " cluster: "
+		   << entry.cluster;
+		return os;
+	}
 
 	// ==================================================================================
 	directory::iterator::iterator (directory& owner)
@@ -151,20 +159,96 @@ namespace vfs::extra {
 		uint16_t name3[sizeof (lfn_data::LDIR_Name3) / sizeof (uint16_t)];
 	};
 
-	directory::entry generate_entry(const slot_entry& e, const std::vector<parsed_lfn>& lfn) {
-
+	directory::entry generate_entry(const slot_entry& e, std::vector<parsed_lfn>& lfn) {
+		if (lfn.empty()) {
+			std::string name;
+			std::string ext;
+			for (int i=0; i<8; i++) {
+				if (e.name[i] != ' ') {
+					name += e.name[i];
+				}
+			}
+			for (int i=8; i<11; i++) {
+				if (e.name[i] != ' ') {
+					ext += e.name[i];
+				}
+			}
+			std::string oname = ext.empty() ? name : name + "." + ext;
+			return {oname, e.size, e.is_dir, e.cluster};
+		}
+		if (lfn.size() > 1) {
+			std::sort (lfn.begin (), lfn.end (), [] (const auto& a, const auto& b) {
+			  return a.seq < b.seq;
+			});
+		}
+		std::wstring ws;
+		for (const auto& lfn_entry: lfn) {
+			bool is_end = false;
+			for (auto rune : lfn_entry.name1) {
+				if (rune == 0 || rune == 0xFFFF) {
+					is_end = true;
+					break;
+				} else {
+					wchar_t w = bsw::byte_order::from_little_endian (rune);
+					ws += w;
+				}
+			}
+			if (!is_end) {
+				for (auto rune : lfn_entry.name2) {
+					if (rune == 0 || rune == 0xFFFF) {
+						is_end = true;
+						break;
+					} else {
+						wchar_t w = bsw::byte_order::from_little_endian (rune);
+						ws += w;
+					}
+				}
+			}
+			if (!is_end) {
+				for (auto rune : lfn_entry.name3) {
+					if (rune == 0 || rune == 0xFFFF) {
+						is_end = true;
+						break;
+					} else {
+						wchar_t w = bsw::byte_order::from_little_endian (rune);
+						ws += w;
+					}
+				}
+			}
+		}
+		return {bsw::wstring_to_utf8 (ws), e.size, e.is_dir, e.cluster};
 	}
 
-	std::optional<directory::entry> directory::iterator::read () {
+	bool directory::iterator::reposition() {
+		if (m_current_cluster == 0) {
+			if (m_pos >= m_owner.m_dir_entries) {
+				return false;
+			}
+		} else {
+			if (m_pos > 0) {
+				if (m_pos >= m_owner.m_dir_entries) {
+					m_pos = 0;
+					m_current_cluster = m_owner.m_driver.fat_get (m_current_cluster);
+				}
+			}
+		}
 		auto offs = m_owner.m_driver.get_cluster_offset (m_current_cluster) + DIR_ENTRY_SIZE*m_pos;
 		auto& ifs = m_owner.m_driver.stream();
 		ifs.seekg (offs);
+		return true;
+	}
+
+	std::optional<directory::entry> directory::iterator::read () {
+		auto& ifs = m_owner.m_driver.stream();
 
 		bool read_more = true;
 		bool end_of_scan = false;
 		std::vector<parsed_lfn> lfn;
 
 		while (read_more) {
+			if (!reposition()) {
+				return std::nullopt;
+			}
 			auto rc = read_dir_entry (ifs);
 			m_pos++;
 
@@ -179,7 +263,13 @@ namespace vfs::extra {
 				  end_of_scan = true;
 				  return std::nullopt;
 				},
-				[] (const slot_entry& e)-> std::optional<slot_entry> {
+				[&read_more] (const slot_entry& e)-> std::optional<slot_entry> {
+					if (e.name[0] == '.') {
+						if (e.name[1] == ' ' || (e.name[1] == '.' && e.name[2] == ' ')) {
+							read_more = true;
+							return std::nullopt;
+						}
+					}
 					return e;
 				},
 				[&lfn](const lfn_data& e) -> std::optional<slot_entry> {
