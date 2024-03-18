@@ -173,6 +173,25 @@ static int file_close(mtar_t *tar) {
   return MTAR_ESUCCESS;
 }
 
+int mtar_open_stream(mtar_t* tar, const char* mode) {
+	int err;
+	mtar_header_t h;
+
+	tar->pos = 0;
+	tar->remaining_data = 0;
+	tar->last_header = 0;
+
+	if (*mode == 'r') {
+		err = mtar_read_header(tar, &h);
+		if (err != MTAR_ESUCCESS) {
+			mtar_close(tar);
+			return err;
+		}
+	}
+
+	/* Return ok */
+	return MTAR_ESUCCESS;
+}
 
 int mtar_open(mtar_t *tar, const char *filename, const char *mode) {
   int err;
@@ -273,17 +292,23 @@ int mtar_read_header(mtar_t *tar, mtar_header_t *h) {
   /* Save header position */
   tar->last_header = tar->pos;
   /* Read raw header */
+  uint64_t p = tar->pos;
   err = tread(tar, &rh, sizeof(rh));
   if (err) {
     return err;
   }
+	p = p + sizeof (rh);
   /* Seek back to start of header */
   err = mtar_seek(tar, tar->last_header);
   if (err) {
     return err;
   }
   /* Load raw header into header struct and return */
-  return raw_to_header(h, &rh);
+  err = raw_to_header(h, &rh);
+  if (err == MTAR_ESUCCESS) {
+	  h->data_pos = p;
+  }
+  return err;
 }
 
 

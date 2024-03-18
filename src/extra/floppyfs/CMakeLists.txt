@@ -40,19 +40,19 @@ generate_export_header(floppyfs
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/floppyfs_api.h
 )
 
-add_executable(test_floppy
-        testme.cc
-        fat/bpb.cc
-        fat/bpb.hh
-        fat/fat.cc
-        fat/fat.hh
-        fat/directory.cc
-        fat/directory.hh
-        fat/driver.cc
-        fat/driver.hh
-        )
-target_compile_definitions(test_floppy PRIVATE
-        _LARGEFILE64_SOURCE
-)
-target_link_libraries(test_floppy PRIVATE bsw)
-target_include_directories(test_floppy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+#add_executable(test_floppy
+#        testme.cc
+#        fat/bpb.cc
+#        fat/bpb.hh
+#        fat/fat.cc
+#        fat/fat.hh
+#        fat/directory.cc
+#        fat/directory.hh
+#        fat/driver.cc
+#        fat/driver.hh
+#        )
+#target_compile_definitions(test_floppy PRIVATE
+#        _LARGEFILE64_SOURCE
+#)
+#target_link_libraries(test_floppy PRIVATE bsw)
+#target_include_directories(test_floppy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

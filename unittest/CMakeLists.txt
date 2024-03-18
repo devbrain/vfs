@@ -13,6 +13,7 @@ add_executable(unittest
 
         extra/zipfs_test.cc
         extra/floppyfs_test.cc
+        extra/tarfs_test.cc
 
 )
 target_compile_definitions(unittest
@@ -24,6 +25,7 @@ target_link_libraries(unittest
                 neutrino::vfs
                 zipfs
                 floppyfs
+                tarfs
         )
 target_include_directories(unittest
         PRIVATE

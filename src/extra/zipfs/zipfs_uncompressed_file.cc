@@ -27,7 +27,7 @@ namespace vfs::extra {
 		return static_cast<ssize_t>(to_read);
 	}
 
-	ssize_t zipfs_uncompressed_file::write (void* buff, size_t len) {
+	ssize_t zipfs_uncompressed_file::write ([[maybe_unused]] void* buff, [[maybe_unused]] size_t len) {
 		RAISE_EX("Write operation is not supported for zipfs");
 	}
 
