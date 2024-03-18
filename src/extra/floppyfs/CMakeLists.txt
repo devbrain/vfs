@@ -5,8 +5,6 @@ endif ()
 set (src
         ${CMAKE_BINARY_DIR}/include/vfs/extra/floppyfs_api.h
         ${PROJECT_ROOT}/include/vfs/extra/floppyfs.hh
-        fat_12.hh
-        fat_12.cc
         floppyfs_impl.cc
         floppyfs_impl.hh
         floppyfs_inode.cc

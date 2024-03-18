@@ -22,14 +22,15 @@ namespace vfs::extra {
 		auto max_bytes = m_file_size - m_pointer;
 		std::size_t has_bytes = 0;
 		while (has_bytes < len && has_bytes < max_bytes) {
-			auto rc = read_cluster (out + has_bytes, len - has_bytes);
+			auto to_read = len - has_bytes;
+			auto rc = read_cluster (out + has_bytes, to_read);
 			if (rc == -1) {
 				return -1;
 			}
 			has_bytes += rc;
 		}
 
-		return 0;
+		return has_bytes;
 	}
 
 	ssize_t floppyfs_file::read_cluster (void* buff, size_t len) {
@@ -37,7 +38,7 @@ namespace vfs::extra {
 		auto in_cluster_offs = m_pointer % m_bytes_per_cluster;
 		auto has_bytes = offs.size - in_cluster_offs;
 		auto to_read = std::min(has_bytes, len);
-		m_fat->stream().seekg (offs.offset, std::ios::beg);
+		m_fat->stream().seekg (offs.offset + in_cluster_offs, std::ios::beg);
 		m_fat->stream().read ((char*)buff, to_read);
 		if (!m_fat->stream()) {
 			return -1;
@@ -52,7 +53,7 @@ namespace vfs::extra {
 
 	bool floppyfs_file::seek (uint64_t pos, whence_type whence) {
 		bool ok = false;
-		uint64_t current_pointer = m_pointer;
+
 		if (whence == eVFS_SEEK_SET) {
 			if (pos < m_file_size) {
 				m_pointer = pos;
@@ -70,7 +71,7 @@ namespace vfs::extra {
 			}
 		}
 		if (ok) {
-			m_current_cluster = current_pointer / m_bytes_per_cluster;
+			m_current_cluster = m_pointer / m_bytes_per_cluster;
 		}
 		return ok;
 	}
