@@ -6,7 +6,7 @@
 #include <fstream>
 #include "microtar.h"
 #include <tar_stream.hh>
-#include "tarfile.hh"
+#include "tar_archive.hh"
 
 
 int main(int argc, char* argv[]) {

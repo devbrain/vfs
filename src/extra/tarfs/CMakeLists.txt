@@ -10,7 +10,7 @@ set (src
         tar_stream.hh
         tar_stream.cc
         tarfile.cc
-        tarfile.hh
+        tar_archive.hh
         tarfs_impl.cc
         tarfs_impl.hh
         tarfs_inode.cc
@@ -44,7 +44,7 @@ add_executable(test_tarfs
         tar_stream.hh
         tar_stream.cc
         tarfile.cc
-        tarfile.hh
+        tar_archive.hh
 )
 target_compile_definitions(test_tarfs PRIVATE
         _LARGEFILE64_SOURCE

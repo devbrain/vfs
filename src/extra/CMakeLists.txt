@@ -9,6 +9,7 @@ add_subdirectory(zipfs)
 #add_subdirectory(rarfs)
 add_subdirectory(floppyfs)
 add_subdirectory(tarfs)
+add_subdirectory(lhafs)
 
 
 

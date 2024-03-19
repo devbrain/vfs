@@ -9,7 +9,7 @@
 
 namespace vfs::extra {
 
-	tarfs_file::tarfs_file (tarfile* archive, const tar_tree* node)
+	tarfs_file::tarfs_file (tar_archive* archive, const tar_tree* node)
 	:m_archive(archive),
 	m_entry_offset(node->offset),
 	m_entry_size(node->size),

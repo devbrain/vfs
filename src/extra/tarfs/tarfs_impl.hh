@@ -6,7 +6,7 @@
 #define VFS_SRC_EXTRA_TARFS_TARFS_IMPL_HH_
 
 #include "vfs/api/vfs_module.h"
-#include "tarfile.hh"
+#include "tar_archive.hh"
 
 namespace vfs::extra {
 	class tarfs_impl  : public vfs::module::filesystem {
@@ -21,7 +21,7 @@ namespace vfs::extra {
 		[[nodiscard]] bool is_readonly () const override;
 	 private:
 		std::unique_ptr<std::istream> m_istream;
-		std::unique_ptr<tarfile> m_tar;
+		std::unique_ptr<tar_archive> m_tar;
 	};
 }
 

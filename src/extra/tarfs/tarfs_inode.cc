@@ -30,7 +30,7 @@ namespace vfs::extra {
 		children_itr_t _end;
 	};
 
-	tarfs_inode::tarfs_inode (tarfile* archive, tar_tree* node)
+	tarfs_inode::tarfs_inode (tar_archive* archive, tar_tree* node)
 	: vfs::module::inode (node->is_dir ? VFS_INODE_DIRECTORY : VFS_INODE_REGULAR),
 	  m_archive(archive),
 	  m_node (node) {
@@ -52,11 +52,11 @@ namespace vfs::extra {
 		return new directory_iterator(m_node->children.begin(), m_node->children.end());;
 	}
 
-	bool tarfs_inode::mkdir (const char* name) {
+	bool tarfs_inode::mkdir ([[maybe_unused]] const char* name) {
 		return false;
 	}
 
-	bool tarfs_inode::mkfile (const char* name) {
+	bool tarfs_inode::mkfile ([[maybe_unused]] const char* name) {
 		return false;
 	}
 

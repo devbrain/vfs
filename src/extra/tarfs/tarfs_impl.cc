@@ -20,7 +20,7 @@ namespace vfs::extra {
 		if (!m_istream->good()) {
 			return nullptr;
 		}
-		m_tar = std::make_unique<tarfile>(*m_istream);
+		m_tar = std::make_unique<tar_archive>(*m_istream);
 		return new tarfs_inode(m_tar.get(), m_tar->get_root());
 	}
 

@@ -6,12 +6,12 @@
 #define VFS_SRC_EXTRA_TARFS_TARFS_INODE_HH_
 
 #include <vfs/api/vfs_module.h>
-#include "tarfile.hh"
+#include "tar_archive.hh"
 
 namespace vfs::extra {
 	class tarfs_inode : public vfs::module::inode {
 	 public:
-		tarfs_inode (tarfile* archive, tar_tree* node);
+		tarfs_inode (tar_archive* archive, tar_tree* node);
 
 		inode* lookup (const char* name) override;
 		uint64_t size () override;
@@ -22,7 +22,7 @@ namespace vfs::extra {
 		[[nodiscard]] bool is_sequential () const override;
 		vfs::module::file* open_file (open_mode_type mode_type) override;
 	 private:
-		tarfile* m_archive;
+		tar_archive* m_archive;
 		tar_tree* m_node;
 	};
 }

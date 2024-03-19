@@ -2,14 +2,14 @@
 // Created by igor on 3/18/24.
 //
 
-#include "tarfile.hh"
+#include "tar_archive.hh"
 #include "tar_stream.hh"
 #include <bsw/exception.hh>
 #include <bsw/strings/string_tokenizer.hh>
 
 namespace vfs::extra {
 
-	tarfile::tarfile (std::istream& is)
+	tar_archive::tar_archive (std::istream& is)
 	: m_stream(is),
 	m_tar(create_mtar_from_stream (&m_stream)),
 	m_root(new tar_tree) {
@@ -28,15 +28,15 @@ namespace vfs::extra {
 		}
 	}
 
-	std::istream& tarfile::stream () {
+	std::istream& tar_archive::stream () {
 		return m_stream;
 	}
 
-	const std::istream& tarfile::stream () const {
+	const std::istream& tar_archive::stream () const {
 		return m_stream;
 	}
 
-	void tarfile::add_to_tree (const mtar_header_t& h) {
+	void tar_archive::add_to_tree (const mtar_header_t& h) {
 		tar_tree* current = m_root;
 
 		bsw::string_tokenizer tokenizer(h.name, "/\\",
@@ -59,16 +59,16 @@ namespace vfs::extra {
 		current->offset = h.data_pos;
 	}
 
-	tarfile::~tarfile () {
+	tar_archive::~tar_archive () {
 		mtar_close (m_tar.get());
 		delete m_root;
 	}
 
-	const tar_tree* tarfile::get_root () const {
+	const tar_tree* tar_archive::get_root () const {
 		return m_root;
 	}
 
-	tar_tree* tarfile::get_root () {
+	tar_tree* tar_archive::get_root () {
 		return m_root;
 	}
 

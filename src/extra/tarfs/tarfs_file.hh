@@ -5,11 +5,11 @@
 #ifndef VFS_SRC_EXTRA_TARFS_TARFS_FILE_HH_
 #define VFS_SRC_EXTRA_TARFS_TARFS_FILE_HH_
 #include <vfs/api/vfs_module.h>
-#include "tarfile.hh"
+#include "tar_archive.hh"
 namespace vfs::extra {
 	class tarfs_file : public vfs::module::file {
 	 public:
-		tarfs_file (tarfile* archive, const tar_tree* node);
+		tarfs_file (tar_archive* archive, const tar_tree* node);
 		~tarfs_file () override = default;
 	 protected:
 		ssize_t read (void* buff, size_t len) override;
@@ -18,7 +18,7 @@ namespace vfs::extra {
 		bool truncate () override;
 		[[nodiscard]] uint64_t tell () const override;
 	 protected:
-		tarfile* m_archive;
+		tar_archive* m_archive;
 		const uint64_t     m_entry_offset;
 		const uint64_t     m_entry_size;
 		uint64_t           m_pointer;

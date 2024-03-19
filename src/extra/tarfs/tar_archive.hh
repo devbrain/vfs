@@ -2,8 +2,8 @@
 // Created by igor on 3/18/24.
 //
 
-#ifndef VFS_SRC_EXTRA_TARFS_TARFILE_HH_
-#define VFS_SRC_EXTRA_TARFS_TARFILE_HH_
+#ifndef VFS_SRC_EXTRA_TARFS_TAR_ARCHIVE_HH_
+#define VFS_SRC_EXTRA_TARFS_TAR_ARCHIVE_HH_
 
 #include <iosfwd>
 #include <memory>
@@ -24,10 +24,10 @@ namespace vfs::extra {
 		children_t children;
 	};
 
-	class tarfile {
+	class tar_archive {
 	 public:
-		explicit tarfile(std::istream& is);
-		~tarfile();
+		explicit tar_archive (std::istream& is);
+		~tar_archive ();
 		std::istream& stream();
 		[[nodiscard]] const std::istream& stream() const;
 
@@ -43,4 +43,4 @@ namespace vfs::extra {
 	};
 }
 
-#endif //VFS_SRC_EXTRA_TARFS_TARFILE_HH_
+#endif //VFS_SRC_EXTRA_TARFS_TAR_ARCHIVE_HH_
