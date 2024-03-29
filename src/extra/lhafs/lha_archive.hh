@@ -15,7 +15,11 @@
 namespace vfs::extra {
 
 	struct lha_entry {
-		lha_entry() = default;
+		lha_entry()
+		: is_file(false),
+		data_pos(0),
+		compressed_size(0),
+		decompressed_size(0) {}
 
 		lha_entry (bool is_file,
 				   std::string  name,

@@ -200,7 +200,8 @@ namespace vfs::extra {
 
 		readonly_inode* do_load_root (const std::string& params) override {
 			m_archive = create_archive_io (params);
-
+			EntryProps root;
+			entry_props_traits<EntryProps>::update_tree_from_entry (m_root, root);
 			while (true) {
 				auto e = m_archive->next_entry ();
 				if (!e) {
