@@ -12,8 +12,6 @@ set (lhasa_src
         lhasa/public/lha_input_stream.h
         lhasa/public/lhasa.h
         lhasa/public/lha_reader.h
-        #lhasa/pma_common.c
-        #lhasa/tree_decode.c
         lhasa/lha_endian.h
         lhasa/lhx_decoder.c
         lhasa/lha_reader.c
@@ -28,14 +26,12 @@ set (lhasa_src
         lhasa/lzs_decoder.c
         lhasa/lha_input_stream.h
         lhasa/ext_header.c
-        #lhasa/bit_stream_reader.c
         lhasa/pm1_decoder.c
         lhasa/lha_input_stream.c
         lhasa/lh6_decoder.c
         lhasa/lh7_decoder.c
         lhasa/lh1_decoder.c
         lhasa/crc16.c
-        #lhasa/lh_new_decoder.c
         lhasa/null_decoder.c
         lhasa/lha_decoder.c
         lhasa/lha_arch_win32.c
@@ -43,9 +39,6 @@ set (lhasa_src
         lhasa/lha_arch_unix.c
         lhasa/macbinary.h
         lhasa/lz5_decoder.c
-
-        input_stream.cc
-        input_stream.hh
 )
 
 
@@ -57,10 +50,12 @@ set(src
         input_stream.hh
         lha_archive.cc
         lha_archive.hh
+        lhafs.cc
+        lhafs.hh
 )
 
 add_library(lhafs ${src})
-target_link_libraries(lhafs PUBLIC neutrino::vfs_api bsw)
+target_link_libraries(lhafs PUBLIC vfs_extra_tools)
 
 target_include_directories(lhafs PUBLIC
         $<INSTALL_INTERFACE:include>
@@ -68,6 +63,7 @@ target_include_directories(lhafs PUBLIC
         $<BUILD_INTERFACE:${PROJECT_ROOT}/src>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
         PRIVATE
+        ${PROJECT_ROOT}/src
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/lhasa/public
         )
@@ -85,11 +81,12 @@ add_executable(test_lhafs
         ${lhasa_src}
         lha_archive.cc
         lha_archive.hh
-        input_stream.cc
         input_stream.hh
+        input_stream.cc
+
 )
 target_compile_definitions(test_lhafs PRIVATE
         _LARGEFILE64_SOURCE
 )
 target_link_libraries(test_lhafs PRIVATE bsw)
-target_include_directories(test_lhafs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(test_lhafs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_ROOT}/src)

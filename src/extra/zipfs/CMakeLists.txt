@@ -29,7 +29,7 @@ set (src
 
 add_library(zipfs ${src})
 target_link_libraries(zipfs PUBLIC neutrino::vfs_api bsw
-                            PRIVATE popl)
+                            PRIVATE popl vfs_extra_tools)
 
 if ("${CMAKE_C_BYTE_ORDER}" STREQUAL "LITTLE_ENDIAN")
     set (defMINIZ_LITTLE_ENDIAN 1)

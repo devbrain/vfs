@@ -60,7 +60,7 @@ namespace vfs::extra {
 		return 1;
 	}
 
-	int zipfs::sync_inode (vfs::module::inode* inod) {
+	int zipfs::sync_inode ([[maybe_unused]] vfs::module::inode* inod) {
 		return 1;
 	}
 

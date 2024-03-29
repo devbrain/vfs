@@ -14,6 +14,7 @@ add_executable(unittest
         extra/zipfs_test.cc
         extra/floppyfs_test.cc
         extra/tarfs_test.cc
+        extra/lhafs_test.cc
 
 )
 target_compile_definitions(unittest
@@ -26,6 +27,7 @@ target_link_libraries(unittest
                 zipfs
                 floppyfs
                 tarfs
+                lhafs
         )
 target_include_directories(unittest
         PRIVATE

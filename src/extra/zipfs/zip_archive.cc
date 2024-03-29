@@ -7,10 +7,8 @@
 #include <bsw/exception.hh>
 #include <bsw/strings/string_tokenizer.hh>
 #include <bsw/logger/logger.hh>
-
-
 #include "zip_archive.hh"
-
+#include "extra/extra_tools/archived_fs.hh"
 
 
 static size_t file_read_func (void* pOpaque, mz_uint64 file_ofs, void* pBuf, size_t n) {
