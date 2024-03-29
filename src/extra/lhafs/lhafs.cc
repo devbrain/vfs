@@ -20,7 +20,6 @@ namespace vfs::extra {
 
 	std::unique_ptr<archive_io<lha_entry>> lhafs::create_archive_io (const std::string& params) {
 		m_stream = new std::ifstream (params, std::ios::in | std::ios::binary);
-	//	m_stream->exceptions ( std::ifstream::failbit | std::ifstream::badbit );
 		return std::make_unique<lha_archive>(m_stream);
 	}
 
