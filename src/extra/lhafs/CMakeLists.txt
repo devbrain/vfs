@@ -63,6 +63,7 @@ target_include_directories(lhafs PUBLIC
         $<BUILD_INTERFACE:${PROJECT_ROOT}/src>
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
         PRIVATE
+	
         ${PROJECT_ROOT}/src
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/lhasa/public
@@ -89,4 +90,5 @@ target_compile_definitions(test_lhafs PRIVATE
         _LARGEFILE64_SOURCE
 )
 target_link_libraries(test_lhafs PRIVATE bsw)
-target_include_directories(test_lhafs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_ROOT}/src)
+target_include_directories(test_lhafs PRIVATE
+${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_ROOT}/src ${PROJECT_ROOT}/include)
