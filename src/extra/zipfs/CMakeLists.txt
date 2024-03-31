@@ -13,16 +13,16 @@ set (src
         ${PROJECT_ROOT}/include/vfs/extra/zipfs.hh
         zipfs_impl.cc
         zipfs_impl.hh
-        zipfs_inode.cc
-        zipfs_inode.hh
+#        zipfs_inode.cc
+#        zipfs_inode.hh
         zip_archive.cc
         zip_archive.hh
-        zipfs_uncompressed_file.cc
-        zipfs_uncompressed_file.hh
-        zipfs_inmem_file.cc
-        zipfs_inmem_file.hh
-        zipfs_stream_file.cc
-        zipfs_stream_file.hh
+#        zipfs_uncompressed_file.cc
+#        zipfs_uncompressed_file.hh
+#        zipfs_inmem_file.cc
+#        zipfs_inmem_file.hh
+#        zipfs_stream_file.cc
+#        zipfs_stream_file.hh
         miniz.c
         miniz.h
 )
@@ -60,11 +60,3 @@ generate_export_header(zipfs
         EXPORT_MACRO_NAME ZIPFS_API
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/zipfs_api.h
 )
-
-#add_executable(testme
-#        testme.cc
-#        miniz-ext.c
-#        miniz.h)
-#target_compile_definitions(testme PRIVATE
-#        _LARGEFILE64_SOURCE
-#)
