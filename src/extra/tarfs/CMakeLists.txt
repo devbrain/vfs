@@ -9,18 +9,16 @@ set (src
         microtar.h
         tar_stream.hh
         tar_stream.cc
-        tarfile.cc
+        tar_archive.cc
         tar_archive.hh
         tarfs_impl.cc
         tarfs_impl.hh
-        tarfs_inode.cc
-        tarfs_inode.hh
-        tarfs_file.cc
-        tarfs_file.hh
 )
 
 add_library(tarfs ${src})
-target_link_libraries(tarfs PUBLIC neutrino::vfs_api bsw)
+target_link_libraries(tarfs
+        PRIVATE vfs_extra_tools
+)
 
 target_include_directories(tarfs PUBLIC
         $<INSTALL_INTERFACE:include>
@@ -37,17 +35,3 @@ generate_export_header(tarfs
         EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/tarfs_api.h
 )
 
-add_executable(test_tarfs
-        testme.cc
-        microtar.c
-        microtar.h
-        tar_stream.hh
-        tar_stream.cc
-        tarfile.cc
-        tar_archive.hh
-)
-target_compile_definitions(test_tarfs PRIVATE
-        _LARGEFILE64_SOURCE
-)
-target_link_libraries(test_tarfs PRIVATE bsw)
-target_include_directories(test_tarfs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

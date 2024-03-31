@@ -36,7 +36,12 @@ namespace vfs::extra {
 		using traits = entry_props_traits<EntryProps>;
 		bsw::string_tokenizer tokenizer (traits::get_file_name (entry), "/\\",
 										 bsw::string_tokenizer::TOK_IGNORE_EMPTY | bsw::string_tokenizer::TOK_TRIM);
+		bool at_least_one_applied = false;
 		for (const auto& name : tokenizer) {
+			if (name == "." || name == "..") {
+				continue;
+			}
+			at_least_one_applied = true;
 			auto i = current->children.find (name);
 			if (i == current->children.end ()) {
 				auto* node = new tree_entry<EntryProps>;
@@ -46,7 +51,9 @@ namespace vfs::extra {
 				current = i->second;
 			}
 		}
-		traits::update_tree_from_entry (*current, entry);
+		if (at_least_one_applied) {
+			traits::update_tree_from_entry (*current, entry);
+		}
 	}
 
 	// ========================================================================================

@@ -6,41 +6,17 @@
 #include <vfs/extra/tarfs.hh>
 #include <fstream>
 
-#include "tarfs_inode.hh"
 #include "tarfs_impl.hh"
 
 namespace vfs::extra {
 
 	tarfs_impl::tarfs_impl ()
-		: vfs::module::filesystem ("tarfs") {
+		: archived_fs<tar_entry, true> ("tarfs") {
 	}
 
-	vfs::module::inode* tarfs_impl::load_root (const std::string& params) {
-		m_istream = std::make_unique<std::ifstream> (params, std::ios::binary | std::ios::in);
-		if (!m_istream->good()) {
-			return nullptr;
-		}
-		m_tar = std::make_unique<tar_archive>(*m_istream);
-		return new tarfs_inode(m_tar.get(), m_tar->get_root());
+	std::unique_ptr<archive_io<tar_entry>> tarfs_impl::create_archive_io (const std::string& params) {
+		return std::make_unique<tar_archive>(params);
 	}
-
-	int tarfs_impl::sync () {
-		return 1;
-	}
-
-	size_t tarfs_impl::max_name_length () {
-		return 100;
-	}
-
-	int tarfs_impl::sync_inode (vfs::module::inode* inod) {
-		return 1;
-	}
-
-	bool tarfs_impl::is_readonly () const {
-		return true;
-	}
-
-	tarfs_impl::~tarfs_impl () = default;
 
 	std::unique_ptr<vfs::module::filesystem> create_tarfs() {
 		return std::make_unique<tarfs_impl>();

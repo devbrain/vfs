@@ -55,7 +55,7 @@ set(src
 )
 
 add_library(lhafs ${src})
-target_link_libraries(lhafs PUBLIC vfs_extra_tools)
+target_link_libraries(lhafs PRIVATE vfs_extra_tools)
 
 target_include_directories(lhafs PUBLIC
         $<INSTALL_INTERFACE:include>
