@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <failsafe/exception.hh>
 #include "tar_archive.hh"
 #include "tar_stream.hh"
 
@@ -26,7 +27,7 @@ namespace vfs::extra {
 			std::size_t remains = m_entry_size - input_stream_offset;
 			std::size_t to_read = std::min (size, remains);
 			if (!m_stream->read ((char*)buff, to_read)) {
-				RAISE_EX("tarfs I/O error");
+				THROW(std::runtime_error,"tarfs I/O error");
 			}
 			auto current = m_stream->tellg ();
 			return (uint64_t)current - (m_entry_offset + input_stream_offset);
@@ -41,12 +42,12 @@ namespace vfs::extra {
 	tar_archive::tar_archive (const std::string& params) {
 		m_stream = std::make_unique<std::ifstream> (params, std::ios::binary | std::ios::in);
 		if (!m_stream->good ()) {
-			RAISE_EX("tarfs: Failed to open file ", params);
+			THROW(std::runtime_error,"tarfs: Failed to open file ", params);
 		}
 		m_tar = create_mtar_from_stream (m_stream.get ());
 		int rc = mtar_open_stream (m_tar.get (), "r");
 		if (rc != MTAR_ESUCCESS) {
-			RAISE_EX("mtar_open_stream: ", mtar_strerror (rc));
+			THROW(std::runtime_error,"mtar_open_stream: ", mtar_strerror (rc));
 		}
 	}
 
@@ -62,7 +63,7 @@ namespace vfs::extra {
 			if (rc == MTAR_ENULLRECORD) {
 				return std::nullopt;
 			}
-			RAISE_EX("mtar_read_header: ", mtar_strerror (rc));
+			THROW(std::runtime_error,"mtar_read_header: ", mtar_strerror (rc));
 		}
 		tar_entry e;
 		e.is_dir = h.type == MTAR_TDIR;
@@ -71,7 +72,7 @@ namespace vfs::extra {
 		e.name = h.name;
 		rc = mtar_next (m_tar.get ());
 		if (rc != MTAR_ESUCCESS) {
-			RAISE_EX("mtar_next: ", mtar_strerror (rc));
+			THROW(std::runtime_error,"mtar_next: ", mtar_strerror (rc));
 		}
 		return e;
 	}

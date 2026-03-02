@@ -1,6 +1,7 @@
 #include "detail/path.hh"
 #include <functional>
-#include <bsw/exception.hh>
+#include <failsafe/exception.hh>
+#include <failsafe/enforce.hh>
 
 namespace vfs {
 	path::path ()
@@ -151,7 +152,7 @@ namespace vfs {
 				break;
 			case PATH_GUESS: parse_guess (pth);
 				break;
-			default: ENFORCE(false)
+			default: ENFORCE(false);
 		}
 		return *this;
 	}
@@ -460,12 +461,12 @@ namespace vfs {
 				if (it != end && *it == ':') // drive letter
 				{
 					if (m_absolute || !((d >= 'a' && d <= 'z') || (d >= 'A' && d <= 'Z'))) {
-						RAISE_EX("Bad path syntax ", pth);
+						THROW(std::runtime_error,"Bad path syntax ", pth);
 					}
 					m_absolute = true;
 					m_device += d;
 					++it;
-					if (it == end || (*it != '\\' && *it != '/')) { RAISE_EX("Bad path syntax ", pth); }
+					if (it == end || (*it != '\\' && *it != '/')) { THROW(std::runtime_error,"Bad path syntax ", pth); }
 					++it;
 				} else { --it; }
 			}
@@ -546,12 +547,12 @@ namespace vfs {
 								}
 								if (it != end && *it != ']') { ++it; }
 							}
-							if (it == end) { RAISE_EX("Bad path syntax ", pth); }
+							if (it == end) { THROW(std::runtime_error,"Bad path syntax ", pth); }
 							++it;
 							if (it != end && *it == '[') {
-								if (!m_absolute) { RAISE_EX("Bad path syntax ", pth); }
+								if (!m_absolute) { THROW(std::runtime_error,"Bad path syntax ", pth); }
 								++it;
-								if (it != end && *it == '.') { RAISE_EX("Bad path syntax ", pth); }
+								if (it != end && *it == '.') { THROW(std::runtime_error,"Bad path syntax ", pth); }
 								int d = int (m_dirs.size ());
 								while (it != end && *it != ']') {
 									name.clear ();
@@ -569,7 +570,7 @@ namespace vfs {
 									}
 									if (it != end && *it != ']') { ++it; }
 								}
-								if (it == end) { RAISE_EX("Bad path syntax ", pth); }
+								if (it == end) { THROW(std::runtime_error,"Bad path syntax ", pth); }
 								++it;
 							}
 						}

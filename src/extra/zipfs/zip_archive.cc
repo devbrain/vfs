@@ -4,8 +4,8 @@
 
 #include <istream>
 #include <algorithm>
-#include <bsw/exception.hh>
-#include <bsw/logger/logger.hh>
+#include <failsafe/exception.hh>
+#include <failsafe/logger.hh>
 #include "zip_archive.hh"
 #include "extra/extra_tools/archived_fs.hh"
 
@@ -19,38 +19,38 @@ static size_t file_read_func (void* pOpaque, mz_uint64 file_ofs, void* pBuf, siz
 static void raise_last_error (const mz_zip_archive& a) {
 	switch (a.m_last_error) {
 		case MZ_ZIP_NO_ERROR : return;
-		case MZ_ZIP_UNDEFINED_ERROR : RAISE_EX("MZ_ZIP_UNDEFINED_ERROR");
-		case MZ_ZIP_TOO_MANY_FILES : RAISE_EX("MZ_ZIP_TOO_MANY_FILES");
-		case MZ_ZIP_FILE_TOO_LARGE : RAISE_EX("MZ_ZIP_FILE_TOO_LARGE");
-		case MZ_ZIP_UNSUPPORTED_METHOD : RAISE_EX("MZ_ZIP_UNSUPPORTED_METHOD");
-		case MZ_ZIP_UNSUPPORTED_ENCRYPTION : RAISE_EX("MZ_ZIP_UNSUPPORTED_ENCRYPTION");
-		case MZ_ZIP_UNSUPPORTED_FEATURE : RAISE_EX("MZ_ZIP_UNSUPPORTED_FEATURE");
-		case MZ_ZIP_FAILED_FINDING_CENTRAL_DIR : RAISE_EX("MZ_ZIP_FAILED_FINDING_CENTRAL_DIR");
-		case MZ_ZIP_NOT_AN_ARCHIVE : RAISE_EX("MZ_ZIP_NOT_AN_ARCHIVE");
-		case MZ_ZIP_INVALID_HEADER_OR_CORRUPTED : RAISE_EX("MZ_ZIP_INVALID_HEADER_OR_CORRUPTED");
-		case MZ_ZIP_UNSUPPORTED_MULTIDISK : RAISE_EX("MZ_ZIP_UNSUPPORTED_MULTIDISK");
-		case MZ_ZIP_DECOMPRESSION_FAILED : RAISE_EX("MZ_ZIP_DECOMPRESSION_FAILED");
-		case MZ_ZIP_COMPRESSION_FAILED : RAISE_EX("MZ_ZIP_COMPRESSION_FAILED");
-		case MZ_ZIP_UNEXPECTED_DECOMPRESSED_SIZE : RAISE_EX("MZ_ZIP_UNEXPECTED_DECOMPRESSED_SIZE");
-		case MZ_ZIP_CRC_CHECK_FAILED : RAISE_EX("MZ_ZIP_CRC_CHECK_FAILED");
-		case MZ_ZIP_UNSUPPORTED_CDIR_SIZE : RAISE_EX("MZ_ZIP_UNSUPPORTED_CDIR_SIZE");
-		case MZ_ZIP_ALLOC_FAILED : RAISE_EX("MZ_ZIP_ALLOC_FAILED");
-		case MZ_ZIP_FILE_OPEN_FAILED : RAISE_EX("MZ_ZIP_FILE_OPEN_FAILED");
-		case MZ_ZIP_FILE_CREATE_FAILED : RAISE_EX("MZ_ZIP_FILE_CREATE_FAILED");
-		case MZ_ZIP_FILE_WRITE_FAILED : RAISE_EX("MZ_ZIP_FILE_WRITE_FAILED");
-		case MZ_ZIP_FILE_READ_FAILED : RAISE_EX("MZ_ZIP_FILE_READ_FAILED");
-		case MZ_ZIP_FILE_CLOSE_FAILED : RAISE_EX("MZ_ZIP_FILE_CLOSE_FAILED");
-		case MZ_ZIP_FILE_SEEK_FAILED : RAISE_EX("MZ_ZIP_FILE_SEEK_FAILED");
-		case MZ_ZIP_FILE_STAT_FAILED : RAISE_EX("MZ_ZIP_FILE_STAT_FAILED");
-		case MZ_ZIP_INVALID_PARAMETER : RAISE_EX("MZ_ZIP_INVALID_PARAMETER");
-		case MZ_ZIP_INVALID_FILENAME : RAISE_EX("MZ_ZIP_INVALID_FILENAME");
-		case MZ_ZIP_BUF_TOO_SMALL : RAISE_EX("MZ_ZIP_BUF_TOO_SMALL");
-		case MZ_ZIP_INTERNAL_ERROR : RAISE_EX("MZ_ZIP_INTERNAL_ERROR");
-		case MZ_ZIP_FILE_NOT_FOUND : RAISE_EX("MZ_ZIP_FILE_NOT_FOUND");
-		case MZ_ZIP_ARCHIVE_TOO_LARGE : RAISE_EX("MZ_ZIP_ARCHIVE_TOO_LARGE");
-		case MZ_ZIP_VALIDATION_FAILED : RAISE_EX("MZ_ZIP_VALIDATION_FAILED");
-		case MZ_ZIP_WRITE_CALLBACK_FAILED : RAISE_EX("MZ_ZIP_WRITE_CALLBACK_FAILED");
-		default: RAISE_EX("Unknown error");
+		case MZ_ZIP_UNDEFINED_ERROR : THROW(std::runtime_error,"MZ_ZIP_UNDEFINED_ERROR");
+		case MZ_ZIP_TOO_MANY_FILES : THROW(std::runtime_error,"MZ_ZIP_TOO_MANY_FILES");
+		case MZ_ZIP_FILE_TOO_LARGE : THROW(std::runtime_error,"MZ_ZIP_FILE_TOO_LARGE");
+		case MZ_ZIP_UNSUPPORTED_METHOD : THROW(std::runtime_error,"MZ_ZIP_UNSUPPORTED_METHOD");
+		case MZ_ZIP_UNSUPPORTED_ENCRYPTION : THROW(std::runtime_error,"MZ_ZIP_UNSUPPORTED_ENCRYPTION");
+		case MZ_ZIP_UNSUPPORTED_FEATURE : THROW(std::runtime_error,"MZ_ZIP_UNSUPPORTED_FEATURE");
+		case MZ_ZIP_FAILED_FINDING_CENTRAL_DIR : THROW(std::runtime_error,"MZ_ZIP_FAILED_FINDING_CENTRAL_DIR");
+		case MZ_ZIP_NOT_AN_ARCHIVE : THROW(std::runtime_error,"MZ_ZIP_NOT_AN_ARCHIVE");
+		case MZ_ZIP_INVALID_HEADER_OR_CORRUPTED : THROW(std::runtime_error,"MZ_ZIP_INVALID_HEADER_OR_CORRUPTED");
+		case MZ_ZIP_UNSUPPORTED_MULTIDISK : THROW(std::runtime_error,"MZ_ZIP_UNSUPPORTED_MULTIDISK");
+		case MZ_ZIP_DECOMPRESSION_FAILED : THROW(std::runtime_error,"MZ_ZIP_DECOMPRESSION_FAILED");
+		case MZ_ZIP_COMPRESSION_FAILED : THROW(std::runtime_error,"MZ_ZIP_COMPRESSION_FAILED");
+		case MZ_ZIP_UNEXPECTED_DECOMPRESSED_SIZE : THROW(std::runtime_error,"MZ_ZIP_UNEXPECTED_DECOMPRESSED_SIZE");
+		case MZ_ZIP_CRC_CHECK_FAILED : THROW(std::runtime_error,"MZ_ZIP_CRC_CHECK_FAILED");
+		case MZ_ZIP_UNSUPPORTED_CDIR_SIZE : THROW(std::runtime_error,"MZ_ZIP_UNSUPPORTED_CDIR_SIZE");
+		case MZ_ZIP_ALLOC_FAILED : THROW(std::runtime_error,"MZ_ZIP_ALLOC_FAILED");
+		case MZ_ZIP_FILE_OPEN_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_OPEN_FAILED");
+		case MZ_ZIP_FILE_CREATE_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_CREATE_FAILED");
+		case MZ_ZIP_FILE_WRITE_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_WRITE_FAILED");
+		case MZ_ZIP_FILE_READ_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_READ_FAILED");
+		case MZ_ZIP_FILE_CLOSE_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_CLOSE_FAILED");
+		case MZ_ZIP_FILE_SEEK_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_SEEK_FAILED");
+		case MZ_ZIP_FILE_STAT_FAILED : THROW(std::runtime_error,"MZ_ZIP_FILE_STAT_FAILED");
+		case MZ_ZIP_INVALID_PARAMETER : THROW(std::runtime_error,"MZ_ZIP_INVALID_PARAMETER");
+		case MZ_ZIP_INVALID_FILENAME : THROW(std::runtime_error,"MZ_ZIP_INVALID_FILENAME");
+		case MZ_ZIP_BUF_TOO_SMALL : THROW(std::runtime_error,"MZ_ZIP_BUF_TOO_SMALL");
+		case MZ_ZIP_INTERNAL_ERROR : THROW(std::runtime_error,"MZ_ZIP_INTERNAL_ERROR");
+		case MZ_ZIP_FILE_NOT_FOUND : THROW(std::runtime_error,"MZ_ZIP_FILE_NOT_FOUND");
+		case MZ_ZIP_ARCHIVE_TOO_LARGE : THROW(std::runtime_error,"MZ_ZIP_ARCHIVE_TOO_LARGE");
+		case MZ_ZIP_VALIDATION_FAILED : THROW(std::runtime_error,"MZ_ZIP_VALIDATION_FAILED");
+		case MZ_ZIP_WRITE_CALLBACK_FAILED : THROW(std::runtime_error,"MZ_ZIP_WRITE_CALLBACK_FAILED");
+		default: THROW(std::runtime_error,"Unknown error");
 	}
 
 }
@@ -62,13 +62,13 @@ static uint64_t get_data_offset (mz_zip_archive& archive, const mz_zip_archive_f
 	auto cur_file_ofs = s.m_local_header_ofs;
 	if (archive.m_pRead (archive.m_pIO_opaque, cur_file_ofs, pLocal_header, MZ_ZIP_LOCAL_DIR_HEADER_SIZE)
 		!= MZ_ZIP_LOCAL_DIR_HEADER_SIZE) {
-		RAISE_EX("Failed to read zip file header for index ", s.m_file_index);
+		THROW(std::runtime_error,"Failed to read zip file header for index ", s.m_file_index);
 	}
 
 	constexpr uint32_t MZ_ZIP_LOCAL_DIR_HEADER_SIG = 0x04034b50;
 
 	if (MZ_READ_LE32(pLocal_header) != MZ_ZIP_LOCAL_DIR_HEADER_SIG) {
-		RAISE_EX("Zip header is corrupted for entry at index ", s.m_file_index);
+		THROW(std::runtime_error,"Zip header is corrupted for entry at index ", s.m_file_index);
 	}
 	constexpr uint32_t MZ_ZIP_LDH_FILENAME_LEN_OFS = 26;
 	constexpr uint32_t MZ_ZIP_LDH_EXTRA_LEN_OFS = 28;
@@ -94,7 +94,7 @@ namespace vfs::extra {
 			auto to_read = std::min(static_cast<size_t>(m_file_size - m_pointer), size);
 			auto has_bytes = m_archive.m_pRead (m_archive.m_pIO_opaque, m_offset + m_pointer, buff, to_read);
 			if (has_bytes != to_read) {
-				RAISE_EX("zipfs I/O error");
+				THROW(std::runtime_error,"zipfs I/O error");
 			}
 			m_pointer += to_read;
 			return static_cast<ssize_t>(to_read);
@@ -252,7 +252,7 @@ namespace vfs::extra {
 			if (file_stat.m_bit_flag
 				& (MZ_ZIP_GENERAL_PURPOSE_BIT_FLAG_IS_ENCRYPTED | MZ_ZIP_GENERAL_PURPOSE_BIT_FLAG_USES_STRONG_ENCRYPTION
 				   | MZ_ZIP_GENERAL_PURPOSE_BIT_FLAG_COMPRESSED_PATCH_FLAG)) {
-				EVLOG_TRACE(EVLOG_WARNING, "Encrypted files are unsupported");
+				LOG_WARN( "Encrypted files are unsupported");
 				continue;
 			}
 			uint64_t offset = m_archive.m_archive_size;
@@ -262,7 +262,7 @@ namespace vfs::extra {
 				is_compressed = file_stat.m_uncomp_size != file_stat.m_comp_size;
 				auto input_size = is_compressed ? file_stat.m_comp_size : file_stat.m_uncomp_size;
 				if (offset + input_size > m_archive.m_archive_size) {
-					EVLOG_TRACE(EVLOG_WARNING, "Corrupted header for zip file entry at index ", file_stat.m_file_index);
+					LOG_WARN( "Corrupted header for zip file entry at index ", file_stat.m_file_index);
 					continue;
 				}
 			}

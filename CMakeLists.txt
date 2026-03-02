@@ -1,78 +1,98 @@
-cmake_minimum_required (VERSION 3.24)
+cmake_minimum_required(VERSION 3.20)
 
-project(vfs VERSION 1.0.0 LANGUAGES CXX C)
+project(vfs
+    VERSION 1.0.0
+    DESCRIPTION "Virtual File System library"
+    LANGUAGES CXX C
+)
 
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
-option(vfs_INCLUDE_PACKAGING "Include packaging rules for vfs" "${is_top_level}")
-option(vfs_ENABLE_TESTING "Enable testing for vfs" ${is_top_level})
-option(BUILD_SHARED_LIBS "Build shared library" ON)
+# =============================================================================
+# Neutrino CMake Integration
+# =============================================================================
 
-set(CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR};${CMAKE_SOURCE_DIR}/cmake")
+include(FetchContent)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT DEFINED NEUTRINO_CMAKE_DIR)
+    FetchContent_Declare(neutrino_cmake
+        GIT_REPOSITORY https://github.com/devbrain/neutrino-cmake.git
+        GIT_TAG master
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(neutrino_cmake)
+    set(NEUTRINO_CMAKE_DIR "${neutrino_cmake_SOURCE_DIR}/cmake")
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${NEUTRINO_CMAKE_DIR}")
+include(NeutrinoInit)
+
+# =============================================================================
+# Options
+# =============================================================================
+
+# VFS modules are designed as plugins - default to shared builds
+set(NEUTRINO_VFS_BUILD_SHARED ON CACHE BOOL "Build VFS as shared library")
+
+neutrino_define_library_options(VFS)
+
+# =============================================================================
+# Dependencies
+# =============================================================================
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads)
+find_package(Threads REQUIRED)
 
-set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-set(PROJECT_INCLUDE_PRIVATE ${PROJECT_ROOT}/src)
-set(PROJECT_INCLUDE ${PROJECT_ROOT}/include)
-set(PROJECT_CONFIG_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/include)
+include(${NEUTRINO_CMAKE_DIR}/deps/bsw.cmake)
+neutrino_fetch_bsw()
+
+include(${NEUTRINO_CMAKE_DIR}/deps/failsafe.cmake)
+neutrino_fetch_failsafe()
+
+# =============================================================================
+# Library
+# =============================================================================
+
 set(VFS_TEST_DATA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/test_data)
 
-if (is_top_level)
-    set(BINARY_OUT_DIR ${CMAKE_BINARY_DIR}/bin)
-    set(LIB_OUT_DIR ${CMAKE_BINARY_DIR}/lib)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_OUT_DIR})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BINARY_OUT_DIR})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIB_OUT_DIR})
-
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BINARY_OUT_DIR})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${BINARY_OUT_DIR})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${LIB_OUT_DIR})
-
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BINARY_OUT_DIR})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${BINARY_OUT_DIR})
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${LIB_OUT_DIR})
-endif()
-
-# Compile flags
-
-if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
-        NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-    set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
-endif ()
-
-
-if (MSVC)
-    # warning level 4
-    add_compile_options(/W4)
-else()
-    # additional warnings
-    add_compile_options(-Wall -Wextra -Wpedantic -g)
-endif()
-
-# --------------------------------------------------------------
-
-add_subdirectory(ext)
 add_subdirectory(src/vfs)
 add_subdirectory(src/extra)
 
-if (vfs_ENABLE_TESTING)
-    message("VFS Testing is enabled")
+# =============================================================================
+# Testing
+# =============================================================================
+
+if(NEUTRINO_VFS_BUILD_TESTS)
+    include(${NEUTRINO_CMAKE_DIR}/deps/doctest.cmake)
+    neutrino_fetch_doctest()
+
+    enable_testing()
     add_subdirectory(unittest)
 endif()
 
-if (vfs_INCLUDE_PACKAGING)
-    #   add_subdirectory(packaging)
-endif ()
+# =============================================================================
+# Installation
+# =============================================================================
 
+if(NEUTRINO_VFS_INSTALL)
+    include(NeutrinoInstall)
 
+    install(FILES
+        ${PROJECT_BINARY_DIR}/include/vfs/api/vfs_api.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vfs/api
+    )
 
+    neutrino_install_library(vfs
+        NAMESPACE neutrino::
+        COMPATIBILITY SameMajorVersion
+        SKIP_EXPORT
+        DEPENDENCIES "find_dependency(bsw REQUIRED)"
+    )
+endif()
 
+# =============================================================================
+# Summary
+# =============================================================================
 
-
+neutrino_is_top_level(_vfs_is_top_level)
+if(_vfs_is_top_level)
+    neutrino_print_options(VFS)
+endif()

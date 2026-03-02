@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "mount_point.hh"
-#include <bsw/logger/logger.hh>
+#include <failsafe/logger.hh>
 
 namespace vfs::core {
 	mount_point::mount_point (std::unique_ptr<inode> root) {
@@ -18,7 +18,7 @@ namespace vfs::core {
 		std::for_each (_allocated_nodes.begin (), _allocated_nodes.end (),
 					   [] (const std::shared_ptr<inode>& x) -> void {
 						 if (x.use_count () > 1) {
-							 EVLOG_TRACE(EVLOG_ERROR, "Memory leak");
+							 LOG_ERROR( "Memory leak");
 						 }
 					   }
 		);
@@ -55,7 +55,7 @@ namespace vfs::core {
 		if (ino->dirty ()) {
 			auto err = ino->sync ();
 			if (err != 1) {
-				EVLOG_TRACE(EVLOG_ERROR, "Error syncing inode");
+				LOG_ERROR( "Error syncing inode");
 			}
 		}
 		delete ino;

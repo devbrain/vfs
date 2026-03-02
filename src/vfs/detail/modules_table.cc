@@ -5,6 +5,7 @@
 #include "modules_table.hh"
 #include "physfs/physfs.hh"
 #include "vfs/exception.hh"
+#include <failsafe/enforce.hh>
 
 namespace vfs::core {
 	modules_table::entry::entry (vfs_module* obj, std::unique_ptr<shared_module>&& dll)
@@ -152,7 +153,7 @@ namespace vfs::core {
 	}
 	// -----------------------------------------------------------------------------------
 	file_system* modules_table::get_single () const {
-		ENFORCE(_entries.size() == 1)
+		ENFORCE(_entries.size() == 1);
 		return _entries.begin()->second->module();
 	}
 } // ns vfs::detail

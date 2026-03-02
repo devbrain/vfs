@@ -13,7 +13,7 @@
 #include "system_iface.hh"
 
 #include <bsw/register_at_exit.hh>
-#include <bsw/errors.hh>
+#include <failsafe/enforce.hh>
 
 namespace vfs {
 	namespace core {
@@ -68,14 +68,14 @@ namespace vfs {
 	static core::system* system = nullptr;
 
 	core::fstab* get_system_fstab() {
-		ENFORCE(system);
-		ENFORCE(system->fstab);
+		ENFORCE(system != nullptr);
+		ENFORCE(system->fstab != nullptr);
 		return system->fstab.get();
 	}
 
 	core::dentry_tree* get_system_dentry_tree() {
-		ENFORCE(system);
-		ENFORCE(system->dentry);
+		ENFORCE(system != nullptr);
+		ENFORCE(system->dentry != nullptr);
 		return system->dentry.get();
 	}
 
@@ -174,12 +174,12 @@ namespace vfs {
 
 	// -------------------------------------------------------------------------------------
 	void set_cwd(const std::string& wd) {
-		ENFORCE(system->dentry);
+		ENFORCE(system->dentry != nullptr);
 		system->dentry->cwd (wd);
 	}
 	// -------------------------------------------------------------------------------------
 	std::string get_cwd() {
-		ENFORCE(system->dentry);
+		ENFORCE(system->dentry != nullptr);
 		return system->dentry->cwd();
 	}
 } // ns vfs

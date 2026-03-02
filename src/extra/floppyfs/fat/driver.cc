@@ -2,7 +2,7 @@
 // Created by igor on 3/14/24.
 //
 
-#include <bsw/exception.hh>
+#include <failsafe/exception.hh>
 #include "driver.hh"
 
 namespace vfs::extra {
@@ -83,13 +83,13 @@ namespace vfs::extra {
 		uint32_t clust_size = get_bytes_per_cluster ();
 		auto total_clusters = m_bpb.count_of_clusters;
 		if (cluster == 0) {
-			RAISE_EX("Bad file termination");
+			THROW(std::runtime_error,"Bad file termination");
 		} else {
 			auto ct = get_cluster_type(cluster);
 			if (ct && *ct == fat::FINAL) {
 				return;
 			} else if (cluster > total_clusters) {
-				RAISE_EX("Too many clusters");
+				THROW(std::runtime_error,"Too many clusters");
 			}
 		}
 

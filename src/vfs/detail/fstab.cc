@@ -1,7 +1,7 @@
 #include "fstab.hh"
 #include "vfs/exception.hh"
-#include <bsw/errors.hh>
-#include <bsw/logger/logger.hh>
+#include <failsafe/enforce.hh>
+#include <failsafe/logger.hh>
 
 namespace {
 	// http://jguegant.github.io/blogs/tech/performing-try-emplace.html
@@ -52,7 +52,7 @@ namespace vfs::core {
 	fstab::entry::~entry () {
 		int err = _fs->sync ();
 		if (err != 1) {
-			EVLOG_TRACE(EVLOG_ERROR, "Failed to sync FS ", _fs->type ());
+			LOG_ERROR("Failed to sync FS ", _fs->type ());
 		}
 	}
 

@@ -4,7 +4,7 @@
 
 #include <vfs/stream.hh>
 #include <vfs/io.hh>
-#include <bsw/exception.hh>
+#include <failsafe/enforce.hh>
 #include <bsw/io/ios_init.hh>
 
 namespace vfs {

@@ -3,8 +3,8 @@
 //
 
 #include <bsw/io/binary_reader.hh>
-#include <bsw/logger/logger.hh>
-#include <bsw/exception.hh>
+#include <failsafe/logger.hh>
+#include <failsafe/exception.hh>
 #include <utility>
 #include "bpb.hh"
 
@@ -59,10 +59,10 @@ namespace vfs::extra {
 		is >> bpb_dos33;
 		if (bpb_dos33.BS_jmpBoot[0] == 0xEB) {
 			if (bpb_dos33.BS_jmpBoot[2] != 0x90) {
-				EVLOG_TRACE(EVLOG_INFO, "Suspicious JMP instruction in BPB");
+				LOG_INFO( "Suspicious JMP instruction in BPB");
 			}
 		} else if (bpb_dos33.BS_jmpBoot[0] != 0xE9) {
-			EVLOG_TRACE(EVLOG_INFO, "Suspicious JMP instruction in BPB");
+			LOG_INFO( "Suspicious JMP instruction in BPB");
 		}
 		switch (bpb_dos33.BPB_BytsPerSec) {
 			case 512:
@@ -70,7 +70,7 @@ namespace vfs::extra {
 			case 2048:
 			case 4096:
 				break;
-			default: RAISE_EX("Bad number of bytes per sector,", bpb_dos33.BPB_BytsPerSec);
+			default: THROW(std::runtime_error,"Bad number of bytes per sector,", bpb_dos33.BPB_BytsPerSec);
 		}
 		switch (bpb_dos33.BPB_SecPerClus) {
 			case 1:
@@ -83,18 +83,18 @@ namespace vfs::extra {
 			case 128:
 				break;
 			default:
-				RAISE_EX("Bad number of sectors per cluster,", bpb_dos33.BPB_SecPerClus);
+				THROW(std::runtime_error,"Bad number of sectors per cluster,", bpb_dos33.BPB_SecPerClus);
 		}
 		if (bpb_dos33.BPB_RootEntCnt*32 % bpb_dos33.BPB_BytsPerSec != 0) {
-			RAISE_EX("Bad number of root entries,", bpb_dos33.BPB_RootEntCnt);
+			THROW(std::runtime_error,"Bad number of root entries,", bpb_dos33.BPB_RootEntCnt);
 		} else {
 			auto r = bpb_dos33.BPB_RootEntCnt*32 / bpb_dos33.BPB_BytsPerSec;
 			if (r % 2 != 0) {
-				RAISE_EX("Bad number of root entries,", bpb_dos33.BPB_RootEntCnt);
+				THROW(std::runtime_error,"Bad number of root entries,", bpb_dos33.BPB_RootEntCnt);
 			}
 		}
 		if ((bpb_dos33.BPB_TotSec16 == 0) && (bpb_dos33.BPB_TotSec32 == 0)) {
-			RAISE_EX("Bad number of total sectors");
+			THROW(std::runtime_error,"Bad number of total sectors");
 		}
 		switch (bpb_dos33.BPB_Media) {
 			case 0xF0:
@@ -108,7 +108,7 @@ namespace vfs::extra {
 			case 0xFF:
 				break;
 			default:
-				RAISE_EX("Bad value of media type,", bpb_dos33.BPB_Media);
+				THROW(std::runtime_error,"Bad value of media type,", bpb_dos33.BPB_Media);
 		}
 
 		return bpb_dos33;

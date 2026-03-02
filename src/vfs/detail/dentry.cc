@@ -3,7 +3,8 @@
 #include "mount_point.hh"
 #include "dentry.hh"
 
-#include <bsw/errors.hh>
+#include <failsafe/exception.hh>
+#include <failsafe/enforce.hh>
 
 namespace vfs::core {
 	struct dentry {
@@ -114,12 +115,12 @@ namespace vfs::core {
 			core::stats st;
 			ino->stat (st);
 			if (st.type != VFS_INODE_DIRECTORY) {
-				RAISE_EX("Can not change directory to ", p, "which points to file");
+				THROW(std::runtime_error,"Can not change directory to ", p, "which points to file");
 			} else {
 				m_current_wd = p;
 			}
 		} else {
-			RAISE_EX("Can not change directory to ", p, "since it is missing");
+			THROW(std::runtime_error,"Can not change directory to ", p, "since it is missing");
 		}
 	}
 

@@ -1,6 +1,6 @@
 #include "file_system.hh"
 #include "vfs/exception.hh"
-#include <bsw/exception.hh>
+#include <failsafe/exception.hh>
 #include <vector>
 
 namespace vfs::core {

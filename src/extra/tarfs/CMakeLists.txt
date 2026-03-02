@@ -1,37 +1,40 @@
-if (DEFINED vfs_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS "${vfs_SHARED_LIBS}")
-endif ()
+neutrino_library_type(VFS _vfs_lib_type)
 
-set (src
-        ${CMAKE_BINARY_DIR}/include/vfs/extra/tarfs_api.h
-        ${PROJECT_ROOT}/include/vfs/extra/tarfs.hh
-        microtar.c
-        microtar.h
-        tar_stream.hh
-        tar_stream.cc
-        tar_archive.cc
-        tar_archive.hh
-        tarfs_impl.cc
-        tarfs_impl.hh
+set(src
+    ${PROJECT_BINARY_DIR}/include/vfs/extra/tarfs_api.h
+    ${PROJECT_SOURCE_DIR}/include/vfs/extra/tarfs.hh
+    microtar.c
+    microtar.h
+    tar_stream.hh
+    tar_stream.cc
+    tar_archive.cc
+    tar_archive.hh
+    tarfs_impl.cc
+    tarfs_impl.hh
 )
 
-add_library(tarfs ${src})
+add_library(tarfs ${_vfs_lib_type} ${src})
 target_link_libraries(tarfs
-        PRIVATE vfs_extra_tools
+    PRIVATE vfs_extra_tools
 )
 
-target_include_directories(tarfs PUBLIC
-        $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:${PROJECT_ROOT}/include>
-        $<BUILD_INTERFACE:${PROJECT_ROOT}/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR})
-
+target_include_directories(tarfs
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 include(GenerateExportHeader)
 generate_export_header(tarfs
-        EXPORT_MACRO_NAME TARFS_API
-        EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/extra/tarfs_api.h
+    EXPORT_MACRO_NAME TARFS_API
+    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include/vfs/extra/tarfs_api.h
 )
 
+neutrino_target_warnings(tarfs)
+
+# Suppress warnings for third-party C code
+set_source_files_properties(microtar.c PROPERTIES COMPILE_OPTIONS "-w")

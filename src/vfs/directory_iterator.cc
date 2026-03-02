@@ -2,7 +2,7 @@
 #include "vfs/exception.hh"
 #include "detail/file_system.hh"
 #include "detail/stats_converter.hh"
-#include <bsw/errors.hh>
+#include <failsafe/enforce.hh>
 
 namespace vfs {
 	struct directory::impl {

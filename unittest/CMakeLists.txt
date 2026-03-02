@@ -1,39 +1,40 @@
 add_executable(unittest
-        utils/sandbox.hh
-        utils/sandbox.cc
-        utils/test_data.hh
-        utils/test_data.cc
-        utils/sha1.hh
-        main.cpp
-        vfs_basic_test.cc
-        vfs_unlink_test.cc
-        vfs_open_file_test.cc
-        vfs_read_write_test.cc
-        vfs_stream_test.cc
+    utils/sandbox.hh
+    utils/sandbox.cc
+    utils/test_data.hh
+    utils/test_data.cc
+    utils/sha1.hh
+    main.cpp
+    vfs_basic_test.cc
+    vfs_unlink_test.cc
+    vfs_open_file_test.cc
+    vfs_read_write_test.cc
+    vfs_stream_test.cc
 
-        extra/zipfs_test.cc
-        extra/floppyfs_test.cc
-        extra/tarfs_test.cc
-        extra/lhafs_test.cc
-
+    extra/zipfs_test.cc
+    extra/floppyfs_test.cc
+    extra/tarfs_test.cc
+    extra/lhafs_test.cc
 )
+
 target_compile_definitions(unittest
-        PRIVATE VFS_TEST_DATA="${VFS_TEST_DATA_FILES}"
+    PRIVATE VFS_TEST_DATA="${VFS_TEST_DATA_FILES}"
 )
+
 target_link_libraries(unittest
-        PRIVATE
-                doctest::doctest
-                neutrino::vfs
-                zipfs
-                floppyfs
-                tarfs
-                lhafs
-        )
+    PRIVATE
+        doctest::doctest
+        neutrino::vfs
+        zipfs
+        floppyfs
+        tarfs
+        lhafs
+)
+
 target_include_directories(unittest
-        PRIVATE
-                ${PROJECT_ROOT}/src
-                ${CMAKE_CURRENT_SOURCE_DIR}
-        )
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
-
-
+add_test(NAME vfs_tests COMMAND unittest)

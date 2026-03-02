@@ -1,124 +1,151 @@
-if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
-        NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-    set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
-endif ()
+# =============================================================================
+# VFS core library
+# =============================================================================
 
-if (DEFINED vfs_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS "${vfs_SHARED_LIBS}")
-endif ()
+neutrino_library_type(VFS _vfs_lib_type)
 
-add_library(vfs_api INTERFACE ${PROJECT_ROOT}/include/vfs/api/vfs_module.h)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+
+# API (header-only)
+add_library(vfs_api INTERFACE ${PROJECT_SOURCE_DIR}/include/vfs/api/vfs_module.h)
 add_library(neutrino::vfs_api ALIAS vfs_api)
-target_include_directories(vfs_api INTERFACE ${PROJECT_ROOT}/include/)
+target_include_directories(vfs_api INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
-set(src
-        detail/modules_table.cc
-        detail/module_loader.cc
-        detail/fstab.cc
-        detail/dentry.cc
-        detail/stats_converter.cc
-        detail/path.cc
-        detail/filesystem.cc
-        detail/mount_point.cc
+# Source files
+set(VFS_SOURCES
+    detail/modules_table.cc
+    detail/module_loader.cc
+    detail/fstab.cc
+    detail/dentry.cc
+    detail/stats_converter.cc
+    detail/path.cc
+    detail/filesystem.cc
+    detail/mount_point.cc
+    detail/io_iface.cc
 
-        physfs/physfs.cc
-        physfs/physfs_inode.cc
+    physfs/physfs.cc
+    physfs/physfs_inode.cc
 
-        system.cc
-        modules.cc
-        mounts.cc
-        directory_iterator.cc
-        detail/module_loader.hh
-        detail/modules_table.hh
-        detail/fstab.hh
-        detail/dentry.hh
-        detail/wrapped_pointer.hh
-        detail/stats_converter.hh
-        detail/path.hh
-        detail/file_system.hh
-        detail/mount_point.hh
+    system.cc
+    modules.cc
+    mounts.cc
+    directory_iterator.cc
+    io.cc
+    stream.cc
+    archive.cc
+)
 
-        physfs/physfs_inode.hh
-        physfs/physfs.hh
+set(VFS_PRIVATE_HEADERS
+    detail/module_loader.hh
+    detail/modules_table.hh
+    detail/fstab.hh
+    detail/dentry.hh
+    detail/wrapped_pointer.hh
+    detail/stats_converter.hh
+    detail/path.hh
+    detail/file_system.hh
+    detail/mount_point.hh
+    detail/io_iface.hh
+    system_iface.hh
 
-        ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
-        ${PROJECT_ROOT}/include/vfs/system.hh
-        ${PROJECT_ROOT}/include/vfs/modules.hh
-        ${PROJECT_ROOT}/include/vfs/mounts.hh
-        ${PROJECT_ROOT}/include/vfs/exception.hh
-        ${PROJECT_ROOT}/include/vfs/stats.hh
-        ${PROJECT_ROOT}/include/vfs/directory_iterator.hh
-        ${PROJECT_ROOT}/include/vfs/detail/wrapped_iterator.hh
-        ${PROJECT_ROOT}/include/vfs/io.hh
-        io.cc
-        ${PROJECT_ROOT}/include/vfs/stream.hh
-        stream.cc
+    physfs/physfs_inode.hh
+    physfs/physfs.hh
+)
 
-        ${PROJECT_ROOT}/include/vfs/archive.hh
-        archive.cc
-        system_iface.hh
-        detail/io_iface.cc
-        detail/io_iface.hh
-        )
+set(VFS_PUBLIC_HEADERS
+    ${PROJECT_BINARY_DIR}/include/vfs/api/vfs_api.h
+    ${PROJECT_SOURCE_DIR}/include/vfs/system.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/modules.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/mounts.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/exception.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/stats.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/directory_iterator.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/detail/wrapped_iterator.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/io.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/stream.hh
+    ${PROJECT_SOURCE_DIR}/include/vfs/archive.hh
+)
 
-if (vfs_ENABLE_TESTING)
-    set(testing_src
-            testing/dll_test_init.cc
-            testing/test_path.cc
+if(NEUTRINO_VFS_BUILD_TESTS)
+    set(VFS_TESTING_SOURCES
+        testing/dll_test_init.cc
+        testing/test_path.cc
     )
 else()
-    set(testing_src
-    )
+    set(VFS_TESTING_SOURCES)
 endif()
 
-add_library(vfs ${src} ${testing_src})
+# Create library
+add_library(vfs ${_vfs_lib_type}
+    ${VFS_SOURCES}
+    ${VFS_PRIVATE_HEADERS}
+    ${VFS_PUBLIC_HEADERS}
+    ${VFS_TESTING_SOURCES}
+)
 add_library(neutrino::vfs ALIAS vfs)
 
-include(GenerateExportHeader)
-generate_export_header(vfs
-        EXPORT_MACRO_NAME VFS_API
-        EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/vfs/api/vfs_api.h
-        )
-
-target_include_directories(vfs
-        PUBLIC
-        $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:${PROJECT_ROOT}/include>
-        $<BUILD_INTERFACE:${PROJECT_ROOT}/src>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        )
-
-target_compile_options(vfs PRIVATE
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-        -Wall -pedantic -ansi -std=c++17 -fvisibility=hidden -fvisibility-inlines-hidden >
-        $<$<CXX_COMPILER_ID:MSVC>: "/W4" >)
-
-if (vfs_ENABLE_TESTING)
-    set (vfs_TESTING_LIB doctest::doctest)
-    target_compile_definitions(vfs PRIVATE VFS_ENABLE_TESTING)
-else()
-    set (vfs_TESTING_LIB "")
-endif()
-
-target_link_libraries(vfs PUBLIC vfs_api bsw::bsw ${vfs_TESTING_LIB} ${CMAKE_DL_LIBS})
-
-
-
-
-
-
-target_compile_definitions(vfs
-        PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:
-        _CRT_SECURE_NO_WARNINGS
-        _SCL_SECURE_NO_WARNINGS
-        _CRT_SECURE_NO_DEPRECATE
-        _CRT_NONSTDC_NO_DEPRECATE
-        NOMINMAX >
-        )
-
+# C++ standard
 target_compile_features(vfs PUBLIC cxx_std_17)
 
+# Export header
+include(GenerateExportHeader)
+generate_export_header(vfs
+    EXPORT_MACRO_NAME VFS_API
+    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include/vfs/api/vfs_api.h
+)
+
+# Include directories
+target_include_directories(vfs
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Testing support
+if(NEUTRINO_VFS_BUILD_TESTS)
+    set(_vfs_testing_lib doctest::doctest)
+    target_compile_definitions(vfs PRIVATE VFS_ENABLE_TESTING)
+else()
+    set(_vfs_testing_lib "")
+endif()
+
+# Dependencies
+target_link_libraries(vfs
+    PUBLIC
+        vfs_api
+        bsw::bsw
+        neutrino::failsafe
+        ${CMAKE_DL_LIBS}
+    PRIVATE
+        ${_vfs_testing_lib}
+)
+
+# MSVC definitions
+target_compile_definitions(vfs
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:
+            _CRT_SECURE_NO_WARNINGS
+            _SCL_SECURE_NO_WARNINGS
+            _CRT_SECURE_NO_DEPRECATE
+            _CRT_NONSTDC_NO_DEPRECATE
+            NOMINMAX
+        >
+)
+
+# Warnings
+neutrino_target_warnings(vfs)
+
+# Properties
+set_target_properties(vfs PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    POSITION_INDEPENDENT_CODE ON
+)

@@ -161,7 +161,7 @@ namespace vfs::extra {
 			if (header->symlink_target) {
 				continue;
 			}
-			auto full_path = result_path (header).u8string ();
+			auto full_path = result_path (header).string ();
 //			if (full_path.find ("fonts") != std::string::npos) {
 //				int x = 0;
 //			}
