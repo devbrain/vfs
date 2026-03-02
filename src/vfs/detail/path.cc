@@ -715,4 +715,4 @@ namespace vfs {
 		}
 		return seed;
 	}
-} // namespace bsw
+} // namespace vfs

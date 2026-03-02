@@ -32,7 +32,6 @@ namespace vfs {
 			st.type = VFS_NAME_TRUNCATED;
 			return std::make_tuple (name, convert (st));
 		}
-		throw std::runtime_error (name + " was removed during iteration");
 	}
 
 	// -----------------------------------------------------------------------------------------

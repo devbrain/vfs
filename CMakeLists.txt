@@ -38,9 +38,6 @@ neutrino_define_library_options(VFS)
 # Dependencies
 # =============================================================================
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
 include(${NEUTRINO_CMAKE_DIR}/deps/bsw.cmake)
 neutrino_fetch_bsw()
 
@@ -84,7 +81,7 @@ if(NEUTRINO_VFS_INSTALL)
         NAMESPACE neutrino::
         COMPATIBILITY SameMajorVersion
         SKIP_EXPORT
-        DEPENDENCIES "find_dependency(bsw REQUIRED)"
+        DEPENDENCIES "find_dependency(bsw REQUIRED)" "find_dependency(failsafe REQUIRED)"
     )
 endif()
 

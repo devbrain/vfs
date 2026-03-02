@@ -52,7 +52,10 @@ set(src
 )
 
 add_library(lhafs ${_vfs_lib_type} ${src})
-target_link_libraries(lhafs PRIVATE vfs_extra_tools)
+target_link_libraries(lhafs
+    PUBLIC neutrino::vfs_api bsw::bsw
+    PRIVATE vfs_extra_tools
+)
 
 target_include_directories(lhafs
     PUBLIC
@@ -72,6 +75,13 @@ generate_export_header(lhafs
 )
 
 neutrino_target_warnings(lhafs)
+
+target_compile_features(lhafs PUBLIC cxx_std_17)
+set_target_properties(lhafs PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    POSITION_INDEPENDENT_CODE ON
+)
 
 # Suppress warnings for third-party C code (lhasa library)
 file(GLOB _lhasa_c_files "${CMAKE_CURRENT_SOURCE_DIR}/lhasa/*.c")

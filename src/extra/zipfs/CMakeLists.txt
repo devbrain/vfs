@@ -49,5 +49,12 @@ generate_export_header(zipfs
 
 neutrino_target_warnings(zipfs)
 
+target_compile_features(zipfs PUBLIC cxx_std_17)
+set_target_properties(zipfs PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    POSITION_INDEPENDENT_CODE ON
+)
+
 # Suppress warnings for third-party C code
 set_source_files_properties(miniz.c PROPERTIES COMPILE_OPTIONS "-w")

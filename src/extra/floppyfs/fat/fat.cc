@@ -154,7 +154,7 @@ namespace vfs::extra {
 				} x{};
 				std::size_t offset = cluster * sizeof (x.value);
 				x.memory = image_buf + offset;
-				x.value =  bsw::byte_order::to_little_endian (x.value);
+				x.value =  bsw::byte_order::to_little_endian (value);
 			}
 		}
 	}

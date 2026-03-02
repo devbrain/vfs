@@ -50,9 +50,13 @@ namespace vfs::core {
 
 	// -------------------------------------------------------------------------------------
 	fstab::entry::~entry () {
-		int err = _fs->sync ();
-		if (err != 1) {
-			LOG_ERROR("Failed to sync FS ", _fs->type ());
+		try {
+			int err = _fs->sync ();
+			if (err != 1) {
+				LOG_ERROR("Failed to sync FS ", _fs->type ());
+			}
+		} catch (...) {
+			LOG_ERROR("Exception during sync in FS destructor");
 		}
 	}
 

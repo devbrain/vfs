@@ -40,3 +40,10 @@ generate_export_header(floppyfs
 )
 
 neutrino_target_warnings(floppyfs)
+
+target_compile_features(floppyfs PUBLIC cxx_std_17)
+set_target_properties(floppyfs PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    POSITION_INDEPENDENT_CODE ON
+)

@@ -298,10 +298,10 @@ namespace vfs {
 
 		// ---------------------------------------------------------------------------------------------------------------
 		void seek (file* f, uint64_t pos, seek_type whence) {
-			if (f->is_sequential) {
-				THROW_EXCEPTION_EX(vfs::exception, "sequential access only for ", f->file_path);
-			}
 			if (f && f->file_ops) {
+				if (f->is_sequential) {
+					THROW_EXCEPTION_EX(vfs::exception, "sequential access only for ", f->file_path);
+				}
 				whence_type wt = eVFS_SEEK_CUR;
 				switch (whence) {
 					case seek_type::eCUR:wt = eVFS_SEEK_CUR;

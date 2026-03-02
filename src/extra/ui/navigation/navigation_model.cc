@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <QColor>
 
-#include "bsw/exception.hh"
+#include <failsafe/exception.hh>
 #include "vfs/io.hh"
 
 #include "navigation_model.hh"
@@ -76,7 +76,7 @@ void NavigationModel::drillDownByRow(int row) {
 }
 
 void NavigationModel::populate (const std::filesystem::path& path) {
-	auto u8_path = path.u8string ();
+	auto u8_path = path.string ();
 	auto stats = vfs::get_stats (u8_path);
 	if (stats) {
 		if (stats->type == vfs::stats::type_t::eDIRECTORY) {
@@ -107,10 +107,10 @@ void NavigationModel::populate (const std::filesystem::path& path) {
 			endResetModel ();
 			emit modelPopulated ();
 		} else {
-			RAISE_EX(u8_path, "should be directory");
+			THROW(std::runtime_error, u8_path, " should be directory");
 		}
 	} else {
-		RAISE_EX("Path", u8_path, "is not found");
+		THROW(std::runtime_error, "Path ", u8_path, " is not found");
 	}
 }
 
